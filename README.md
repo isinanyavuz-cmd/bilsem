@@ -8,7 +8,7 @@ yüzden ezberlenemez.
 ## Yayın
 
 GitHub Pages ile ana daldan yayınlanır: `https://isinanyavuz-cmd.github.io/bilsem/`.
-Uygulama daha önce Kod Pilotu deposunda (`codegame/bilsem/`) duruyordu; ikisi de aynı
+Uygulama daha önce Kod Pilotu deposunda (`codepilot/bilsem/`, eski adıyla `codegame`) duruyordu; ikisi de aynı
 `isinanyavuz-cmd.github.io` adresinde yayınlandığı için tarayıcıda kayıtlı ilerleme yeni
 adreste de görünür.
 
