@@ -5,15 +5,22 @@
 bölümü. Sorular hazır bir havuzdan gelmez; her seferinde yeniden üretilir, bu
 yüzden ezberlenemez.
 
+## Yayın
+
+GitHub Pages ile ana daldan yayınlanır: `https://isinanyavuz-cmd.github.io/bilsem/`.
+Uygulama daha önce Kod Pilotu deposunda (`codegame/bilsem/`) duruyordu; ikisi de aynı
+`isinanyavuz-cmd.github.io` adresinde yayınlandığı için tarayıcıda kayıtlı ilerleme yeni
+adreste de görünür.
+
 ## Açmak
 
-Kurulum yok: `bilsem/index.html` dosyasını tarayıcıda aç. Tablet, telefon ve
+Kurulum yok: `index.html` dosyasını tarayıcıda aç. Tablet, telefon ve
 bilgisayarda çalışır; dokunma, fare ve klavye (1–4 ya da A–D, Enter) desteklenir.
 
 Tek dosya hâlinde taşımak için:
 
 ```
-node bilsem/tools/tek-dosya.js enes-bilsem.html
+node tools/tek-dosya.js enes-bilsem.html
 ```
 
 ## Çalışma biçimleri
@@ -73,7 +80,7 @@ node --test
 Bir CSS ya da JS dosyası değişince, yayına göndermeden önce sürüm damgalarını yenile:
 
 ```
-node bilsem/tools/surum.js
+node tools/surum.js
 ```
 
 Bu, `index.html` içindeki dosya adreslerine içerik damgası ekler (`js/app.js?v=…`). Dosya

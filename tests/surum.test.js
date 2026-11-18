@@ -8,7 +8,7 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
-test('index.html içindeki sürüm damgaları güncel (değilse: node bilsem/tools/surum.js)', () => {
+test('index.html içindeki sürüm damgaları güncel (değilse: node tools/surum.js)', () => {
   const res = stamp(html, read);
   assert.strictEqual(res.html, html, 'bir dosya değişmiş ama damgası yenilenmemiş');
   assert.ok(res.files >= 12, 'bütün css ve js dosyaları damgalı');

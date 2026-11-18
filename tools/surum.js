@@ -4,7 +4,7 @@
  * Ayrıca bütün damgalardan tek bir sürüm kodu üretip <div id="app" data-surum="..."> içine yazar;
  * uygulama bu kodu ana sayfanın altında gösterir.
  *
- *   node bilsem/tools/surum.js        -> index.html dosyasını günceller (her değişiklikten sonra çalıştırılır)
+ *   node tools/surum.js        -> index.html dosyasını günceller (her değişiklikten sonra çalıştırılır)
  */
 const fs = require('fs');
 const path = require('path');

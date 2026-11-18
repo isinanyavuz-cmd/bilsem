@@ -1,4 +1,10 @@
 {
+  "name": "enes-bilsem",
   "private": true,
-  "type": "commonjs"
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "surum": "node tools/surum.js",
+    "start": "python3 -m http.server 8080"
+  }
 }

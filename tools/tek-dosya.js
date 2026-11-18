@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Uygulamayı tek bir HTML dosyasında toplar (CSS ve JS gömülü).
- *   node bilsem/tools/tek-dosya.js cikti.html            -> çift tıklayınca açılan tam sayfa
- *   node bilsem/tools/tek-dosya.js cikti.html --govde    -> yalnızca gövde (bir sayfanın içine gömmek için)
+ *   node tools/tek-dosya.js cikti.html            -> çift tıklayınca açılan tam sayfa
+ *   node tools/tek-dosya.js cikti.html --govde    -> yalnızca gövde (bir sayfanın içine gömmek için)
  */
 const fs = require('fs');
 const path = require('path');
