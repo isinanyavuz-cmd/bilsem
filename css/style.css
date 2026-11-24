@@ -649,3 +649,8 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .acc-info > div { display: grid; gap: 2px; }
 .acc-info small { font: 700 13px/1.2 var(--font-body); color: var(--ink-soft); }
 .acc-info b { font: 800 17px/1.2 var(--font-display); word-break: break-all; }
+
+/* avatarın yanındaki yatay boşluğu kaldır */
+.brand .avatar-card { padding: 6px 4px 6px; }
+.brand .avatar-card .avatar-emoji { min-width: 0; width: auto; }
+.brand .avatar-card .robot, .brand .avatar-card .avatar-img { width: 66px; }
