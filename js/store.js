@@ -4,6 +4,11 @@
   const Bilsem = root.Bilsem = root.Bilsem || {};
   const KEY = 'bilsem.v3';
   const OLD_KEYS = ['bilsem.v2', 'zekakasifi.v1'];     // kademeler değişmeden önceki kayıtlar
+  const OWNER_KEY = 'bilsem.owner';                    // bu cihazdaki kaydın sahibi olan hesap (uid)
+
+  function lsGet(k) { try { return root.localStorage ? root.localStorage.getItem(k) : null; } catch (e) { return null; } }
+  function lsSet(k, v) { try { if (root.localStorage) root.localStorage.setItem(k, v); } catch (e) { /* kayıt kapalı olabilir */ } }
+  function lsDel(k) { try { if (root.localStorage) root.localStorage.removeItem(k); } catch (e) { /* önemli değil */ } }
 
   const spanBlank = () => ({ plays: 0, best: { 1: { both: 0, fwd: 0, bwd: 0 }, 2: { both: 0, fwd: 0, bwd: 0 }, 3: { both: 0, fwd: 0, bwd: 0 } } });
   function blank() {
@@ -73,32 +78,62 @@
 
   const Store = {
     data: blank(),
-    load() {
+    /* Ham metindeki kaydı (bugünkü ya da eski biçim) okur. Geçerliyse true döner ve veriyi yükler. */
+    hydrate(raw) {
       try {
-        const ls = root.localStorage;
-        const raw = ls && [KEY].concat(OLD_KEYS).map((k) => ls.getItem(k)).find(Boolean);
-        if (raw) {
-          const d = migrate(JSON.parse(raw)), b = blank();
-          if (d && d.v === 3) {
-            const Sp = Bilsem.Span;
-            this.data = Object.assign(b, d, { settings: Object.assign(b.settings, d.settings), span: normalizeSpan(d.span, Sp.MAX) });
-            const set = this.data.settings;
-            set.spanStart = Math.max(Sp.MIN, Math.min(Sp.MAX, set.spanStart));
-            set.spanLevel = Sp.levelOf(set.spanLevel).id;
-            set.spanTypeTimed = set.spanTypeTimed !== false;
-          }
+        const d = migrate(JSON.parse(raw)), b = blank();
+        if (d && d.v === 3) {
+          const Sp = Bilsem.Span;
+          this.data = Object.assign(b, d, { settings: Object.assign(b.settings, d.settings), span: normalizeSpan(d.span, Sp.MAX) });
+          const set = this.data.settings;
+          set.spanStart = Math.max(Sp.MIN, Math.min(Sp.MAX, set.spanStart));
+          set.spanLevel = Sp.levelOf(set.spanLevel).id;
+          set.spanTypeTimed = set.spanTypeTimed !== false;
+          return true;
         }
-      } catch (e) { /* kayıt okunamadıysa boş başla */ }
+      } catch (e) { /* bozuk kayıt */ }
+      return false;
+    },
+    /* Bu cihazdaki yerel kaydı okur (bugünkü ya da eski anahtar). */
+    localRaw() {
+      return [KEY].concat(OLD_KEYS).map(lsGet).find(Boolean) || null;
+    },
+    load() {
+      const raw = this.localRaw();
+      if (raw) this.hydrate(raw);
       return this.data;
     },
+    /* Kaydı bu cihazda saklar ve (giriş yapılmışsa) hesabın bulut kaydına gönderir. */
     save() {
-      try { root.localStorage && root.localStorage.setItem(KEY, JSON.stringify(this.data)); } catch (e) { /* kayıt kapalı olabilir */ }
+      lsSet(KEY, JSON.stringify(this.data));
+      if (root.BilsemSync) root.BilsemSync.push(this.data);
+    },
+    /* Hesap açıldığında ya da giriş yapıldığında çağrılır. cloudRaw bulut kaydının metnidir; yoksa null.
+       (Bulut okunamadıysa bu fonksiyon çağrılmaz; aksi hâlde boş bir kayıt buluttaki ilerlemenin üzerine yazılırdı.)
+       - Bulutta kayıt varsa onu kullanır (yalnızca bu cihaza yazılır, buluta geri gönderilmez).
+       - Bulutta yoksa ve bu cihaz henüz bir hesaba bağlanmamışsa, bu cihazdaki ilerlemeyi ilk hesaba aktarır.
+       - Aksi hâlde yeni, boş bir kayıtla başlar. */
+    attach(uid, cloudRaw) {
+      const owner = lsGet(OWNER_KEY), local = this.localRaw();
+      let source;
+      if (cloudRaw && this.hydrate(cloudRaw)) source = 'cloud';
+      else if (!owner && local && this.hydrate(local)) source = 'adopted';
+      else { this.data = blank(); source = 'blank'; }
+      lsSet(OWNER_KEY, uid);
+      lsSet(KEY, JSON.stringify(this.data));
+      if (source !== 'cloud' && root.BilsemSync) root.BilsemSync.push(this.data);
+      return source;
+    },
+    /* Çıkışta bu cihazdaki ilerlemeyi siler; ortak kullanılan bir cihazda bir sonraki çocuk onu görmesin. */
+    detach() {
+      this.data = blank();
+      [KEY].concat(OLD_KEYS, [OWNER_KEY]).forEach(lsDel);
     },
     reset() {
       const s = this.data.settings;
       this.data = blank();
       this.data.settings = s;
-      try { OLD_KEYS.forEach((k) => root.localStorage && root.localStorage.removeItem(k)); } catch (e) { /* önemli değil */ }
+      OLD_KEYS.forEach(lsDel);
       this.save();
     },
     cat(id) {

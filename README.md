@@ -9,7 +9,7 @@ yüzden ezberlenemez.
 
 GitHub Pages ile ana daldan yayınlanır: `https://isinanyavuz-cmd.github.io/bilsem/`.
 Uygulama daha önce Kod Pilotu deposunda (`codepilot/bilsem/`, eski adıyla `codegame`) duruyordu; ikisi de aynı
-`isinanyavuz-cmd.github.io` adresinde yayınlandığı için tarayıcıda kayıtlı ilerleme yeni
+`isinanyavuz-cmd.github.io` adresinde yayınlandığı için hesapta kayıtlı ilerleme yeni
 adreste de görünür.
 
 ## Açmak
@@ -22,6 +22,32 @@ Tek dosya hâlinde taşımak için:
 ```
 node tools/tek-dosya.js enes-bilsem.html
 ```
+
+## Hesaplar ve giriş
+
+Uygulamaya girmek için hesap gerekir. Kullanıcı adı ve şifre ile hesap açılır; Google ya da Apple ile de
+giriş yapılabilir. İlerleme hesapta saklanır, hangi cihazla girilirse aynı ilerleme görünür. Altyapı
+Firebase'dir (Authentication + Firestore); GitHub Pages'ta sunucu gerekmez.
+
+Dosyalar: `js/auth.js` (giriş ve bulut senkronu), `js/firebase-config.js` (Firebase yapılandırması),
+`firestore.rules` (veri güvenlik kuralları). Kurulum bir kez yapılır:
+
+1. [Firebase konsolunda](https://console.firebase.google.com) yeni bir proje oluştur.
+2. **Authentication → Sign-in method**: "E-posta/Şifre" yöntemini aç. "Google" yöntemini aç (destek e-postası seç).
+3. **Authentication → Settings → Authorized domains**: `isinanyavuz-cmd.github.io` alan adını ekle.
+   Eklenmezse giriş "yetkili alan adı değil" hatası verir.
+4. **Apple** için: Apple Developer Program üyeliği (yıllık ücretli) ve Apple tarafında bir Services ID,
+   alan adı doğrulaması ve yönlendirme adresi gerekir. Firebase'in "Apple" yöntemi ayarlarında
+   istenen değerleri Apple geliştirici hesabından alıp girilir. Apple girişi bu adımlar yapılmadan çalışmaz.
+5. **Firestore Database**: veritabanını oluştur (üretim modunda). **Kurallar** sekmesine `firestore.rules`
+   dosyasının içeriğini yapıştırıp yayınla.
+6. **Proje ayarları → Uygulamalar → Web uygulaması**: çıkan yapılandırmayı `js/firebase-config.js`
+   içindeki `window.BILSEM_FIREBASE` değerine yaz. Bu değerler herkese açıktır; güvenlik kurallarla sağlanır.
+7. `node tools/surum.js` çalıştırıp değişikliği gönder.
+
+Yapılandırma girilmeden uygulama giriş ekranında "ayarlanmadı" uyarısı gösterir. Kullanıcı adı girişinde
+şifre sıfırlama yoktur; şifresini unutan çocuk için hesabı Firebase konsolundan silip yeniden açmak gerekir.
+Tek dosya sürümü (`tools/tek-dosya.js`) giriş modülünü içermez; hesap girişi yalnızca yayındaki sürümde çalışır.
 
 ## Çalışma biçimleri
 

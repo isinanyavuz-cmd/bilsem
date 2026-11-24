@@ -590,3 +590,16 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .pin-input:focus { outline: none; border-color: var(--a-gorsel); }
 .pin-input[aria-invalid="true"] { border-color: var(--bad); animation: shake .35s ease; }
 .pin-err { color: var(--bad-ink); font-weight: 800; }
+
+/* giriş ekranı */
+.login { display: grid; gap: 18px; justify-items: center; }
+.login .top { width: 100%; }
+.login-card { max-width: 440px; display: grid; gap: 14px; }
+.login-tabs { display: flex; gap: 8px; }
+.login-tabs button { flex: 1; min-height: 44px; border-radius: 14px; font: 800 17px/1 var(--font-display); }
+.login .field { display: grid; gap: 6px; font: 700 15px/1.2 var(--font-display); color: var(--ink-soft); }
+.login-input { font: 700 18px/1.2 var(--font-display); letter-spacing: 0; text-align: left; padding: 10px 14px; }
+.login-or { display: flex; align-items: center; gap: 10px; color: var(--ink-soft); font-size: 14px; }
+.login-or::before, .login-or::after { content: ""; flex: 1; height: 2px; background: var(--line-strong); border-radius: 2px; }
+.login-note { text-align: center; }
+.login .btn { width: 100%; }

@@ -16,6 +16,9 @@
   let sheet = null;      // açık pencere
   let clock = null, memoT = null, trVoice = null, actx = null;
 
+  /* hesap: undefined = henüz bilinmiyor, null = giriş yapılmamış, nesne = giriş yapılmış */
+  let user = undefined, loadFailed = false, authMode = 'in', authErr = '', authBusy = false, authName = '';
+
   /* ---------- simgeler ---------- */
   function star(on) {
     return '<svg viewBox="0 0 24 24" class="' + (on ? 'on' : 'off') + '" aria-hidden="true"><path d="M12 2.4l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.3l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="' +
@@ -597,11 +600,12 @@
       '<div class="set-row"><span>Ses efektleri</span>' + seg('sound', [[true, 'Açık'], [false, 'Kapalı']], set.sound) + '</div>' +
       '<div class="set-row"><span>Sayı Hafızası\'nda yazarken süre</span>' + seg('spanTypeTimed', [[true, 'Süreli'], [false, 'Süresiz']], set.spanTypeTimed !== false) + '</div>' +
       '<div class="set-row"><span>Alıştırmadaki soru sayısı</span>' + seg('len', [[5, '5'], [10, '10'], [15, '15']], set.len) + '</div>' +
-      '<div class="set-row"><span>Bütün ilerlemeyi sil</span><button type="button" class="btn btn-ghost btn-sm" data-act="reset-ask">Sıfırla</button></div></div>' +
+      '<div class="set-row"><span>Bütün ilerlemeyi sil</span><button type="button" class="btn btn-ghost btn-sm" data-act="reset-ask">Sıfırla</button></div>' +
+      '<div class="set-row"><span>Hesap' + (user && user.name ? ': <b>' + esc(user.name) + '</b>' : '') + '</span><button type="button" class="btn btn-ghost btn-sm" data-act="logout">Çıkış yap</button></div></div>' +
       '<div class="card"><h2>Sınav hakkında</h2>' +
       '<p class="note">BİLSEM genel zihinsel yetenek ön değerlendirmesi tablet üzerinde yapılır. Soru sayısı ve süre her yıl MEB kılavuzunda duyurulur; deneme uzunluğunu o yılın kılavuzuna göre seçin.</p>' +
       '<p class="note">Buradaki sorular çıkmış sınav sorusu değildir. Aynı beceri alanlarında her seferinde yeniden üretilen alıştırmalardır; bu yüzden ezberlenemez.</p>' +
-      '<p class="note">İlerleme yalnızca bu cihazdaki tarayıcıda saklanır.</p></div></div>';
+      '<p class="note">İlerleme hesabında saklanır; hangi cihazla girersen aynı ilerlemeyi görürsün.</p></div></div>';
   }
 
   /* ---------- pencereler ---------- */
@@ -674,7 +678,37 @@
     return '<div class="scrim"><div class="sheet' + (wide ? ' sheet-wide' : '') + '" role="dialog" aria-modal="true">' + body + '</div></div>';
   }
 
+  /* ---------- giriş ekranı ---------- */
+  function loadingView() {
+    return '<div class="page login"><p class="note login-note">' +
+      (loadFailed ? 'Giriş servisi yüklenemedi. Sayfayı yenileyip tekrar dene.' : 'Yükleniyor…') + '</p></div>';
+  }
+  function loginView() {
+    const busy = authBusy || !window.BilsemAuth;
+    return '<div class="page login">' +
+      '<header class="top"><div class="brand">' + robot('idle', 'logo badge') +
+      '<div><span class="brand-name">Enes <b>BİLSEM\'e</b> Hazırlanıyor</span><span class="brand-sub">Devam etmek için giriş yap</span></div></div></header>' +
+      '<section class="card login-card">' +
+      '<div class="seg login-tabs" role="group">' +
+      '<button type="button" class="' + (authMode === 'in' ? 'on' : '') + '" data-act="auth-mode" data-mode="in" aria-pressed="' + (authMode === 'in') + '">Giriş yap</button>' +
+      '<button type="button" class="' + (authMode === 'up' ? 'on' : '') + '" data-act="auth-mode" data-mode="up" aria-pressed="' + (authMode === 'up') + '">Hesap aç</button></div>' +
+      '<form data-form="auth" class="pin-form" novalidate>' +
+      '<label class="field"><span>Kullanıcı adı</span><input name="u" class="pin-input login-input" autocomplete="username" autocapitalize="none" spellcheck="false" value="' + esc(authName) + '"' + (busy ? ' disabled' : '') + '></label>' +
+      '<label class="field"><span>Şifre</span><input name="p" type="password" class="pin-input login-input" autocomplete="' + (authMode === 'in' ? 'current-password' : 'new-password') + '"' + (busy ? ' disabled' : '') + '></label>' +
+      (authErr ? '<p class="pin-err" role="alert">' + esc(authErr) + '</p>' : '') +
+      '<button type="submit" class="btn btn-sun"' + (busy ? ' disabled' : '') + '>' + (authMode === 'in' ? 'Giriş yap' : 'Hesap aç') + '</button>' +
+      '</form>' +
+      '<div class="login-or"><span>veya</span></div>' +
+      '<button type="button" class="btn btn-ghost" data-act="auth-google"' + (busy ? ' disabled' : '') + '>Google ile devam et</button>' +
+      '<button type="button" class="btn btn-ghost" data-act="auth-apple"' + (busy ? ' disabled' : '') + '>Apple ile devam et</button>' +
+      (authMode === 'up' ? '<p class="note">Kullanıcı adı 3–20 karakter; yalnızca küçük harf, rakam ve _. Şifre en az 6 karakter.</p>' : '') +
+      '</section></div>';
+  }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
   function render() {
+    if (user === undefined) { app.innerHTML = S.defs() + loadingView(); return; }
+    if (user === null) { app.innerHTML = S.defs() + loginView(); return; }
     const html = view === 'quiz' ? quizView() : view === 'result' ? resultView() : view === 'parent' ? parentView() : view === 'span' ? spanView() : homeView();
     app.innerHTML = S.defs() + html + sheetView();
   }
@@ -730,7 +764,55 @@
     },
     'reset-ask'() { sheet = { kind: 'reset' }; render(); },
     reset() { Store.reset(); sheet = null; render(); },
+    'auth-mode'(el) { authMode = el.dataset.mode === 'up' ? 'up' : 'in'; authErr = ''; render(); },
+    'auth-google'() { socialAuth('google'); },
+    'auth-apple'() { socialAuth('apple'); },
+    async logout() {
+      if (!window.BilsemAuth) return;
+      try { await BilsemAuth.out(); } catch (err) { /* çıkışta hata olursa yerel kayıt silinmez */ return; }
+      Store.detach();
+      ses = null; span = null; sheet = null; view = 'home';
+      user = null; authErr = ''; authName = '';
+      render();
+    },
   };
+
+  async function socialAuth(kind) {
+    if (!window.BilsemAuth || authBusy) return;
+    authBusy = true; authErr = ''; render();
+    try { await BilsemAuth[kind](); } catch (err) { authErr = err.message || 'Giriş yapılamadı.'; }
+    authBusy = false; render();
+  }
+  async function submitAuth(f) {
+    if (!window.BilsemAuth || authBusy) return;
+    const name = f.querySelector('[name=u]').value, pw = f.querySelector('[name=p]').value;
+    authName = name.trim(); authBusy = true; authErr = ''; render();
+    try {
+      if (authMode === 'in') await BilsemAuth.signIn(name, pw);
+      else await BilsemAuth.signUp(name, pw);
+    } catch (err) { authErr = err.message || 'Giriş yapılamadı.'; }
+    authBusy = false;
+    if (user === null) render();   // başarılıysa olay zaten ekranı değiştirir
+  }
+
+  /* hesap olayları: giriş, çıkış, bulut kaydının okunamaması */
+  window.addEventListener('bilsem:auth', (e) => {
+    const d = e.detail || {};
+    loadFailed = false;
+    authBusy = false;
+    if (!d.configured) { user = null; authErr = 'Giriş henüz ayarlanmadı: js/firebase-config.js dosyasına Firebase bilgileri girilmeli.'; render(); return; }
+    if (!d.user) {
+      if (d.error) authErr = d.error;
+      user = null; ses = null; span = null; sheet = null; view = 'home';
+      render();
+      return;
+    }
+    Store.attach(d.user.uid, d.cloud);   // bu cihazdaki kaydı hesabın kaydıyla eşitler
+    user = d.user; authErr = ''; authName = '';
+    view = 'home'; sheet = null;
+    render(); window.scrollTo(0, 0);
+  });
+  setTimeout(() => { if (user === undefined) { loadFailed = true; render(); } }, 12000);
 
   app.addEventListener('click', (e) => {
     if (e.target.classList && e.target.classList.contains('scrim')) {
@@ -747,6 +829,7 @@
   const PARENT_PIN = '321321';
   document.addEventListener('submit', (e) => {
     const f = e.target;
+    if (f && f.dataset && f.dataset.form === 'auth') { e.preventDefault(); submitAuth(f); return; }
     if (!f || f.dataset.form !== 'pin') return;
     e.preventDefault();
     if (f.querySelector('#pin').value.trim() === PARENT_PIN) { sheet = null; view = 'parent'; render(); window.scrollTo(0, 0); return; }
@@ -775,8 +858,7 @@
     if (window.speechSynthesis.addEventListener) window.speechSynthesis.addEventListener('voiceschanged', findVoice);
   }
 
-  Store.load();
-  render();
+  render();   // hesap durumu gelene kadar "Yükleniyor"; giriş yoksa giriş ekranı
 
   // otomatik denetimler için
   window.BilsemApp = { startPractice: startPractice, startDaily: startDaily, startExam: startExam, startSpan: spanStart, state: () => ({ view: view, ses: ses, span: span, sheet: sheet }) };

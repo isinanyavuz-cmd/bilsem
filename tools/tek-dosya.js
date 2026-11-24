@@ -13,6 +13,7 @@ if (!out) { console.error('Kullanım: node tek-dosya.js <çıktı.html> [--govde
 
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'css/style.css'), 'utf8');
+if (/<script type="module"/.test(html)) console.warn('Not: giriş modülü (js/auth.js) bu tek dosya sürümüne eklenmez; hesap girişi bu sürümde çalışmaz.');
 const scripts = Array.from(html.matchAll(/<script src="([^"?]+)(?:\?[^"]*)?"><\/script>/g)).map((m) => m[1]);   // ?v= damgası atılır
 const appDiv = (html.match(/<div id="app"[^>]*>/) || ['<div id="app">'])[0] + '</div>';
 const js = scripts.map((s) => fs.readFileSync(path.join(root, s), 'utf8').replace(/<\/script/g, '<\\/script')).join('\n');

@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// Her kullanıcı yalnızca kendi kaydını okuyabilir ve yazabilir.
+// Firebase konsolunda: Firestore → Kurallar bölümüne bu içeriği yapıştırıp "Yayınla" de.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['data', 'updatedAt'])
+        && request.resource.data.data is string
+        && request.resource.data.data.size() < 900000;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
