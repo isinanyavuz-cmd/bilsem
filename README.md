@@ -1,7 +1,7 @@
 # Enes BİLSEM'e Hazırlanıyor
 
 2. ve 3. sınıf için BİLSEM genel zihinsel yetenek sınavına hazırlık uygulaması.
-36 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
+38 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
 bölümü. Sorular hazır bir havuzdan gelmez; her seferinde yeniden üretilir, bu
 yüzden ezberlenemez.
 
@@ -74,9 +74,9 @@ uzunluğu bu yüzden seçilebilir bırakıldı.
 |---|---|
 | Şekil Bulmacaları | Şekil Örüntüsü, Şekil Tablosu, Şekil Benzetmesi, Farklı Olan, Desen Tamamlama, Şeffaf Kâğıt, Simetri |
 | Döndür ve Hayal Et | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
-| Sayı Bulmacaları | Sayı Örüntüsü, Meyve İşlemleri, Şifre Çözme, Sayı Makinesi, Sihirli Kare, Geriye Doğru, Ocak Planı |
+| Sayı Bulmacaları | Sayı Örüntüsü, Meyve İşlemleri, Şifre Çözme, Sayı Makinesi, Sihirli Kare, Geriye Doğru, Ocak Planı, Figürsel Eşitlik |
 | Dikkat ve Hafıza | Aynısını Bul, Şekil Sayma, Görsel Hafıza, Gölge Bulma |
-| Mantık Yürütme | Sıralama, Ok Yolu, Terazi, Kim Hangisi?, Yalancı mı Doğrucu mu?, Mini Sudoku, Kapılardan Geçiş |
+| Mantık Yürütme | Sıralama, Ok Yolu, Terazi, Kim Hangisi?, Yalancı mı Doğrucu mu?, Mini Sudoku, Kapılardan Geçiş, Harf Şifresi |
 
 ## Kademeler
 
@@ -110,6 +110,8 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Noktalı Kâğıt | 3×3 nokta, kaç kare (eğik kareler dâhil)? | 4×3 nokta | 4×4 noktada bazıları eksik | 4×4; kaç farklı büyüklükte kare? |
 | Geriye Doğru | tek işlem | iki işlem | üç işlem (yarısı, çarpma dâhil) | dört işlem ya da robotun kafaları (3 kesişte 1 kafa uzar) |
 | Kartı Çevir | sağ ya da üst kenardan çevrilince görünen yüz verilir; öbür eksenden çevirsek? | karşı kenar da olabilir (aynı görüntü) | 4×4 resim, 3 çevirme dizisi | 4×4 resim, 5 çevirme dizisi |
+| Harf Şifresi | örnek kelimeden kural çıkar: alfabede 1 ileri ya da geri kayma | 2–3 harf kayma | alfabeyi tersten yazma (A yerine Z) ya da kayma ve tersten yazma | kayma ya da ters alfabe, ayrıca kelime tersten yazılır |
+| Figürsel Eşitlik | iki şekil, bir eşitlik | iki şekil, iki eşitlik | üç şekil, iki eşitlik | üç şekil, üç eşitlik; her şekil sayısı 9'a kadar değer alabilir |
 
 3. sınıf için eklenen beş türde (Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı) En Zor kademe 3. sınıf düzeyindedir; Kolay kademe 2. sınıfa da uygundur. Sınıf seçimi yoktur: tüm türler tek havuzda, kademeler ilerlemeye göre otomatik önerilir.
 Yalancı mı Doğrucu mu?, Sihirli Kare ve Mini Sudoku'da bulmacanın tek çözümlü olduğu üretimde denetlenir. Cevaplar kuraldan hesaplanır: Küp Devirme'de küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
@@ -150,6 +152,7 @@ cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu, sıralama, terazi v
 | `js/gen-*.js` | Soru üreticileri: `Bilsem.GEN[tür](rng, kademe)`; kademe 1–4 |
 | `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
 | `js/gen-sinif3c.js` | Kangaroo tarzı türler: Kapılardan Geçiş, Ocak Planı, Çubukla Kare, Noktalı Kâğıt, Geriye Doğru, Kartı Çevir |
+| `js/gen-bilsem.js` | BİLSEM'in resmî tiplerinden: Harf Şifresi, Figürsel Eşitlik |
 | `js/span.js` | Sayı Hafızası: sayı üretimi ve oyun kuralları |
 | `js/store.js` | Yıldızlar, gün serisi, konu istatistikleri, rekorlar (`localStorage`) |
 | `js/app.js` | Arayüz |

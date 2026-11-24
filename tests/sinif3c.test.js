@@ -131,3 +131,37 @@ test('kartı çevir: kartın noktaları üç boyutta döndürülüp arka yüz ok
     assert.strictEqual(q.options[q.answer].key, 'k' + G.key(out));
   });
 });
+
+test('harf şifresi: örneğe uyan her kural aynı cevabı verir, cevap kuraldan gelir', () => {
+  const A = Array.from('ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ');
+  assert.strictEqual(A.length, 29);
+  const enc = (w, kind, k, rev) => { const o = Array.from(w).map((ch) => { const i = A.indexOf(ch); assert.ok(i >= 0, 'alfabede yok: ' + ch); return A[kind === 's' ? (((i + k) % 29) + 29) % 29 : 28 - i]; }); return (rev ? o.reverse() : o).join(''); };
+  forEach('cipher', (q) => {
+    const m = q.meta, cands = [];
+    [false, true].forEach((rev) => { for (let k = -3; k <= 3; k++) if (k) cands.push(['s', k, rev]); cands.push(['a', 0, rev]); });
+    const fit = cands.filter((c) => enc(m.ex, c[0], c[1], c[2]) === m.exCode);
+    assert.strictEqual(fit.length, 1, 'örnek tek bir kurala uymalı');
+    assert.strictEqual(enc(m.target, fit[0][0], fit[0][1], fit[0][2]), m.answer);
+    assert.strictEqual(q.options[q.answer].key, 't' + m.answer);
+    assert.strictEqual(q.options.length, 4);
+  }, 150);
+});
+
+test('figürsel eşitlik: satırları sağlayan her değer üçlüsünde cevap aynıdır', () => {
+  forEach('equiv', (q) => {
+    const m = q.meta, nT = m.nT, found = new Set();
+    const val = (c, v) => c.reduce((a, x, i) => a + x * v[i], 0);
+    const rec = (i, cur) => {
+      if (i === nT) {
+        if (m.rows.every((r) => val(r.left, cur) === val(r.right, cur))) { const t = val(m.ask, cur); found.add(t % cur[m.unit] ? -1 : t / cur[m.unit]); }
+        return;
+      }
+      for (let x = 1; x <= 14; x++) { cur.push(x); rec(i + 1, cur); cur.pop(); }
+    };
+    rec(0, []);
+    assert.deepStrictEqual(Array.from(found), [m.answer]);
+    assert.strictEqual(q.options[q.answer].value, m.answer);
+    assert.ok(m.answer >= 2 && m.answer <= 12);
+    assert.ok(val(m.rows[0].left, m.small) === val(m.rows[0].right, m.small));
+  }, 120);
+});

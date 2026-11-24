@@ -10,5 +10,6 @@ require('../js/gen-extra.js');
 require('../js/gen-sinif3.js');
 require('../js/gen-sinif3b.js');
 require('../js/gen-sinif3c.js');
+require('../js/gen-bilsem.js');
 require('../js/span.js');
 module.exports = require('../js/store.js');

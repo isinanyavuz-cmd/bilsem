@@ -66,6 +66,8 @@
     { id: 'sticks', area: 'uzamsal', name: 'Çubukla Kare', desc: 'Hangi takım kare yapar?', tip: 'Önce toplam uzunluğu 4\'e böl: bir kenarın uzunluğu çıkar. Sonra çubukları uç uca ekleyip o uzunluğu yapıp yapamadığına bak.' },
     { id: 'dots', area: 'uzamsal', name: 'Noktalı Kâğıt', desc: 'Noktalardan kaç kare çıkar?', tip: 'Önce düz kareleri say. Sonra eğik kareleri unutma: bir kenarı "bir sağa, bir yukarı" gibi eğik giden kareler de var.' },
     { id: 'flip', area: 'uzamsal', name: 'Kartı Çevir', desc: 'Çevirince ne görünür?', tip: 'Sağ ya da sol kenardan çevirmek resmi sağ-sol ters yapar. Üst ya da alt kenardan çevirmek aşağı-yukarı ters yapar.' },
+    { id: 'cipher', area: 'sozel', name: 'Harf Şifresi', desc: 'Şifre kuralını bul', tip: 'Örnekte her harfin yerine hangi harfin yazıldığına bak. Aynı kuralı alfabeyi sayarak yeni kelimeye uygula.' },
+    { id: 'equiv', area: 'sayisal', name: 'Figürsel Eşitlik', desc: 'Şekillerle denge kur', tip: 'Her şekle bir sayı değeri ver ve eşitlikleri tutturmaya çalış. Sonra son eşitliğin sol tarafının değerini bul.' },
     { id: 'order', area: 'sozel', name: 'Sıralama', desc: 'Kim önde, kim arkada?', tip: 'Okuduğun her cümlede isimleri sıraya diz. Parmaklarını kullanabilirsin.' },
     { id: 'path', area: 'sozel', name: 'Ok Yolu', desc: 'Okları takip et', tip: 'Parmağını başlangıç karesine koy ve her ok için bir kare ilerle.' },
     { id: 'balance', area: 'sozel', name: 'Terazi', desc: 'Hangisi daha ağır?', tip: 'Terazinin aşağı inen kefesi daha ağırdır. Şekilleri ağırdan hafife doğru sıraya diz.' },
