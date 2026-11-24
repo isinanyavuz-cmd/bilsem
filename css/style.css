@@ -640,3 +640,12 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .brand .avatar-card { gap: 0; min-width: 0; padding: 6px 10px 6px; }
 .brand .avatar-card .avatar-emoji { width: auto; height: auto; min-width: 66px; padding: 0; font-size: 56px; line-height: 1; background: none; box-shadow: none; }
 .brand .avatar-card .avatar-name { margin-top: 2px; }
+
+/* başlık satırı: kullanıcı adı, sonra yıldız ve gün serisi */
+.title-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.chips-inline { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.brand .avatar-card { min-width: 0; }
+.acc-info { display: grid; gap: 8px; padding: 12px 14px; border-radius: 16px; background: var(--surface-2); box-shadow: inset 0 0 0 2px var(--line); }
+.acc-info > div { display: grid; gap: 2px; }
+.acc-info small { font: 700 13px/1.2 var(--font-body); color: var(--ink-soft); }
+.acc-info b { font: 800 17px/1.2 var(--font-display); word-break: break-all; }

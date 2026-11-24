@@ -307,14 +307,15 @@
   }
   function homeView() {
     const done = Store.dailyDone();
+    const pname = user && user.name ? esc(user.name) : 'Enes';
     return '<div class="page home">' +
       '<header class="top"><div class="brand">' +
-      '<button type="button" class="avatar-card" data-act="account" aria-label="Hesap bilgileri">' + avatarHtml('') +
-      (user && user.name ? '<span class="avatar-name">' + esc(user.name) + '</span>' : '') + '</button>' +
-      '<div><span class="brand-name">Enes <b>BİLSEM\'e</b> Hazırlanıyor</span><span class="brand-sub">2. sınıf · genel yetenek alıştırmaları</span></div></div>' +
+      '<button type="button" class="avatar-card" data-act="account" aria-label="Hesap bilgileri">' + avatarHtml('') + '</button>' +
+      '<div class="title-wrap"><div class="title-line"><span class="brand-name">' + pname + ' <b>BİLSEM\'e</b> Hazırlanıyor</span>' +
+      '<span class="chips chips-inline"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
+      '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span></span></div>' +
+      '<span class="brand-sub">2. sınıf · genel yetenek alıştırmaları</span></div></div>' +
       '<button type="button" class="btn btn-ghost btn-sm parent-corner" data-act="parent">Veli paneli</button></header>' +
-      '<div class="chips chips-row"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
-      '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span></div>' +
       '<section class="hero">' +
       '<button type="button" class="hero-card hero-daily" data-act="daily">' + robot(done ? 'happy' : 'idle') +
       '<span class="hc"><span class="hc-title">Günün Görevi</span><span class="hc-text">' +
@@ -686,7 +687,11 @@
         '</p></div></div><div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Geri dön</button><button type="button" class="btn btn-sun" data-act="finish">Bitir</button></div>';
     } else if (sheet.kind === 'account') {
       const a = Store.data.profile && Store.data.profile.avatar;
+      const prov = { password: 'E-posta ve şifre', 'google.com': 'Google', 'apple.com': 'Apple' }[user && user.provider] || 'E-posta ve şifre';
       body = '<div class="sheet-head"><div class="acc-big">' + avatarHtml('acc-art') + '</div><div><h2>' + esc(user ? user.name : 'Hesap') + '</h2><p>Karakterini seç ya da kendi fotoğrafını yükle.</p></div>' + closeBtn + '</div>' +
+        '<div class="acc-info"><div><small>Kullanıcı adı</small><b>' + esc(user ? user.name : '—') + '</b></div>' +
+        '<div><small>E-posta</small><b>' + esc(user && user.email ? user.email : '—') + '</b></div>' +
+        '<div><small>Giriş yöntemi</small><b>' + prov + '</b></div></div>' +
         '<div class="avatar-grid">' +
         '<button type="button" class="avatar-opt' + (!a ? ' on' : '') + '" data-act="avatar-set" data-v="" aria-label="Robot" aria-pressed="' + (!a) + '">' + robot('idle', '') + '</button>' +
         AVATARS.map((e) => '<button type="button" class="avatar-opt' + (a === e ? ' on' : '') + '" data-act="avatar-set" data-v="' + e + '" aria-label="' + e + '" aria-pressed="' + (a === e) + '">' + e + '</button>').join('') +

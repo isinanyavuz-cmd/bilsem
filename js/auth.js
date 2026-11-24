@@ -175,7 +175,8 @@ if (auth) {
     }
     uid = u.uid;
     const label = u.displayName || u.email || 'Hesap';
-    emit({ configured: true, user: { uid: u.uid, name: label }, cloud: cloud });
+    const provider = (u.providerData && u.providerData[0] && u.providerData[0].providerId) || 'password';
+    emit({ configured: true, user: { uid: u.uid, name: label, email: u.email || '', provider: provider }, cloud: cloud });
   });
 } else {
   emit({ configured: false, user: null });
