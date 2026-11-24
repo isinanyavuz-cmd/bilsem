@@ -1,7 +1,7 @@
 # Enes BİLSEM'e Hazırlanıyor
 
 2. ve 3. sınıf için BİLSEM genel zihinsel yetenek sınavına hazırlık uygulaması.
-25 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
+30 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
 bölümü. Sorular hazır bir havuzdan gelmez; her seferinde yeniden üretilir, bu
 yüzden ezberlenemez.
 
@@ -72,11 +72,11 @@ uzunluğu bu yüzden seçilebilir bırakıldı.
 
 | Alan | Türler |
 |---|---|
-| Şekil Bulmacaları | Şekil Örüntüsü, Şekil Tablosu, Şekil Benzetmesi, Farklı Olan, Desen Tamamlama, Şeffaf Kâğıt |
-| Döndür ve Hayal Et | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Devirme, Küp Görünümü, Küp Açılımı |
-| Sayı Bulmacaları | Sayı Örüntüsü, Meyve İşlemleri, Şifre Çözme, Sayı Makinesi |
+| Şekil Bulmacaları | Şekil Örüntüsü, Şekil Tablosu, Şekil Benzetmesi, Farklı Olan, Desen Tamamlama, Şeffaf Kâğıt, Simetri |
+| Döndür ve Hayal Et | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş |
+| Sayı Bulmacaları | Sayı Örüntüsü, Meyve İşlemleri, Şifre Çözme, Sayı Makinesi, Sihirli Kare |
 | Dikkat ve Hafıza | Aynısını Bul, Şekil Sayma, Görsel Hafıza, Gölge Bulma |
-| Mantık Yürütme | Sıralama, Ok Yolu, Terazi, Kim Hangisi? |
+| Mantık Yürütme | Sıralama, Ok Yolu, Terazi, Kim Hangisi?, Yalancı mı Doğrucu mu?, Mini Sudoku |
 
 ## Kademeler
 
@@ -99,9 +99,14 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Küp Devirme | alt yüz ya da bir devirme sonrası üst yüz (karşılıklı yüzlerden) | bir devirme; üst, sağ ya da sol yüz | iki devirme | üç devirme |
 | Küp Görünümü | 2×2 taban, soldan bakış | 3×2 taban; soldan ya da sağdan | 3×3 taban | 4×3 taban, 4 kata kadar |
 | Küp Açılımı | hangi açılım küp olur? (bariz yanlış çeldiriciler) | aynısı, inandırıcı çeldiricilerle | verilen renkli açılımda karşı yüzün rengi | 7 kareden hangisi çıkarılırsa açılım olur (Kangaroo tarzı) |
+| Katla ve Deş | 4×4 kâğıt, bir katlama, 1 delik | 6×6 kâğıt, bir katlama, 2 delik | iki katlama (dikey sonra yatay), 1–2 delik | 6×6, iki katlama, 2–3 delik |
+| Simetri | 4×4, dikey ayna çizgisi, yarıyı tamamla | 6×6, dikey ya da yatay çizgi | 5×5, çapraz ayna çizgisi | kaç simetri ekseni var? (0–4; yalnızca dönme simetrisi olan şekiller de var) |
+| Sihirli Kare | 3×3, 1–11 arası sayılar, toplam verilir, 1 gizli | daha büyük sayılar, toplam verilir | toplam verilmez, 2 gizli sayı | toplam verilmez, 3 gizli sayı |
+| Yalancı mı Doğrucu mu? | 3 çocuk; "X doğru/yalan söylüyor", "hepimiz yalanız" | 3 çocuk; "ben ve X yalan söylüyoruz" gibi ikili ifadeler | 4 çocuk; "aramızda tam bir yalancı var" | 4 çocuk; tüm ifade türleri |
+| Mini Sudoku | 3×3, 3 renk, 4 boş kare | 4×4, her satır ve sütunda 4 renk | 4×4, 2×2 kutular da | 4×4 kutulu, çok az ipucu |
 
 3. sınıf için eklenen beş türde (Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı) En Zor kademe 3. sınıf düzeyindedir; Kolay kademe 2. sınıfa da uygundur. Sınıf seçimi yoktur: tüm türler tek havuzda, kademeler ilerlemeye göre otomatik önerilir.
-Cevaplar kuraldan hesaplanır: Küp Devirme'de küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
+Yalancı mı Doğrucu mu?, Sihirli Kare ve Mini Sudoku'da bulmacanın tek çözümlü olduğu üretimde denetlenir. Cevaplar kuraldan hesaplanır: Küp Devirme'de küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
 
 Öncüllü sorularda (Kim Hangisi?, Sıralama) soru cümlesi öncüllerin altında gösterilir.
 
@@ -137,7 +142,7 @@ cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu, sıralama, terazi v
 | `js/core.js` | Tohumlu rastgele sayı üreteci, kategori listesi, şık yardımcıları |
 | `js/shapes.js` | Şekil, kareli şekil ve küp çizimleri (SVG metni; DOM gerekmez) |
 | `js/gen-*.js` | Soru üreticileri: `Bilsem.GEN[tür](rng, kademe)`; kademe 1–4 |
-| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı |
+| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş |
 | `js/span.js` | Sayı Hafızası: sayı üretimi ve oyun kuralları |
 | `js/store.js` | Yıldızlar, gün serisi, konu istatistikleri, rekorlar (`localStorage`) |
 | `js/app.js` | Arayüz |
