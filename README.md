@@ -1,7 +1,7 @@
 # Enes BİLSEM'e Hazırlanıyor
 
 2. ve 3. sınıf için BİLSEM genel zihinsel yetenek sınavına hazırlık uygulaması.
-30 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
+36 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
 bölümü. Sorular hazır bir havuzdan gelmez; her seferinde yeniden üretilir, bu
 yüzden ezberlenemez.
 
@@ -73,10 +73,10 @@ uzunluğu bu yüzden seçilebilir bırakıldı.
 | Alan | Türler |
 |---|---|
 | Şekil Bulmacaları | Şekil Örüntüsü, Şekil Tablosu, Şekil Benzetmesi, Farklı Olan, Desen Tamamlama, Şeffaf Kâğıt, Simetri |
-| Döndür ve Hayal Et | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş |
-| Sayı Bulmacaları | Sayı Örüntüsü, Meyve İşlemleri, Şifre Çözme, Sayı Makinesi, Sihirli Kare |
+| Döndür ve Hayal Et | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
+| Sayı Bulmacaları | Sayı Örüntüsü, Meyve İşlemleri, Şifre Çözme, Sayı Makinesi, Sihirli Kare, Geriye Doğru, Ocak Planı |
 | Dikkat ve Hafıza | Aynısını Bul, Şekil Sayma, Görsel Hafıza, Gölge Bulma |
-| Mantık Yürütme | Sıralama, Ok Yolu, Terazi, Kim Hangisi?, Yalancı mı Doğrucu mu?, Mini Sudoku |
+| Mantık Yürütme | Sıralama, Ok Yolu, Terazi, Kim Hangisi?, Yalancı mı Doğrucu mu?, Mini Sudoku, Kapılardan Geçiş |
 
 ## Kademeler
 
@@ -104,6 +104,12 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Sihirli Kare | 3×3, 1–11 arası sayılar, toplam verilir, 1 gizli | daha büyük sayılar, toplam verilir | toplam verilmez, 2 gizli sayı | toplam verilmez, 3 gizli sayı |
 | Yalancı mı Doğrucu mu? | 3 çocuk; "X doğru/yalan söylüyor", "hepimiz yalanız" | 3 çocuk; "ben ve X yalan söylüyoruz" gibi ikili ifadeler | 4 çocuk; "aramızda tam bir yalancı var" | 4 çocuk; tüm ifade türleri |
 | Mini Sudoku | 3×3, 3 renk, 4 boş kare | 4×4, her satır ve sütunda 4 renk | 4×4, 2×2 kutular da | 4×4 kutulu, çok az ipucu |
+| Kapılardan Geçiş | 3 katlı labirent, 4–6 yol | 3×3'lük labirent, kaç farklı yol? | 4 katlı labirent | 5 katlı, her katta 3 oda |
+| Ocak Planı | 4 yemek, 2 ocak, en kısa süre | 5 yemek | 5 yemek; sırayla ocağa koymak yanlış sonuç verir | 6 yemek |
+| Çubukla Kare | 1 cm ve 3 cm'lik çubuklar | daha çok çubuk | 2 cm ve 3 cm; toplamı 4'e bölünür ama kare olmayan çeldirici | 2 cm ve 5 cm |
+| Noktalı Kâğıt | 3×3 nokta, kaç kare (eğik kareler dâhil)? | 4×3 nokta | 4×4 noktada bazıları eksik | 4×4; kaç farklı büyüklükte kare? |
+| Geriye Doğru | tek işlem | iki işlem | üç işlem (yarısı, çarpma dâhil) | dört işlem ya da robotun kafaları (3 kesişte 1 kafa uzar) |
+| Kartı Çevir | sağ ya da üst kenardan çevrilince görünen yüz verilir; öbür eksenden çevirsek? | karşı kenar da olabilir (aynı görüntü) | 4×4 resim, 3 çevirme dizisi | 4×4 resim, 5 çevirme dizisi |
 
 3. sınıf için eklenen beş türde (Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı) En Zor kademe 3. sınıf düzeyindedir; Kolay kademe 2. sınıfa da uygundur. Sınıf seçimi yoktur: tüm türler tek havuzda, kademeler ilerlemeye göre otomatik önerilir.
 Yalancı mı Doğrucu mu?, Sihirli Kare ve Mini Sudoku'da bulmacanın tek çözümlü olduğu üretimde denetlenir. Cevaplar kuraldan hesaplanır: Küp Devirme'de küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
@@ -142,7 +148,8 @@ cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu, sıralama, terazi v
 | `js/core.js` | Tohumlu rastgele sayı üreteci, kategori listesi, şık yardımcıları |
 | `js/shapes.js` | Şekil, kareli şekil ve küp çizimleri (SVG metni; DOM gerekmez) |
 | `js/gen-*.js` | Soru üreticileri: `Bilsem.GEN[tür](rng, kademe)`; kademe 1–4 |
-| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş |
+| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
+| `js/gen-sinif3c.js` | Kangaroo tarzı türler: Kapılardan Geçiş, Ocak Planı, Çubukla Kare, Noktalı Kâğıt, Geriye Doğru, Kartı Çevir |
 | `js/span.js` | Sayı Hafızası: sayı üretimi ve oyun kuralları |
 | `js/store.js` | Yıldızlar, gün serisi, konu istatistikleri, rekorlar (`localStorage`) |
 | `js/app.js` | Arayüz |
