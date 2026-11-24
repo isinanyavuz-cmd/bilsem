@@ -57,6 +57,30 @@
       '<rect x="11.5" y="18" width="27" height="16" rx="8" fill="#1d2b4a"/>' + eyes + '</g></svg>';
   }
 
+  /* avatar: hazır karakterler ya da yüklenen fotoğraf; seçilmemişse robot */
+  const AVATARS = ['🦊', '🐼', '🐯', '🦁', '🐸', '🐶', '🐱', '🐵', '🦄', '🚀', '⭐', '🌈', '⚽', '🎨', '📚', '🌟'];
+  function avatarHtml(cls) {
+    const a = Store.data.profile && Store.data.profile.avatar;
+    if (a && a.indexOf('data:') === 0) return '<img class="avatar-img ' + (cls || '') + '" src="' + a + '" alt="">';
+    if (a) return '<span class="avatar-emoji ' + (cls || '') + '" aria-hidden="true">' + esc(a) + '</span>';
+    return robot('idle', cls);
+  }
+  function resizeImage(file, px) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(), url = URL.createObjectURL(file);
+      img.onload = () => {
+        const side = Math.min(img.width, img.height), sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+        const c = document.createElement('canvas');
+        c.width = c.height = px;
+        c.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, px, px);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Görsel okunamadı.')); };
+      img.src = url;
+    });
+  }
+
   /* kategori simgeleri: soru çizimleriyle aynı şekil kütüphanesinden */
   const F = (shape, color, extra) => Object.assign({ shape: shape, color: color }, extra || {});
   const greenTile = (x, y, rot) => '<rect x="' + x + '" y="' + y + '" width="40" height="40" rx="10" fill="#3cc35f" stroke="#23924a" stroke-width="3"/>' +
@@ -284,13 +308,13 @@
   function homeView() {
     const done = Store.dailyDone();
     return '<div class="page home">' +
-      '<header class="top"><div class="brand">' + robot('idle', 'logo badge') +
+      '<header class="top"><div class="brand">' +
+      '<div class="avatar-col"><button type="button" class="avatar-btn" data-act="account" aria-label="Hesap bilgileri">' + avatarHtml('logo badge') + '</button>' +
+      (user && user.name ? '<span class="avatar-name">' + esc(user.name) + '</span>' : '') + '</div>' +
       '<div><span class="brand-name">Enes <b>BİLSEM\'e</b> Hazırlanıyor</span><span class="brand-sub">2. sınıf · genel yetenek alıştırmaları</span></div></div>' +
       '<div class="chips"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
-      '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span>' +
-      (user && user.name ? '<span class="chip"><small>Hesap</small><b>' + esc(user.name) + '</b></span>' : '') +
-      '<button type="button" class="btn btn-ghost btn-sm" data-act="logout">Çıkış yap</button>' +
-      '<button type="button" class="btn btn-ghost btn-sm" data-act="parent">Veli paneli</button></div></header>' +
+      '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span></div>' +
+      '<button type="button" class="btn btn-ghost btn-sm parent-corner" data-act="parent">Veli paneli</button></header>' +
       '<section class="hero">' +
       '<button type="button" class="hero-card hero-daily" data-act="daily">' + robot(done ? 'happy' : 'idle') +
       '<span class="hc"><span class="hc-title">Günün Görevi</span><span class="hc-text">' +
@@ -660,6 +684,15 @@
       const blank = ses.items.filter((it) => it.chosen == null).length;
       body = '<div class="sheet-head"><div><h2>Sınavı bitirelim mi?</h2><p>' + (blank ? blank + ' soru boş kaldı. Geri dönüp cevaplayabilirsin.' : 'Bütün soruları cevapladın.') +
         '</p></div></div><div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Geri dön</button><button type="button" class="btn btn-sun" data-act="finish">Bitir</button></div>';
+    } else if (sheet.kind === 'account') {
+      const a = Store.data.profile && Store.data.profile.avatar;
+      body = '<div class="sheet-head"><div class="acc-big">' + avatarHtml('acc-art') + '</div><div><h2>' + esc(user ? user.name : 'Hesap') + '</h2><p>Karakterini seç ya da kendi fotoğrafını yükle.</p></div>' + closeBtn + '</div>' +
+        '<div class="avatar-grid">' +
+        '<button type="button" class="avatar-opt' + (!a ? ' on' : '') + '" data-act="avatar-set" data-v="" aria-label="Robot" aria-pressed="' + (!a) + '">' + robot('idle', '') + '</button>' +
+        AVATARS.map((e) => '<button type="button" class="avatar-opt' + (a === e ? ' on' : '') + '" data-act="avatar-set" data-v="' + e + '" aria-label="' + e + '" aria-pressed="' + (a === e) + '">' + e + '</button>').join('') +
+        '</div>' +
+        '<div class="sheet-actions"><label class="btn btn-ghost avatar-file">Fotoğraf seç<input type="file" accept="image/*" data-file="avatar" hidden></label></div>' +
+        '<div class="sheet-actions"><button type="button" class="btn btn-bad" data-act="logout">Çıkış yap</button></div>';
     } else if (sheet.kind === 'reset') {
       body = '<div class="sheet-head"><div><h2>İlerleme silinsin mi?</h2><p>Bütün yıldızlar, gün serisi ve istatistikler silinir. Bu işlem geri alınamaz.</p></div></div>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="button" class="btn btn-bad" data-act="reset">Sil</button></div>';
@@ -769,6 +802,12 @@
     },
     'reset-ask'() { sheet = { kind: 'reset' }; render(); },
     reset() { Store.reset(); sheet = null; render(); },
+    account() { sheet = { kind: 'account' }; render(); },
+    'avatar-set'(el) {
+      Store.data.profile = Store.data.profile || { avatar: null };
+      Store.data.profile.avatar = el.dataset.v || null;
+      Store.save(); render();
+    },
     'auth-mode'(el) { authMode = el.dataset.mode === 'up' ? 'up' : 'in'; authErr = ''; authInfo = ''; render(); },
     'auth-forgot': forgotAuth,
     'auth-google'() { socialAuth('google'); },
@@ -853,6 +892,16 @@
     if (f.querySelector('#pin').value.trim() === PARENT_PIN) { sheet = null; view = 'parent'; render(); window.scrollTo(0, 0); return; }
     sheet = { kind: 'pin', wrong: true }; render();
     const inp = app.querySelector('#pin'); if (inp) inp.focus();
+  });
+  document.addEventListener('change', (e) => {
+    const f = e.target;
+    if (!f || f.dataset.file !== 'avatar' || !f.files || !f.files[0]) return;
+    resizeImage(f.files[0], 160).then((url) => {
+      Store.data.profile = Store.data.profile || { avatar: null };
+      Store.data.profile.avatar = url;
+      Store.save(); render();
+    }).catch(() => { authErr = ''; });
+    f.value = '';
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && sheet) { sheet = null; render(); return; }

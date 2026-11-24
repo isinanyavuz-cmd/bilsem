@@ -603,3 +603,21 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .login-or::before, .login-or::after { content: ""; flex: 1; height: 2px; background: var(--line-strong); border-radius: 2px; }
 .login-note { text-align: center; }
 .login .btn { width: 100%; }
+
+/* hesap: robot yerine avatar, altında kullanıcı adı, sağ üstte Veli paneli */
+.parent-corner { margin-left: auto; align-self: flex-start; }
+.avatar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.avatar-btn { background: none; border: 0; padding: 0; cursor: pointer; border-radius: 18px; line-height: 0; }
+.avatar-btn:active { transform: translateY(2px); }
+.avatar-name { max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 800 13px/1.1 var(--font-display); color: var(--ink-soft); text-align: center; }
+.avatar-img, .avatar-emoji { width: 54px; height: 54px; border-radius: 16px; box-shadow: var(--shadow); background: var(--surface); }
+.avatar-img { object-fit: cover; display: block; }
+.avatar-emoji { display: grid; place-items: center; font-size: 30px; line-height: 1; }
+.acc-big { flex: none; width: 76px; height: 76px; }
+.acc-big .robot, .acc-big .avatar-img { width: 76px; height: 76px; }
+.acc-big .avatar-emoji { width: 76px; height: 76px; font-size: 44px; }
+.avatar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px; }
+.avatar-opt { min-height: 64px; display: grid; place-items: center; padding: 6px; border-radius: 16px; background: var(--surface-2); box-shadow: inset 0 0 0 2px var(--line-strong); font-size: 32px; line-height: 1; cursor: pointer; }
+.avatar-opt.on { box-shadow: inset 0 0 0 4px var(--a-gorsel); }
+.avatar-opt .robot { width: 44px; height: 44px; }
+.avatar-file { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
