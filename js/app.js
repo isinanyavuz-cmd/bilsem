@@ -288,6 +288,8 @@
       '<div><span class="brand-name">Enes <b>BİLSEM\'e</b> Hazırlanıyor</span><span class="brand-sub">2. sınıf · genel yetenek alıştırmaları</span></div></div>' +
       '<div class="chips"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
       '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span>' +
+      (user && user.name ? '<span class="chip"><small>Hesap</small><b>' + esc(user.name) + '</b></span>' : '') +
+      '<button type="button" class="btn btn-ghost btn-sm" data-act="logout">Çıkış yap</button>' +
       '<button type="button" class="btn btn-ghost btn-sm" data-act="parent">Veli paneli</button></div></header>' +
       '<section class="hero">' +
       '<button type="button" class="hero-card hero-daily" data-act="daily">' + robot(done ? 'happy' : 'idle') +
@@ -601,7 +603,7 @@
       '<div class="set-row"><span>Sayı Hafızası\'nda yazarken süre</span>' + seg('spanTypeTimed', [[true, 'Süreli'], [false, 'Süresiz']], set.spanTypeTimed !== false) + '</div>' +
       '<div class="set-row"><span>Alıştırmadaki soru sayısı</span>' + seg('len', [[5, '5'], [10, '10'], [15, '15']], set.len) + '</div>' +
       '<div class="set-row"><span>Bütün ilerlemeyi sil</span><button type="button" class="btn btn-ghost btn-sm" data-act="reset-ask">Sıfırla</button></div>' +
-      '<div class="set-row"><span>Hesap' + (user && user.name ? ': <b>' + esc(user.name) + '</b>' : '') + '</span><button type="button" class="btn btn-ghost btn-sm" data-act="logout">Çıkış yap</button></div></div>' +
+      '</div>' +
       '<div class="card"><h2>Sınav hakkında</h2>' +
       '<p class="note">BİLSEM genel zihinsel yetenek ön değerlendirmesi tablet üzerinde yapılır. Soru sayısı ve süre her yıl MEB kılavuzunda duyurulur; deneme uzunluğunu o yılın kılavuzuna göre seçin.</p>' +
       '<p class="note">Buradaki sorular çıkmış sınav sorusu değildir. Aynı beceri alanlarında her seferinde yeniden üretilen alıştırmalardır; bu yüzden ezberlenemez.</p>' +
