@@ -621,3 +621,8 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .avatar-opt.on { box-shadow: inset 0 0 0 4px var(--a-gorsel); }
 .avatar-opt .robot { width: 44px; height: 44px; }
 .avatar-file { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+
+/* ana sayfadaki avatar: biraz daha büyük */
+.brand .logo, .brand .avatar-img, .brand .avatar-emoji { width: 80px; height: 80px; }
+.brand .avatar-emoji { font-size: 44px; }
+.brand .avatar-name { max-width: 100px; font-size: 14px; }

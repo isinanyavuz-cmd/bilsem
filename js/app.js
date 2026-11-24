@@ -692,7 +692,7 @@
         AVATARS.map((e) => '<button type="button" class="avatar-opt' + (a === e ? ' on' : '') + '" data-act="avatar-set" data-v="' + e + '" aria-label="' + e + '" aria-pressed="' + (a === e) + '">' + e + '</button>').join('') +
         '</div>' +
         '<div class="sheet-actions"><label class="btn btn-ghost avatar-file">Fotoğraf seç<input type="file" accept="image/*" data-file="avatar" hidden></label></div>' +
-        '<div class="sheet-actions"><button type="button" class="btn btn-bad" data-act="logout">Çıkış yap</button></div>';
+        '<div class="sheet-actions"><button type="button" class="btn btn-bad" data-act="logout">Çıkış yap</button><button type="button" class="btn btn-sun" data-act="close">Tamam</button></div>';
     } else if (sheet.kind === 'reset') {
       body = '<div class="sheet-head"><div><h2>İlerleme silinsin mi?</h2><p>Bütün yıldızlar, gün serisi ve istatistikler silinir. Bu işlem geri alınamaz.</p></div></div>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="button" class="btn btn-bad" data-act="reset">Sil</button></div>';
