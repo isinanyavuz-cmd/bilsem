@@ -635,3 +635,8 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .brand .avatar-card .avatar-name { max-width: 84px; font-size: 13px; line-height: 1; }
 .top .parent-corner { margin-left: auto; align-self: flex-start; }
 .chips-row { margin-top: 10px; }
+
+/* avatar kartı: emoji ve robot kutuyu doldursun, kart avatara sıkı otursun */
+.brand .avatar-card { gap: 0; min-width: 0; padding: 6px 10px 6px; }
+.brand .avatar-card .avatar-emoji { width: auto; height: auto; min-width: 66px; padding: 0; font-size: 56px; line-height: 1; background: none; box-shadow: none; }
+.brand .avatar-card .avatar-name { margin-top: 2px; }
