@@ -1,7 +1,7 @@
 # Enes BİLSEM'e Hazırlanıyor
 
-2. sınıf için BİLSEM genel zihinsel yetenek sınavına hazırlık uygulaması.
-20 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
+2. ve 3. sınıf için BİLSEM genel zihinsel yetenek sınavına hazırlık uygulaması.
+25 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
 bölümü. Sorular hazır bir havuzdan gelmez; her seferinde yeniden üretilir, bu
 yüzden ezberlenemez.
 
@@ -72,8 +72,8 @@ uzunluğu bu yüzden seçilebilir bırakıldı.
 
 | Alan | Türler |
 |---|---|
-| Şekil Bulmacaları | Şekil Örüntüsü, Şekil Tablosu, Şekil Benzetmesi, Farklı Olan |
-| Döndür ve Hayal Et | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler |
+| Şekil Bulmacaları | Şekil Örüntüsü, Şekil Tablosu, Şekil Benzetmesi, Farklı Olan, Desen Tamamlama, Şeffaf Kâğıt |
+| Döndür ve Hayal Et | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Devirme, Küp Görünümü, Küp Açılımı |
 | Sayı Bulmacaları | Sayı Örüntüsü, Meyve İşlemleri, Şifre Çözme, Sayı Makinesi |
 | Dikkat ve Hafıza | Aynısını Bul, Şekil Sayma, Görsel Hafıza, Gölge Bulma |
 | Mantık Yürütme | Sıralama, Ok Yolu, Terazi, Kim Hangisi? |
@@ -94,6 +94,14 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Terazi | 4 şekil, en ağır ya da en hafif | 4–5 şekil sıralanır | 6 şekil, "kaç şekil daha ağır?" | dengede duran terazilerle "kaç tane eder?" |
 | Ok Yolu | 5×5 alan, 5–6 ok | 5×5 alan, 6–8 ok, yol seçme | 6×6 alan, tekrar sayılı oklar | baktığı yöne göre komut alan robot |
 | Kim Hangisi? | 3 kişi, 2 ipucu | 3–4 kişi, "değil" ipuçları | 4 kişi, en az sayıda ipucu | "ne … ne …" ve "ya … ya da …" ipuçları |
+| Desen Tamamlama | 6×6 desende 2×2 boşluk; 2 renkli yinelenen kalıp | 3 renkli ya da 3×3 kalıp | çapraz çizgiler; ortadan aynalanmış desen | 6×6 çeyrek tur simetrisi; 8×8 desende 3×3 boşluk, aynalama ya da çeyrek tur |
+| Şeffaf Kâğıt | 3×3, iki kâğıt | 4×4, iki kâğıt | 3×3, kâğıdın biri çevrilir | 4×4, iki ya da üç kâğıt; çeyrek, yarım tur ya da ters yöne çevirme |
+| Küp Devirme | alt yüz ya da bir devirme sonrası üst yüz (karşılıklı yüzlerden) | bir devirme; üst, sağ ya da sol yüz | iki devirme | üç devirme |
+| Küp Görünümü | 2×2 taban, soldan bakış | 3×2 taban; soldan ya da sağdan | 3×3 taban | 4×3 taban, 4 kata kadar |
+| Küp Açılımı | hangi açılım küp olur? (bariz yanlış çeldiriciler) | aynısı, inandırıcı çeldiricilerle | verilen renkli açılımda karşı yüzün rengi | 7 kareden hangisi çıkarılırsa açılım olur (Kangaroo tarzı) |
+
+3. sınıf için eklenen beş türde (Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı) En Zor kademe 3. sınıf düzeyindedir; Kolay kademe 2. sınıfa da uygundur. Sınıf seçimi yoktur: tüm türler tek havuzda, kademeler ilerlemeye göre otomatik önerilir.
+Cevaplar kuraldan hesaplanır: Küp Devirme'de küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
 
 Öncüllü sorularda (Kim Hangisi?, Sıralama) soru cümlesi öncüllerin altında gösterilir.
 
@@ -129,6 +137,7 @@ cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu, sıralama, terazi v
 | `js/core.js` | Tohumlu rastgele sayı üreteci, kategori listesi, şık yardımcıları |
 | `js/shapes.js` | Şekil, kareli şekil ve küp çizimleri (SVG metni; DOM gerekmez) |
 | `js/gen-*.js` | Soru üreticileri: `Bilsem.GEN[tür](rng, kademe)`; kademe 1–4 |
+| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı |
 | `js/span.js` | Sayı Hafızası: sayı üretimi ve oyun kuralları |
 | `js/store.js` | Yıldızlar, gün serisi, konu istatistikleri, rekorlar (`localStorage`) |
 | `js/app.js` | Arayüz |

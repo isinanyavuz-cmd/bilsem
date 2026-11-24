@@ -94,6 +94,14 @@
     rotate: () => S.figAt(F('flag', 'purple'), 6, 24, 62) + '<path d="M62 20a26 26 0 0 1 24 26" fill="none" stroke="#f08c00" stroke-width="7" stroke-linecap="round"/><path d="M86 58l-10 -13h20z" fill="#f08c00"/>',
     mirror: () => S.figAt(F('flag', 'green'), 0, 22, 56) + '<path d="M50 10v80" stroke="#2f7de1" stroke-width="3.4" stroke-dasharray="6 6" stroke-linecap="round"/>' + S.figAt(F('flag', 'green', { mirror: true }), 44, 22, 56),
     cubes: () => { const c = S.cubes([[2, 1], [1, 0]], 26, S.CUBE_TONES[0]); return '<g transform="translate(' + (100 - c.w) / 2 + ' ' + (100 - c.h) / 2 + ')">' + c.inner + '</g>'; },
+    fillgap: () => { const m = [[1, 2, 1], [2, 1, 2], [1, 2, 0]]; return S.Grid.draw(m, ['blue', 'yellow'], 12, 12, 76) + '<rect x="62.7" y="62.7" width="25.3" height="25.3" rx="4" fill="#fff4cc" stroke="#f0a000" stroke-width="3" stroke-dasharray="6 4"/>' + S.text(75.3, 75.3, '?', 20, { fill: '#e08600' }); },
+    overlay: () => '<rect x="8" y="14" width="52" height="52" rx="7" fill="#e3efff" stroke="#3d6fb8" stroke-width="3.4"/><rect x="40" y="34" width="52" height="52" rx="7" fill="#e3efff" fill-opacity=".8" stroke="#3d6fb8" stroke-width="3.4"/>' +
+      '<rect x="16" y="22" width="17" height="17" fill="#26324f"/><rect x="42" y="48" width="17" height="17" fill="#26324f"/><rect x="62" y="56" width="17" height="17" fill="#26324f"/>',
+    roll: () => '<polygon points="42,18 68,33 42,48 16,33" fill="#ffd233"/><polygon points="16,33 42,48 42,80 16,65" fill="#3d8ef7"/><polygon points="42,48 68,33 68,65 42,80" fill="#f2545b"/>' +
+      '<g stroke="#1d2b4a" stroke-width="3.4" stroke-linejoin="round" fill="none"><polygon points="42,18 68,33 42,48 16,33"/><polygon points="16,33 42,48 42,80 16,65"/><polygon points="42,48 68,33 68,65 42,80"/></g>' +
+      '<path d="M74 22a22 22 0 0 1 14 22" fill="none" stroke="#f08c00" stroke-width="6" stroke-linecap="round"/><path d="M91 54l-9 -12h18z" fill="#f08c00"/>',
+    view: () => { const c = S.cubes([[2, 1], [1, 0]], 20, S.CUBE_TONES[1]); return '<g transform="translate(' + (4 + (60 - c.w) / 2) + ' ' + (100 - c.h) / 2 + ')">' + c.inner + '</g>' + S.emoji(80, 30, '👁️', 30) + '<path d="M72 44l-6 6" stroke="#f08c00" stroke-width="5" stroke-linecap="round"/>'; },
+    net: () => [[1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2]].map((p) => '<rect x="' + (p[0] * 24 + 4) + '" y="' + (p[1] * 24 + 14) + '" width="24" height="24" fill="#cfe3ff" stroke="#1d2b4a" stroke-width="3" stroke-linejoin="round"/>').join(''),
     stack: () => [['#3d8ef7', 'M12 72L88 28'], ['#ffd233', 'M10 40L90 58'], ['#f2545b', 'M24 16L76 86']].map((l) =>
       '<path d="' + l[1] + '" stroke="#1d2b4a" stroke-width="15" stroke-linecap="round"/><path d="' + l[1] + '" stroke="' + l[0] + '" stroke-width="10" stroke-linecap="round"/>').join(''),
     numseq: () => S.tile(3, 35, 29) + S.text(17.5, 49.5, '2', 20) + S.tile(35.5, 35, 29) + S.text(50, 49.5, '4', 20) + S.qtile(68, 35, 29),
