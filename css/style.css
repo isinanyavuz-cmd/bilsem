@@ -605,7 +605,7 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .login .btn { width: 100%; }
 
 /* hesap: robot yerine avatar, altında kullanıcı adı, sağ üstte Veli paneli */
-.parent-corner { margin-left: auto; align-self: flex-start; }
+.top-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
 .avatar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .avatar-btn { background: none; border: 0; padding: 0; cursor: pointer; border-radius: 18px; line-height: 0; }
 .avatar-btn:active { transform: translateY(2px); }
