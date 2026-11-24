@@ -74,6 +74,12 @@
     { id: 'who', area: 'sozel', name: 'Kim Hangisi?', desc: 'İpuçlarıyla eşleştir', tip: 'Kesin bildiklerini önce yerleştir. Sonra "değil" diyen ipuçlarıyla kalanları ele.' },
   ];
   Bilsem.catById = function (id) { return Bilsem.CATS.find((c) => c.id === id); };
+  /* Sınıflar: 2. sınıf yalnızca ilk 20 türü görür. 3. sınıf bunların hepsini ve sonradan eklenen aşağıdaki türleri görür;
+     eski türlerde 3. sınıf Orta kademeden başlar. */
+  Bilsem.GRADES = [{ id: 2, name: '2. sınıf' }, { id: 3, name: '3. sınıf' }];
+  Bilsem.G3_ONLY = ['fillgap', 'overlay', 'sym', 'roll', 'view', 'net', 'fold', 'sticks', 'dots', 'flip', 'magic', 'back', 'cook', 'equiv', 'liar', 'sudoku', 'maze', 'cipher'];
+  Bilsem.catsFor = function (grade) { return grade === 3 ? Bilsem.CATS : Bilsem.CATS.filter((c) => Bilsem.G3_ONLY.indexOf(c.id) < 0); };
+  Bilsem.floorLevel = function (id, grade) { return grade === 3 && Bilsem.G3_ONLY.indexOf(id) < 0 ? 2 : 1; };
   Bilsem.LEVELS = [1, 2, 3, 4];
   Bilsem.LEVEL_NAMES = ['', 'Kolay', 'Orta', 'Zor', 'En Zor'];
 

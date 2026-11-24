@@ -12,7 +12,7 @@
 
   const spanBlank = () => ({ plays: 0, best: { 1: { both: 0, fwd: 0, bwd: 0 }, 2: { both: 0, fwd: 0, bwd: 0 }, 3: { both: 0, fwd: 0, bwd: 0 } } });
   function blank() {
-    return { v: 3, settings: { sound: true, len: 10, spanStart: 3, spanLevel: 1, spanTypeTimed: true }, cats: {}, days: {}, exams: [], span: spanBlank(), profile: { avatar: null } };
+    return { v: 3, settings: { sound: true, len: 10, grade: 2, spanStart: 3, spanLevel: 1, spanTypeTimed: true }, cats: {}, days: {}, exams: [], span: spanBlank(), profile: { avatar: null } };
   }
 
   /* Sayı hafızası kaydını bugünkü biçime getirir: rekorlar düzeye göre tutulur ve en çok MAX basamaktır.
@@ -89,6 +89,7 @@
           set.spanStart = Math.max(Sp.MIN, Math.min(Sp.MAX, set.spanStart));
           set.spanLevel = Sp.levelOf(set.spanLevel).id;
           set.spanTypeTimed = set.spanTypeTimed !== false;
+          set.grade = set.grade === 3 ? 3 : 2;
           return true;
         }
       } catch (e) { /* bozuk kayıt */ }
@@ -163,7 +164,8 @@
       const c = this.cat(id);
       if (stars > c.stars[level - 1]) c.stars[level - 1] = stars;
     },
-    workLevel(id) { return Math.max(1, Math.min(4, Math.floor(this.cat(id).skill))); },
+    grade() { return this.data.settings.grade === 3 ? 3 : 2; },
+    workLevel(id) { return Math.max(Bilsem.floorLevel(id, this.grade()), Math.min(4, Math.floor(this.cat(id).skill))); },
     /* Toplam yıldız: kategori yıldızları + her günün görevinden kazanılan en iyi yıldız */
     totalStars() {
       let n = 0;
@@ -196,7 +198,7 @@
     spanPlayed() { this.data.span.plays++; },
     /* Günün görevi: az çalışılan ve zorlanılan kategoriler daha sık gelir. */
     dailyPlan(rng, n) {
-      const pool = Bilsem.CATS.map((c) => {
+      const pool = Bilsem.catsFor(this.grade()).map((c) => {
         const s = this.cat(c.id);
         const recent = s.recent.slice(-10);
         const acc = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : 0.5;

@@ -654,3 +654,6 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .brand .avatar-card { padding: 6px 4px 6px; }
 .brand .avatar-card .avatar-emoji { min-width: 0; width: auto; }
 .brand .avatar-card .robot, .brand .avatar-card .avatar-img { width: 66px; }
+
+/* Sınıf seçici (ana ekran) */
+.grade-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 4px 0 14px; font: 800 16px/1 var(--font-display); color: var(--muted, #566889); }

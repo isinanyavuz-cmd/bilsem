@@ -211,9 +211,9 @@
     const ex = EXAMS[i], specs = [];
     let pool = [];
     for (let k = 0; k < ex.n; k++) {
-      if (!pool.length) pool = rng.shuffle(B.CATS.map((c) => c.id));
-      const f = k / ex.n;
-      specs.push({ type: pool.pop(), level: level || (f < 0.25 ? 1 : f < 0.5 ? 2 : f < 0.8 ? 3 : 4) });   // seçilmediyse kolaydan zora
+      if (!pool.length) pool = rng.shuffle(B.catsFor(Store.grade()).map((c) => c.id));
+      const f = k / ex.n, id = pool.pop();
+      specs.push({ type: id, level: Math.max(B.floorLevel(id, Store.grade()), level || (f < 0.25 ? 1 : f < 0.5 ? 2 : f < 0.8 ? 3 : 4)) });   // seçilmediyse kolaydan zora
     }
     begin({ mode: 'exam', exam: i, fixed: level || 0, left: ex.min * 60, items: makeItems(specs) });
   }
@@ -336,8 +336,10 @@
       '<div class="title-wrap"><div class="title-line"><span class="brand-name">' + pname + ' <b>BİLSEM\'e</b> Hazırlanıyor</span>' +
       '<span class="chips chips-inline"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
       '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span></span></div>' +
-      '<span class="brand-sub">2. sınıf · genel yetenek alıştırmaları</span></div></div>' +
+      '<span class="brand-sub">' + Store.grade() + '. sınıf · genel yetenek alıştırmaları</span></div></div>' +
       '<button type="button" class="btn btn-ghost btn-sm parent-corner" data-act="parent">Veli paneli</button></header>' +
+      '<div class="grade-row"><span>Sınıf</span><span class="seg" role="group" aria-label="Sınıf seç">' + B.GRADES.map((g) =>
+        '<button type="button" class="' + (g.id === Store.grade() ? 'on' : '') + '" data-act="grade" data-g="' + g.id + '" aria-pressed="' + (g.id === Store.grade()) + '">' + g.name + '</button>').join('') + '</span></div>' +
       '<section class="hero">' +
       '<button type="button" class="hero-card hero-daily" data-act="daily">' + robot(done ? 'happy' : 'idle') +
       '<span class="hc"><span class="hc-title">Günün Görevi</span><span class="hc-text">' +
@@ -351,8 +353,10 @@
       '<span class="hc"><span class="hc-title">Sayıyı aklında tut</span><span class="hc-text">Sayıya bak; kapanınca süre bitmeden klavyeyle düzden ve tersten yaz. ' +
       Span.MIN + ' basamakla başlar, ' + Span.MAX + ' basamağa kadar uzar.</span><span class="span-recs">' + spanRecords() + '</span></span>' +
       '<span class="hero-go">Başla</span></button></section>' +
-      B.AREAS.map((a) => '<section class="area" style="--area: var(--a-' + a.id + ')"><h2>' + a.name + '</h2><div class="cat-grid">' +
-        B.CATS.filter((c) => c.area === a.id).map(catCard).join('') + '</div></section>').join('') +
+      B.AREAS.map((a) => {
+        const cats = B.catsFor(Store.grade()).filter((c) => c.area === a.id);
+        return cats.length ? '<section class="area" style="--area: var(--a-' + a.id + ')"><h2>' + a.name + '</h2><div class="cat-grid">' + cats.map(catCard).join('') + '</div></section>' : '';
+      }).join('') +
       '<p class="foot">Her gün kısa bir çalışma, arada bir uzun çalışmadan daha çok işe yarar.' +
       (app.dataset.surum ? '<span class="surum">Sürüm ' + app.dataset.surum + '</span>' : '') + '</p></div>';
   }
@@ -588,7 +592,7 @@
 
   /* ---------- veli paneli ---------- */
   function parentView() {
-    const rows = B.CATS.map((c) => ({ c: c, s: Store.cat(c.id) }));
+    const rows = B.catsFor(Store.grade()).map((c) => ({ c: c, s: Store.cat(c.id) }));
     const seen = rows.reduce((a, r) => a + r.s.seen, 0), ok = rows.reduce((a, r) => a + r.s.ok, 0), ms = rows.reduce((a, r) => a + r.s.ms, 0);
     const set = Store.data.settings;
     const weak = rows.filter((r) => r.s.seen >= 5 && r.s.ok / r.s.seen < 0.7).sort((a, b) => a.s.ok / a.s.seen - b.s.ok / b.s.seen).slice(0, 3);
@@ -789,6 +793,7 @@
       Store.save();
       render();
     },
+    grade(el) { Store.data.settings.grade = Number(el.dataset.g) === 3 ? 3 : 2; Store.save(); render(); },
     'span-level'(el) { Store.data.settings.spanLevel = Number(el.dataset.level); Store.save(); render(); },
     'span-key'(el) { spanKey(el.dataset.d); },
     'span-del': spanDel,
