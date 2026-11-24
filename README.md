@@ -45,6 +45,10 @@ Dosyalar: `js/auth.js` (giriş ve bulut senkronu), `js/firebase-config.js` (Fire
    içindeki `window.BILSEM_FIREBASE` değerine yaz. Bu değerler herkese açıktır; güvenlik kurallarla sağlanır.
 7. `node tools/surum.js` çalıştırıp değişikliği gönder.
 
+Firebase SDK'sı `js/vendor/firebase.js` içinde tek dosya olarak gelir (CDN kullanılmaz; iki ayrı Firebase kopyası yüklenirse giriş çalışmaz).
+Yeniden üretmek için `tools/firebase-entry.js` dosyasını `firebase` ve `esbuild` ile paketleyin:
+`npx esbuild tools/firebase-entry.js --bundle --format=esm --minify --target=es2020 --outfile=js/vendor/firebase.js`
+
 Yapılandırma girilmeden uygulama giriş ekranında "ayarlanmadı" uyarısı gösterir. Kullanıcı adı girişinde
 şifre sıfırlama yoktur; şifresini unutan çocuk için hesabı Firebase konsolundan silip yeniden açmak gerekir.
 Tek dosya sürümü (`tools/tek-dosya.js`) giriş modülünü içermez; hesap girişi yalnızca yayındaki sürümde çalışır.

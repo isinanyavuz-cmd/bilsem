@@ -1,18 +1,18 @@
 /* Hesap girişi (Firebase Auth) ve ilerlemenin buluta kaydı (Firestore).
  * ES modülüdür: index.html içinde <script type="module"> ile yüklenir.
+ * Firebase SDK'sı js/vendor/firebase.js içinde tek dosya olarak gelir (tools/firebase-entry.js'ten derlenir).
  *
  * Dışarıya iki nesne açar:
  *   window.BilsemAuth  -> signIn, signUp, google, apple, out
  *   window.BilsemSync  -> push(data): ilerlemeyi bulutta kullanıcının kaydına gönderir (kısa gecikmeli)
  * Durum değişince "bilsem:auth" olayı yayınlanır (detail: { configured, user, cloud }).
  */
-import { initializeApp } from 'https://cdn.jsdelivr.net/npm/firebase@13.2.0/app/+esm';
+
 import {
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  initializeApp, getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   updateProfile, GoogleAuthProvider, OAuthProvider, signInWithPopup, signInWithRedirect,
-  getRedirectResult, signOut,
-} from 'https://cdn.jsdelivr.net/npm/firebase@13.2.0/auth/+esm';
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://cdn.jsdelivr.net/npm/firebase@13.2.0/firestore/+esm';
+  getRedirectResult, signOut, getFirestore, doc, getDoc, setDoc, serverTimestamp,
+} from './vendor/firebase.js';
 
 const cfg = window.BILSEM_FIREBASE || null;
 const app = cfg ? initializeApp(cfg) : null;
