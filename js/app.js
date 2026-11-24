@@ -17,7 +17,7 @@
   let clock = null, memoT = null, trVoice = null, actx = null;
 
   /* hesap: undefined = henüz bilinmiyor, null = giriş yapılmamış, nesne = giriş yapılmış */
-  let user = undefined, loadFailed = false, authMode = 'in', authErr = '', authBusy = false, authName = '';
+  let user = undefined, loadFailed = false, authMode = 'in', authErr = '', authInfo = '', authBusy = false, authName = '';
 
   /* ---------- simgeler ---------- */
   function star(on) {
@@ -695,15 +695,18 @@
       '<button type="button" class="' + (authMode === 'in' ? 'on' : '') + '" data-act="auth-mode" data-mode="in" aria-pressed="' + (authMode === 'in') + '">Giriş yap</button>' +
       '<button type="button" class="' + (authMode === 'up' ? 'on' : '') + '" data-act="auth-mode" data-mode="up" aria-pressed="' + (authMode === 'up') + '">Hesap aç</button></div>' +
       '<form data-form="auth" class="pin-form" novalidate>' +
-      '<label class="field"><span>Kullanıcı adı</span><input name="u" class="pin-input login-input" autocomplete="username" autocapitalize="none" spellcheck="false" value="' + esc(authName) + '"' + (busy ? ' disabled' : '') + '></label>' +
+      '<label class="field"><span>E-posta</span><input name="u" type="email" class="pin-input login-input" autocomplete="email" autocapitalize="none" spellcheck="false" value="' + esc(authName) + '"' + (busy ? ' disabled' : '') + '></label>' +
+      (authMode === 'up' ? '<label class="field"><span>Görünen ad (isteğe bağlı)</span><input name="n" class="pin-input login-input" autocomplete="nickname" maxlength="30"' + (busy ? ' disabled' : '') + '></label>' : '') +
       '<label class="field"><span>Şifre</span><input name="p" type="password" class="pin-input login-input" autocomplete="' + (authMode === 'in' ? 'current-password' : 'new-password') + '"' + (busy ? ' disabled' : '') + '></label>' +
       (authErr ? '<p class="pin-err" role="alert">' + esc(authErr) + '</p>' : '') +
+      (authInfo ? '<p class="note" role="status">' + esc(authInfo) + '</p>' : '') +
       '<button type="submit" class="btn btn-sun"' + (busy ? ' disabled' : '') + '>' + (authMode === 'in' ? 'Giriş yap' : 'Hesap aç') + '</button>' +
+      (authMode === 'in' ? '<button type="button" class="btn btn-ghost btn-sm" data-act="auth-forgot"' + (busy ? ' disabled' : '') + '>Şifremi unuttum</button>' : '') +
       '</form>' +
       '<div class="login-or"><span>veya</span></div>' +
       '<button type="button" class="btn btn-ghost" data-act="auth-google"' + (busy ? ' disabled' : '') + '>Google ile devam et</button>' +
       '<button type="button" class="btn btn-ghost" data-act="auth-apple"' + (busy ? ' disabled' : '') + '>Apple ile devam et</button>' +
-      (authMode === 'up' ? '<p class="note">Kullanıcı adı 3–20 karakter; yalnızca küçük harf, rakam ve _. Şifre en az 6 karakter.</p>' : '') +
+      (authMode === 'up' ? '<p class="note">Şifre en az 6 karakter. Bu e-posta adresi şifreni unuttuğunda kurtarma bağlantısını almak için kullanılır.</p>' : '') +
       '</section></div>';
   }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -766,7 +769,8 @@
     },
     'reset-ask'() { sheet = { kind: 'reset' }; render(); },
     reset() { Store.reset(); sheet = null; render(); },
-    'auth-mode'(el) { authMode = el.dataset.mode === 'up' ? 'up' : 'in'; authErr = ''; render(); },
+    'auth-mode'(el) { authMode = el.dataset.mode === 'up' ? 'up' : 'in'; authErr = ''; authInfo = ''; render(); },
+    'auth-forgot': forgotAuth,
     'auth-google'() { socialAuth('google'); },
     'auth-apple'() { socialAuth('apple'); },
     async logout() {
@@ -787,14 +791,26 @@
   }
   async function submitAuth(f) {
     if (!window.BilsemAuth || authBusy) return;
-    const name = f.querySelector('[name=u]').value, pw = f.querySelector('[name=p]').value;
-    authName = name.trim(); authBusy = true; authErr = ''; render();
+    const email = f.querySelector('[name=u]').value, pw = f.querySelector('[name=p]').value;
+    const nameEl = f.querySelector('[name=n]'), shown = nameEl ? nameEl.value : '';
+    authName = email.trim(); authBusy = true; authErr = ''; authInfo = ''; render();
     try {
-      if (authMode === 'in') await BilsemAuth.signIn(name, pw);
-      else await BilsemAuth.signUp(name, pw);
+      if (authMode === 'in') await BilsemAuth.signIn(email, pw);
+      else await BilsemAuth.signUp(email, pw, shown);
     } catch (err) { authErr = err.message || 'Giriş yapılamadı.'; }
     authBusy = false;
     if (user === null) render();   // başarılıysa olay zaten ekranı değiştirir
+  }
+  async function forgotAuth() {
+    if (!window.BilsemAuth || authBusy) return;
+    const el = app.querySelector('[name=u]');
+    authName = el ? el.value.trim() : authName;
+    authBusy = true; authErr = ''; authInfo = ''; render();
+    try {
+      await BilsemAuth.forgot(authName);
+      authInfo = 'Bu e-posta ile bir hesap varsa şifre sıfırlama bağlantısı gönderildi. Gelen kutunu ve spam klasörünü kontrol et.';
+    } catch (err) { authErr = err.message || 'Gönderilemedi.'; }
+    authBusy = false; render();
   }
 
   /* hesap olayları: giriş, çıkış, bulut kaydının okunamaması */

@@ -25,7 +25,7 @@ node tools/tek-dosya.js enes-bilsem.html
 
 ## Hesaplar ve giriş
 
-Uygulamaya girmek için hesap gerekir. Kullanıcı adı ve şifre ile hesap açılır; Google ya da Apple ile de
+Uygulamaya girmek için hesap gerekir. E-posta ve şifre ile hesap açılır; Google ya da Apple ile de
 giriş yapılabilir. İlerleme hesapta saklanır, hangi cihazla girilirse aynı ilerleme görünür. Altyapı
 Firebase'dir (Authentication + Firestore); GitHub Pages'ta sunucu gerekmez.
 
@@ -49,8 +49,9 @@ Firebase SDK'sı `js/vendor/firebase.js` içinde tek dosya olarak gelir (CDN kul
 Yeniden üretmek için `tools/firebase-entry.js` dosyasını `firebase` ve `esbuild` ile paketleyin:
 `npx esbuild tools/firebase-entry.js --bundle --format=esm --minify --target=es2020 --outfile=js/vendor/firebase.js`
 
-Yapılandırma girilmeden uygulama giriş ekranında "ayarlanmadı" uyarısı gösterir. Kullanıcı adı girişinde
-şifre sıfırlama yoktur; şifresini unutan çocuk için hesabı Firebase konsolundan silip yeniden açmak gerekir.
+Yapılandırma girilmeden uygulama giriş ekranında "ayarlanmadı" uyarısı gösterir. Şifre sıfırlama, hesabın e-posta adresine
+gönderilen bağlantıyla yapılır ("Şifremi unuttum"). Bağlantının Türkçe görünmesi için Firebase'de
+Authentication → Templates bölümünden "Şifre sıfırlama" metnini düzenleyebilirsiniz.
 Tek dosya sürümü (`tools/tek-dosya.js`) giriş modülünü içermez; hesap girişi yalnızca yayındaki sürümde çalışır.
 
 ## Çalışma biçimleri

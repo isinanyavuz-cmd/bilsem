@@ -3,15 +3,15 @@
  * Firebase SDK'sı js/vendor/firebase.js içinde tek dosya olarak gelir (tools/firebase-entry.js'ten derlenir).
  *
  * Dışarıya iki nesne açar:
- *   window.BilsemAuth  -> signIn, signUp, google, apple, out
+ *   window.BilsemAuth  -> signIn, signUp, forgot, google, apple, out
  *   window.BilsemSync  -> push(data): ilerlemeyi bulutta kullanıcının kaydına gönderir (kısa gecikmeli)
- * Durum değişince "bilsem:auth" olayı yayınlanır (detail: { configured, user, cloud }).
+ * Durum değişince "bilsem:auth" olayı yayınlanır (detail: { configured, user, cloud, error }).
  */
 
 import {
   initializeApp, getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   updateProfile, GoogleAuthProvider, OAuthProvider, signInWithPopup, signInWithRedirect,
-  getRedirectResult, signOut, getFirestore, doc, getDoc, setDoc, serverTimestamp,
+  getRedirectResult, signOut, sendPasswordResetEmail, getFirestore, doc, getDoc, setDoc, serverTimestamp,
 } from './vendor/firebase.js';
 
 const cfg = window.BILSEM_FIREBASE || null;
@@ -19,23 +19,22 @@ const app = cfg ? initializeApp(cfg) : null;
 const auth = app ? getAuth(app) : null;
 const db = app ? getFirestore(app) : null;
 
-/* Kullanıcı adı, Firebase e-posta/şifre girişi için gizli bir e-postaya çevrilir. Bu adres hiçbir yere posta göndermez. */
-const USER_RE = /^[a-z0-9_]{3,20}$/;
-const EMAIL_DOMAIN = 'kullanici.bilsem.app';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const MSG = {
-  'auth/invalid-credential': 'Kullanıcı adı ya da şifre yanlış.',
-  'auth/invalid-login-credentials': 'Kullanıcı adı ya da şifre yanlış.',
-  'auth/user-not-found': 'Kullanıcı adı ya da şifre yanlış.',
-  'auth/wrong-password': 'Kullanıcı adı ya da şifre yanlış.',
-  'auth/email-already-in-use': 'Bu kullanıcı adı zaten alınmış.',
+  'auth/invalid-credential': 'E-posta ya da şifre yanlış.',
+  'auth/invalid-login-credentials': 'E-posta ya da şifre yanlış.',
+  'auth/user-not-found': 'E-posta ya da şifre yanlış.',
+  'auth/wrong-password': 'E-posta ya da şifre yanlış.',
+  'auth/email-already-in-use': 'Bu e-posta ile zaten bir hesap var. Giriş yapmayı dene.',
   'auth/weak-password': 'Şifre en az 6 karakter olmalı.',
-  'auth/invalid-email': 'Kullanıcı adı geçersiz.',
+  'auth/invalid-email': 'E-posta adresi geçersiz.',
+  'auth/missing-email': 'Önce e-posta adresini yaz.',
   'auth/too-many-requests': 'Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.',
   'auth/network-request-failed': 'İnternet bağlantısı yok gibi görünüyor.',
   'auth/popup-closed-by-user': 'Giriş penceresi kapatıldı.',
   'auth/cancelled-popup-request': 'Giriş penceresi kapatıldı.',
-  'auth/account-exists-with-different-credential': 'Bu e-posta başka bir giriş yöntemiyle açılmış.',
+  'auth/account-exists-with-different-credential': 'Bu e-posta başka bir giriş yöntemiyle açılmış (ör. Google).',
   'auth/operation-not-allowed': 'Bu giriş yöntemi Firebase’de açık değil.',
   'auth/unauthorized-domain': 'Bu adres Firebase’de yetkili alan adları arasında değil.',
 };
@@ -88,10 +87,11 @@ window.BilsemSync = {
 window.addEventListener('pagehide', () => { flush(); });
 
 /* ---------- giriş ---------- */
-function usernameOf(raw) {
-  const name = String(raw || '').trim().toLowerCase();
-  if (!USER_RE.test(name)) throw new Error('Kullanıcı adı 3–20 karakter olmalı; yalnızca küçük harf, rakam ve _ kullanılabilir.');
-  return name;
+function emailOf(raw) {
+  const e = String(raw || '').trim().toLowerCase();
+  if (!e) throw new Error('E-posta adresini yaz.');
+  if (!EMAIL_RE.test(e)) throw new Error('E-posta adresi geçersiz.');
+  return e;
 }
 function passwordOf(raw) {
   const pw = String(raw || '');
@@ -110,18 +110,25 @@ function providerSignIn(provider) {
 
 window.BilsemAuth = {
   configured: !!auth,
-  async signIn(name, password) {
+  async signIn(email, password) {
     need();
-    const n = usernameOf(name);
-    try { await signInWithEmailAndPassword(auth, n + '@' + EMAIL_DOMAIN, password); } catch (e) { throw fail(e); }
+    const e = emailOf(email);
+    try { await signInWithEmailAndPassword(auth, e, password); } catch (err) { throw fail(err); }
   },
-  async signUp(name, password) {
+  async signUp(email, password, name) {
     need();
-    const n = usernameOf(name), pw = passwordOf(password);
+    const e = emailOf(email), pw = passwordOf(password);
+    const shown = String(name || '').trim().slice(0, 30) || e.split('@')[0];
     try {
-      const cred = await createUserWithEmailAndPassword(auth, n + '@' + EMAIL_DOMAIN, pw);
-      await updateProfile(cred.user, { displayName: n });
-    } catch (e) { throw fail(e); }
+      const cred = await createUserWithEmailAndPassword(auth, e, pw);
+      await updateProfile(cred.user, { displayName: shown });
+    } catch (err) { throw fail(err); }
+  },
+  /* Şifre sıfırlama bağlantısını e-postaya gönderir. Hesabın var olup olmadığı bilgisi verilmez. */
+  async forgot(email) {
+    need();
+    const e = emailOf(email);
+    try { await sendPasswordResetEmail(auth, e); } catch (err) { throw fail(err); }
   },
   google() {
     need();
