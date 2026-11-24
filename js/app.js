@@ -309,12 +309,12 @@
     const done = Store.dailyDone();
     return '<div class="page home">' +
       '<header class="top"><div class="brand">' +
-      '<div class="avatar-col"><button type="button" class="avatar-btn" data-act="account" aria-label="Hesap bilgileri">' + avatarHtml('logo badge') + '</button>' +
-      (user && user.name ? '<span class="avatar-name">' + esc(user.name) + '</span>' : '') + '</div>' +
+      '<button type="button" class="avatar-card" data-act="account" aria-label="Hesap bilgileri">' + avatarHtml('') +
+      (user && user.name ? '<span class="avatar-name">' + esc(user.name) + '</span>' : '') + '</button>' +
       '<div><span class="brand-name">Enes <b>BİLSEM\'e</b> Hazırlanıyor</span><span class="brand-sub">2. sınıf · genel yetenek alıştırmaları</span></div></div>' +
-      '<div class="top-tools"><div class="chips"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
+      '<button type="button" class="btn btn-ghost btn-sm parent-corner" data-act="parent">Veli paneli</button></header>' +
+      '<div class="chips chips-row"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
       '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span></div>' +
-      '<button type="button" class="btn btn-ghost btn-sm" data-act="parent">Veli paneli</button></div></header>' +
       '<section class="hero">' +
       '<button type="button" class="hero-card hero-daily" data-act="daily">' + robot(done ? 'happy' : 'idle') +
       '<span class="hc"><span class="hc-title">Günün Görevi</span><span class="hc-text">' +

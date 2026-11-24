@@ -626,3 +626,12 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .brand .logo, .brand .avatar-img, .brand .avatar-emoji { width: 80px; height: 80px; }
 .brand .avatar-emoji { font-size: 44px; }
 .brand .avatar-name { max-width: 100px; font-size: 14px; }
+
+/* avatar kartı: avatar ve kullanıcı adı tek kare içinde; Veli paneli sağ üstte ayrı */
+.brand .avatar-card { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 96px; padding: 10px 8px 8px; border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow); cursor: pointer; font: inherit; color: inherit; }
+.brand .avatar-card:active { transform: translateY(2px); }
+.brand .avatar-card .robot, .brand .avatar-card .avatar-img, .brand .avatar-card .avatar-emoji { width: 60px; height: 60px; border-radius: 14px; box-shadow: none; background: none; }
+.brand .avatar-card .avatar-emoji { font-size: 36px; }
+.brand .avatar-card .avatar-name { max-width: 100%; font-size: 13px; }
+.top .parent-corner { margin-left: auto; align-self: flex-start; }
+.chips-row { margin-top: 10px; }
