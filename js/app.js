@@ -43,6 +43,8 @@
   };
   /* maskot: sevinc | selam | dusun */
   const ENES = { sevinc: 'assets/kil/enes-sevinc.webp', selam: 'assets/kil/enes-selam.webp', dusun: 'assets/kil/enes-dusun.webp' };   // tam yollar: tek dosya aracı bunları gömer
+  const ALAN = { gorsel: 'assets/kil/alan-gorsel.webp', uzamsal: 'assets/kil/alan-uzamsal.webp', sayisal: 'assets/kil/alan-sayisal.webp', dikkat: 'assets/kil/alan-dikkat.webp', sozel: 'assets/kil/alan-sozel.webp' };
+  const KUPA = '<img class="kupa" src="assets/kil/kupa.webp" alt="">';
   const enes = (poz) => '<img class="enes enes-' + poz + '" src="' + ENES[poz] + '" alt="">';
 
   /* Avatar seçilmemişse kil karakteri gösterilir. */
@@ -335,7 +337,7 @@
       '<span class="hc"><span class="hc-title">Deneme Sınavı</span><span class="hc-text">Süreli ve karışık sorular</span></span>' + I.back + '</button>' +
       '<button type="button" class="hero-card hero-memory" data-act="span-pick">' + I.span +
       '<span class="hc"><span class="hc-title">Sayı Hafızası</span><span class="hc-text">' + spanRecords() + '</span></span>' + I.back + '</button></section>' +
-      B.AREAS.map((a) => '<section class="area" style="--area: var(--a-' + a.id + ')"><h2>' + a.name + '</h2><div class="cat-grid">' +
+      B.AREAS.map((a) => '<section class="area" style="--area: var(--a-' + a.id + ')"><h2><img class="alan-ico" src="' + ALAN[a.id] + '" alt="">' + a.name + '</h2><div class="cat-grid">' +
         B.CATS.filter((c) => c.area === a.id).map(catCard).join('') + '</div></section>').join('') +
       '<p class="foot">Her gün kısa bir çalışma, arada bir uzun çalışmadan daha çok işe yarar.' +
       (app.dataset.surum ? '<span class="surum">Sürüm ' + app.dataset.surum + '</span>' : '') + '</p></div>';
@@ -495,7 +497,7 @@
 
     if (span.phase === 'over') {
       const rec = Store.data.span.best[g.level][g.mode];
-      return '<div class="page result" style="--area: var(--a-hafiza)">' + enes(g.best ? 'sevinc' : 'dusun') +
+      return '<div class="page result" style="--area: var(--a-hafiza)"><div class="result-art">' + enes(g.best ? 'sevinc' : 'dusun') + (g.won ? KUPA : '') + '</div>' +
         '<h1>' + (g.won ? Span.MAX + ' basamağı da bildin!' : g.best ? 'Güzel hafıza!' : 'Bu sefer olmadı') + '</h1>' +
         '<div class="score">' + g.best + '<small> basamak</small></div>' +
         '<p class="result-sub">' + lvl.name + ' · ' + mode.name + ' · ' + g.hits + ' doğru, ' + (g.trials - g.hits) + ' yanlış · ' + (span.record ? 'Yeni rekor!' : rec ? 'Rekorun ' + rec + ' basamak' : 'Henüz rekor yok') + '</p>' +
@@ -553,7 +555,7 @@
     } else {
       sub = EXAMS[ses.exam].name + ' · ' + (ses.fixed ? B.LEVEL_NAMES[ses.fixed] : 'karışık kademe') + ' · ' + r.blank + ' boş · süre ' + fmtTime(r.sec);
     }
-    let html = '<div class="page result">' + enes(p >= 0.7 ? 'sevinc' : p >= 0.5 ? 'selam' : 'dusun') + '<h1>' + title + '</h1>';
+    let html = '<div class="page result"><div class="result-art">' + enes(p >= 0.7 ? 'sevinc' : p >= 0.5 ? 'selam' : 'dusun') + (p >= 0.9 ? KUPA : '') + '</div><h1>' + title + '</h1>';
     if (!exam) html += '<div class="big-stars">' + [0, 1, 2].map((i) => star(i < r.stars)).join('') + '</div>';
     html += '<div class="score">' + r.ok + '<small> / ' + r.total + ' doğru</small></div><p class="result-sub">' + sub + '</p>';
     if (ses.mode !== 'practice') html += '<div class="card"><h2>Konulara göre</h2>' + areaBars(ses.items) + '</div>';

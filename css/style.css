@@ -216,7 +216,10 @@ svg { display: block; }
 /* maskot */
 .enes { display: block; flex: none; object-fit: contain; filter: drop-shadow(1px 5px 4px #3a274040); }
 .fb > .enes { width: 64px; height: 76px; margin-block: -6px; }
-.result > .enes { width: auto; height: clamp(170px, 30vh, 250px); animation: enes-gel .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+.result-art { display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
+.result-art .enes { width: auto; height: clamp(170px, 30vh, 250px); animation: enes-gel .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+.kupa { width: auto; height: clamp(84px, 14vh, 120px); filter: drop-shadow(1px 5px 4px #3a274040); animation: enes-gel .5s .18s cubic-bezier(.2, 1.4, .4, 1) both; }
+.alan-ico { flex: none; width: auto; height: 40px; filter: drop-shadow(0 2px 2px #3a274033); }
 @keyframes enes-gel { from { transform: translateY(26px) scale(.8); opacity: 0; } }
 .fb > .enes-sevinc { animation: enes-zipla .5s ease-out; }
 @keyframes enes-zipla { 40% { transform: translateY(-9px) rotate(-4deg); } 70% { transform: translateY(0) rotate(3deg); } }
@@ -241,7 +244,7 @@ svg { display: block; }
   display: flex; align-items: center; gap: 10px;
   font: 800 22px/1.1 var(--font-display); margin-bottom: 12px;
 }
-.area h2::before { content: ""; width: 14px; height: 14px; border-radius: 5px; background: var(--area); transform: rotate(12deg); }
+.area h2:not(:has(.alan-ico))::before { content: ""; width: 14px; height: 14px; border-radius: 5px; background: var(--area); transform: rotate(12deg); }
 .cat-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 700px) { .cat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .cat {
@@ -560,7 +563,7 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
   .opt { min-height: 104px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sheet, .fb, .enes, .opt.no, .big-stars svg.on { animation: none; }
+  .sheet, .fb, .enes, .kupa, .opt.no, .big-stars svg.on { animation: none; }
   .btn, .opt, .cat, .hero-card, .key, .prog-bar { transition: none; }
 }
 
