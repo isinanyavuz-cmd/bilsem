@@ -5,10 +5,11 @@ const test = require('node:test');
 const assert = require('node:assert');
 const B = require('./load.js');
 
-const N = 150;               // kategori ve düzey başına soru
+const N = 300;               // kategori ve düzey başına soru
 const LIMIT = 0.5;
-// Farklı olan şık zaten tanım gereği uçtadır; bu kategoride "uç" ölçüsü anlamsızdır.
-const OUTLIER_EXEMPT = { odd: 'doğru cevap farklı olandır, yani tanımı gereği uçtaki şıktır' };
+// Bu kategoride şıkların birbirine benzerliği ölçülmez: doğru cevap farklı olandır, yani tanımı gereği
+// uçtaki şıktır; döndürülmüş benzerlerin yanındaki "yakın yanlış" ise merkeze düşer. Cevabı soru belirler.
+const EXEMPT = { odd: 'doğru cevap tanımı gereği diğerlerinden farklı olan şıktır' };
 
 function dist(a, b) {
   const cells = (s, sep) => s.split(sep);
@@ -27,7 +28,7 @@ function dist(a, b) {
 }
 
 function rates(id, level) {
-  const rng = new B.RNG(9100 + level);
+  const rng = new B.RNG(20260 + level * 7919);
   let central = 0, outlier = 0, used = 0;
   for (let i = 0; i < N; i++) {
     const q = B.generate(id, level, rng);
@@ -43,13 +44,13 @@ function rates(id, level) {
 }
 
 for (const c of B.CATS) {
-  test('şık sızıntısı: ' + c.id, () => {
+  test('şık sızıntısı: ' + c.id, { skip: EXEMPT[c.id] ? 'ölçü uygulanmaz: ' + EXEMPT[c.id] : false }, () => {
     for (const lv of B.LEVELS) {
       const r = rates(c.id, lv);
       if (!r) continue;
       const where = c.id + ' s' + lv;
       assert.ok(r.central < LIMIT, where + ' doğru cevap çok sık tek merkez: %' + Math.round(r.central * 100));
-      if (!OUTLIER_EXEMPT[c.id]) assert.ok(r.outlier < LIMIT, where + ' doğru cevap çok sık tek uç: %' + Math.round(r.outlier * 100));
+      assert.ok(r.outlier < LIMIT, where + ' doğru cevap çok sık tek uç: %' + Math.round(r.outlier * 100));
     }
   });
 }
