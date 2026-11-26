@@ -54,6 +54,10 @@ gönderilen bağlantıyla yapılır ("Şifremi unuttum"). Bağlantının Türkç
 Authentication → Templates bölümünden "Şifre sıfırlama" metnini düzenleyebilirsiniz.
 Tek dosya sürümü (`tools/tek-dosya.js`) giriş modülünü içermez; hesap girişi yalnızca yayındaki sürümde çalışır.
 
+Soru şekillerinin mat kil görünümü `assets/kil/sekil-*.webp` gölge resimlerinden gelir. Bunlar three.js ile bir kez
+çizilip depoya konmuştur; şekil eklenir ya da değişirse yeniden üretin (Chrome gerekir):
+`npm pack three@0.147.0 && tar xzf three-0.147.0.tgz && node tools/kil-sekiller.js package`
+
 ## Çalışma biçimleri
 
 | Biçim | Ne yapar |
