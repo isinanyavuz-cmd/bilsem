@@ -20,7 +20,10 @@ const js = scripts.map((s) => fs.readFileSync(path.join(root, s), 'utf8').replac
 const fonts = (html.match(/<link rel="stylesheet" href="https:\/\/fonts[^>]+>/) || [''])[0];
 const title = (html.match(/<title>[^<]*<\/title>/) || ['<title>BİLSEM Hazırlık</title>'])[0];
 
-const core = fonts + '\n<style>\n' + css + '</style>\n' + appDiv + '\n<script>\n' + js + '</script>\n';
+// Stil ve betiklerdeki yerel görseller de HTML ile taşınır.
+const inlineArt = (source) => source.replace(/(?:\.\.\/)?(assets\/kil\/[\w-]+\.webp)/g, (_, file) =>
+  'data:image/webp;base64,' + fs.readFileSync(path.join(root, file)).toString('base64'));
+const core = fonts + '\n<style>\n' + inlineArt(css) + '</style>\n' + appDiv + '\n<script>\n' + inlineArt(js) + '</script>\n';
 const page = bodyOnly
   ? title + '\n<meta name="claude:viewport-fit-sides" content="cover">\n' + core
   : '<!DOCTYPE html>\n<html lang="tr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' +

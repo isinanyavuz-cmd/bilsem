@@ -21,8 +21,8 @@
 
   /* ---------- simgeler ---------- */
   function star(on) {
-    return '<svg viewBox="0 0 24 24" class="' + (on ? 'on' : 'off') + '" aria-hidden="true"><path d="M12 2.4l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.3l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="' +
-      (on ? 'var(--sun)' : 'var(--surface-2)') + '" stroke="' + (on ? 'var(--sun-dark)' : 'var(--line-strong)') + '" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+    if (on) return '<svg viewBox="0 0 24 24" class="on" aria-hidden="true"><image href="assets/kil/yildiz.webp" width="24" height="24"/></svg>';
+    return '<svg viewBox="0 0 24 24" class="off" aria-hidden="true"><path d="M12 2.4l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.3l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.7" stroke-linejoin="round"/></svg>';
   }
   function heart(on) {
     return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5C5.5 15.6 3 12.4 3 8.9 3 6.2 5 4.3 7.5 4.3c1.8 0 3.4 1 4.5 2.7 1.1-1.7 2.7-2.7 4.5-2.7C19 4.3 21 6.2 21 8.9c0 3.5-2.5 6.7-9 11.6z" fill="' +
@@ -36,34 +36,19 @@
     sound: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.2 6.5a7.6 7.6 0 0 1 0 11"/></svg>',
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></svg>',
     del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg>',
-    span: '<svg class="hero-ico" viewBox="0 0 56 56" aria-hidden="true">' + [['4', 3, '#fff'], ['7', 20.5, '#fff'], ['2', 38, '#ffc93c']].map((d) =>
-      '<rect x="' + d[1] + '" y="14" width="15" height="24" rx="5" fill="' + d[2] + '" stroke="#1d2b4a" stroke-width="3"/><text x="' + (d[1] + 7.5) + '" y="26" dy="0.35em" text-anchor="middle" font-size="14" font-weight="800" fill="#1d2b4a">' + d[0] + '</text>').join('') +
-      '<path d="M14 47h28m-6 -5l6 5l-6 5M42 47H14m6 -5l-6 5l6 5" fill="none" stroke="#1d2b4a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    exam: '<svg class="hero-ico" viewBox="0 0 56 56" aria-hidden="true"><rect x="8" y="5" width="32" height="42" rx="6" fill="#fff" stroke="#1d2b4a" stroke-width="3.4"/>' +
-      '<path d="M15 16h18M15 24h18M15 32h10" stroke="#b4c5e2" stroke-width="3.4" stroke-linecap="round"/>' +
-      '<circle cx="39" cy="39" r="12" fill="#ffc93c" stroke="#1d2b4a" stroke-width="3.4"/><path d="M39 32v7l4.5 3" fill="none" stroke="#1d2b4a" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    span: '<img class="hero-ico" src="assets/kil/sayilar.webp" alt="">',
+    exam: '<img class="hero-ico" src="assets/kil/kronometre.webp" alt="">',
+    rocket: '<img class="kil-roket" src="assets/kil/roket.webp" alt="">',
+    avatar: '<img class="avatar-img kil-avatar" src="assets/kil/avatar.webp" alt="">',
   };
 
-  function robot(mood, cls) {
-    const eyes = mood === 'happy'
-      ? '<path d="M15.2 27.5q3.6-5.4 7.2 0M27.6 27.5q3.6-5.4 7.2 0" fill="none" stroke="#7cf7ff" stroke-width="3" stroke-linecap="round"/>'
-      : mood === 'sad'
-        ? '<circle cx="19" cy="25" r="3" fill="#7cf7ff"/><circle cx="31" cy="25" r="3" fill="#7cf7ff"/><path d="M21 31.2q4-2.4 8 0" fill="none" stroke="#7cf7ff" stroke-width="2.2" stroke-linecap="round"/>'
-        : '<circle cx="19" cy="26" r="3.5" fill="#7cf7ff"/><circle cx="31" cy="26" r="3.5" fill="#7cf7ff"/>';
-    return '<svg class="robot' + (cls ? ' ' + cls : '') + '" viewBox="0 0 56 56" aria-hidden="true">' +
-      /* eski robot, büyüteçsiz; ortalamak için kaydırıldı */
-      '<g transform="translate(3 5)"><path d="M25 5.5v8" stroke="#1d2b4a" stroke-width="3.4" stroke-linecap="round"/><circle cx="25" cy="5.5" r="4" fill="#ffc93c" stroke="#1d2b4a" stroke-width="2.6"/>' +
-      '<rect x="6" y="12" width="38" height="32" rx="12" fill="#3d8ef7" stroke="#1d2b4a" stroke-width="3.4"/>' +
-      '<rect x="11.5" y="18" width="27" height="16" rx="8" fill="#1d2b4a"/>' + eyes + '</g></svg>';
-  }
-
-  /* avatar: hazır karakterler ya da yüklenen fotoğraf; seçilmemişse robot */
+  /* Avatar seçilmemişse kil karakteri gösterilir. */
   const AVATARS = ['🦊', '🐼', '🐯', '🦁', '🐸', '🐶', '🐱', '🐵', '🦄', '🚀', '⭐', '🌈', '⚽', '🎨', '📚', '🌟'];
-  function avatarHtml(cls) {
+  function avatarHtml() {
     const a = Store.data.profile && Store.data.profile.avatar;
-    if (a && a.indexOf('data:') === 0) return '<img class="avatar-img ' + (cls || '') + '" src="' + a + '" alt="">';
-    if (a) return '<span class="avatar-emoji ' + (cls || '') + '" aria-hidden="true">' + esc(a) + '</span>';
-    return robot('idle', cls);
+    if (a && a.indexOf('data:') === 0) return '<img class="avatar-img" src="' + a + '" alt="">';
+    if (a) return '<span class="avatar-emoji" aria-hidden="true">' + esc(a) + '</span>';
+    return I.avatar;
   }
   function resizeImage(file, px) {
     return new Promise((resolve, reject) => {
@@ -325,32 +310,28 @@
   function spanRecords() {
     const best = Store.data.span.best;
     const list = Span.LEVELS.map((l) => ({ name: l.name, v: Math.max(best[l.id].both, best[l.id].fwd, best[l.id].bwd) })).filter((x) => x.v);
-    return list.length ? 'Rekor: ' + list.map((x) => x.name + ' ' + x.v + ' basamak').join(' · ') : 'Henüz rekor yok.';
+    return list.length ? 'Rekor: ' + list.map((x) => x.name + ' ' + x.v + ' basamak').join(' · ') : 'Sayıları düzden ve tersten hatırla';
   }
   function homeView() {
     const done = Store.dailyDone();
     const pname = user && user.name ? esc(user.name) : 'Enes';
     return '<div class="page home">' +
       '<header class="top"><div class="brand">' +
-      '<button type="button" class="avatar-card" data-act="account" aria-label="Hesap bilgileri">' + avatarHtml('') + '</button>' +
+      '<button type="button" class="avatar-card" data-act="account" aria-label="Hesap bilgileri">' + avatarHtml() + '</button>' +
       '<div class="title-wrap"><div class="title-line"><span class="brand-name">' + pname + ' <b>BİLSEM\'e</b> Hazırlanıyor</span>' +
       '<span class="chips chips-inline"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
       '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span></span></div>' +
       '<span class="brand-sub">2. sınıf · genel yetenek alıştırmaları</span></div></div>' +
       '<button type="button" class="btn btn-ghost btn-sm parent-corner" data-act="parent">Veli paneli</button></header>' +
       '<section class="hero">' +
-      '<button type="button" class="hero-card hero-daily" data-act="daily">' + robot(done ? 'happy' : 'idle') +
+      '<button type="button" class="hero-card hero-daily" data-act="daily">' +
       '<span class="hc"><span class="hc-title">Günün Görevi</span><span class="hc-text">' +
-      (done ? 'Bugünkü görev tamam. İstersen yeniden oyna.' : 'Her konudan karışık 10 soru. Yaklaşık 10 dakika sürer.') +
-      '</span><span class="hero-go">' + (done ? 'Tekrar oyna' : 'Başla') + '</span></span></button>' +
+      (done ? 'Bugünkü görev tamam.' : '10 soru · 10 dakika') +
+      '</span><span class="hero-go">' + (done ? 'Tekrar oyna' : 'Başla') + I.back + '</span></span>' + I.rocket + '</button>' +
       '<button type="button" class="hero-card hero-exam" data-act="exam-pick">' + I.exam +
-      '<span class="hc"><span class="hc-title">Deneme Sınavı</span><span class="hc-text">Süreli ve karışık sorular. Cevaplar sınav bitince gösterilir.</span>' +
-      '<span class="hero-go">Sınav seç</span></span></button></section>' +
-      '<section class="area" style="--area: var(--a-hafiza)"><h2>Sayı Hafızası</h2>' +
-      '<button type="button" class="span-card" data-act="span-pick">' + I.span +
-      '<span class="hc"><span class="hc-title">Sayıyı aklında tut</span><span class="hc-text">Sayıya bak; kapanınca süre bitmeden klavyeyle düzden ve tersten yaz. ' +
-      Span.MIN + ' basamakla başlar, ' + Span.MAX + ' basamağa kadar uzar.</span><span class="span-recs">' + spanRecords() + '</span></span>' +
-      '<span class="hero-go">Başla</span></button></section>' +
+      '<span class="hc"><span class="hc-title">Deneme Sınavı</span><span class="hc-text">Süreli ve karışık sorular</span></span>' + I.back + '</button>' +
+      '<button type="button" class="hero-card hero-memory" data-act="span-pick">' + I.span +
+      '<span class="hc"><span class="hc-title">Sayı Hafızası</span><span class="hc-text">' + spanRecords() + '</span></span>' + I.back + '</button></section>' +
       B.AREAS.map((a) => '<section class="area" style="--area: var(--a-' + a.id + ')"><h2>' + a.name + '</h2><div class="cat-grid">' +
         B.CATS.filter((c) => c.area === a.id).map(catCard).join('') + '</div></section>').join('') +
       '<p class="foot">Her gün kısa bir çalışma, arada bir uzun çalışmadan daha çok işe yarar.' +
@@ -377,8 +358,8 @@
       ? '<span class="chip chip-time' + (ses.left <= 60 ? ' low' : '') + '" id="clock">' + I.clock + '<b>' + fmtTime(Math.max(0, ses.left)) + '</b></span>'
       : '<span class="chip">' + star(true) + '<b>' + ses.items.filter((it) => it.chosen != null && it.chosen === it.q.answer).length + '</b></span>';
     return '<header class="quiz-top"><button type="button" class="icon-btn" data-act="quit" aria-label="Çık">' + I.x + '</button>' +
-      '<div class="prog"><div class="prog-bar" style="width:' + pct(ses.idx + (ses.mode !== 'exam' && cur().chosen != null ? 1 : 0), n) + '%"></div>' +
-      '<span class="prog-txt">' + (ses.idx + 1) + ' / ' + n + '</span></div>' + right + '</header>';
+      '<div class="prog" aria-hidden="true"><div class="prog-bar" style="width:' + pct(ses.idx + 1, n) + '%"></div></div>' +
+      '<span class="prog-txt">' + (ses.idx + 1) + ' / ' + n + '</span>' + right + '</header>';
   }
   function quizView() {
     const it = cur(), q = it.q, cat = B.catById(q.type), exam = ses.mode === 'exam';
@@ -395,12 +376,12 @@
       (trVoice ? '<button type="button" class="icon-btn" data-act="speak" aria-label="Soruyu sesli oku">' + I.sound + '</button>' : '') + '</div>';
     const stem = q.stem ? '<div class="paper stem">' + q.stem + '</div>' : '';
     // öncüllü sorularda (Kim Hangisi, Sıralama) soru cümlesi öncüllerin altında durur
-    let html = '<div class="page quiz"' + area + '>' + quizTop() +
+    let html = '<div class="page quiz' + (q.type === 'cubes' ? ' quiz-cubes' : '') + '"' + area + '>' + quizTop() +
       (q.promptBelow ? tag + stem + prompt : '<div class="q-head">' + tag + prompt + '</div>' + stem) +
       optsHtml(q, it, exam ? 'exam' : answered ? 'done' : 'live');
     if (answered) {
       const ok = it.chosen === q.answer;
-      html += '<div class="fb ' + (ok ? 'fb-ok' : 'fb-no') + '" role="status">' + robot(ok ? 'happy' : 'sad', 'badge') +
+      html += '<div class="fb ' + (ok ? 'fb-ok' : 'fb-no') + '" role="status">' + (ok ? star(true) : I.avatar) +
         '<div class="fb-msg"><b>' + it.msg + '</b>' + (ok ? '' : 'Doğru cevap ' + LETTERS[q.answer] + ' şıkkı. ') + q.explain + '</div>' +
         '<button type="button" class="btn btn-sun" data-act="next">' + (last ? 'Bitir' : 'Devam') + '</button></div>';
     }
@@ -511,7 +492,7 @@
 
     if (span.phase === 'over') {
       const rec = Store.data.span.best[g.level][g.mode];
-      return '<div class="page result" style="--area: var(--a-hafiza)">' + robot(g.best ? 'happy' : 'idle', 'badge') +
+      return '<div class="page result" style="--area: var(--a-hafiza)">' + I.span +
         '<h1>' + (g.won ? Span.MAX + ' basamağı da bildin!' : g.best ? 'Güzel hafıza!' : 'Bu sefer olmadı') + '</h1>' +
         '<div class="score">' + g.best + '<small> basamak</small></div>' +
         '<p class="result-sub">' + lvl.name + ' · ' + mode.name + ' · ' + g.hits + ' doğru, ' + (g.trials - g.hits) + ' yanlış · ' + (span.record ? 'Yeni rekor!' : rec ? 'Rekorun ' + rec + ' basamak' : 'Henüz rekor yok') + '</p>' +
@@ -544,7 +525,7 @@
     const nextInfo = g.over ? (g.won ? 'En uzun sayıyı da bildin.' : 'Canların bitti.')
       : span.ok ? 'Sıradaki sayı ' + g.len + ' basamaklı.' : 'Aynı uzunlukta yeni bir sayı gelecek. Kalan can: ' + g.lives + '.';
     return open + '<div class="paper span-result">' + rows + '</div>' +
-      '<div class="fb ' + (span.ok ? 'fb-ok' : 'fb-no') + '" role="status">' + robot(span.ok ? 'happy' : 'sad', 'badge') +
+      '<div class="fb ' + (span.ok ? 'fb-ok' : 'fb-no') + '" role="status">' + (span.ok ? star(true) : I.avatar) +
       '<div class="fb-msg"><b>' + (span.ok ? rng.pick(PRAISE) : 'Olmadı, bir daha deneyelim.') + '</b>' + nextInfo + '</div>' +
       '<button type="button" class="btn btn-sun" data-act="span-next">' + (g.over ? 'Bitir' : 'Devam') + '</button></div></div>';
   }
@@ -569,7 +550,7 @@
     } else {
       sub = EXAMS[ses.exam].name + ' · ' + (ses.fixed ? B.LEVEL_NAMES[ses.fixed] : 'karışık kademe') + ' · ' + r.blank + ' boş · süre ' + fmtTime(r.sec);
     }
-    let html = '<div class="page result">' + robot(p >= 0.5 ? 'happy' : 'idle', 'badge') + '<h1>' + title + '</h1>';
+    let html = '<div class="page result">' + I.rocket + '<h1>' + title + '</h1>';
     if (!exam) html += '<div class="big-stars">' + [0, 1, 2].map((i) => star(i < r.stars)).join('') + '</div>';
     html += '<div class="score">' + r.ok + '<small> / ' + r.total + ' doğru</small></div><p class="result-sub">' + sub + '</p>';
     if (ses.mode !== 'practice') html += '<div class="card"><h2>Konulara göre</h2>' + areaBars(ses.items) + '</div>';
@@ -669,7 +650,7 @@
           B.LEVEL_NAMES[lv] + (lv === rec ? '<small>Sana uygun seviye</small>' : '') + '</span>' + starsRow(st.stars[lv - 1]) + '</button>').join('') +
         '</div><p class="note">' + Store.data.settings.len + ' soruluk alıştırma. Soruların çoğunu doğru yaparsan yıldız kazanırsın.</p>';
     } else if (sheet.kind === 'daily') {
-      body = '<div class="sheet-head"><span class="cat-ico">' + robot('happy') + '</span><div><h2>Günün Görevi</h2><p>Her konudan karışık 10 soru. Hangi kademede olsun?</p></div>' + closeBtn + '</div><div class="levels">' +
+      body = '<div class="sheet-head"><span class="cat-ico">' + I.rocket + '</span><div><h2>Günün Görevi</h2><p>Her konudan karışık 10 soru. Hangi kademede olsun?</p></div>' + closeBtn + '</div><div class="levels">' +
         '<button type="button" class="level rec" data-act="daily-go" data-level="0"><span>Bana uygun<small>Her konuda kendi kademen</small></span></button>' +
         B.LEVELS.map((lv) => '<button type="button" class="level" data-act="daily-go" data-level="' + lv + '"><span>' + B.LEVEL_NAMES[lv] + '</span></button>').join('') + '</div>';
     } else if (sheet.kind === 'exam') {
@@ -710,12 +691,12 @@
     } else if (sheet.kind === 'account') {
       const a = Store.data.profile && Store.data.profile.avatar;
       const prov = { password: 'E-posta ve şifre', 'google.com': 'Google', 'apple.com': 'Apple' }[user && user.provider] || 'E-posta ve şifre';
-      body = '<div class="sheet-head"><div class="acc-big">' + avatarHtml('acc-art') + '</div><div><h2>' + esc(user ? user.name : 'Hesap') + '</h2><p>Karakterini seç ya da kendi fotoğrafını yükle.</p></div>' + closeBtn + '</div>' +
+      body = '<div class="sheet-head"><div class="acc-big">' + avatarHtml() + '</div><div><h2>' + esc(user ? user.name : 'Hesap') + '</h2><p>Karakterini seç ya da kendi fotoğrafını yükle.</p></div>' + closeBtn + '</div>' +
         '<div class="acc-info"><div><small>Kullanıcı adı</small><b>' + esc(user ? user.name : '—') + '</b></div>' +
         '<div><small>E-posta</small><b>' + esc(user && user.email ? user.email : '—') + '</b></div>' +
         '<div><small>Giriş yöntemi</small><b>' + prov + '</b></div></div>' +
         '<div class="avatar-grid">' +
-        '<button type="button" class="avatar-opt' + (!a ? ' on' : '') + '" data-act="avatar-set" data-v="" aria-label="Robot" aria-pressed="' + (!a) + '">' + robot('idle', '') + '</button>' +
+        '<button type="button" class="avatar-opt' + (!a ? ' on' : '') + '" data-act="avatar-set" data-v="" aria-label="Kil karakteri" aria-pressed="' + (!a) + '">' + I.avatar + '</button>' +
         AVATARS.map((e) => '<button type="button" class="avatar-opt' + (a === e ? ' on' : '') + '" data-act="avatar-set" data-v="' + e + '" aria-label="' + e + '" aria-pressed="' + (a === e) + '">' + e + '</button>').join('') +
         '</div>' +
         '<div class="sheet-actions"><label class="btn btn-ghost avatar-file">Fotoğraf seç<input type="file" accept="image/*" data-file="avatar" hidden></label></div>' +
@@ -748,7 +729,7 @@
   function loginView() {
     const busy = authBusy || !window.BilsemAuth;
     return '<div class="page login">' +
-      '<header class="top"><div class="brand">' + robot('idle', 'logo badge') +
+      '<header class="top"><div class="brand">' + I.rocket +
       '<div><span class="brand-name">Enes <b>BİLSEM\'e</b> Hazırlanıyor</span><span class="brand-sub">Devam etmek için giriş yap</span></div></div></header>' +
       '<section class="card login-card">' +
       '<div class="seg login-tabs" role="group">' +

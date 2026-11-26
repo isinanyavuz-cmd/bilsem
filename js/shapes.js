@@ -237,24 +237,24 @@
 
   /* Küp yapısı: h[x][y] yükseklik. Dönen: { inner, w, h } */
   const CUBE_TONES = [
-    { t: '#ffe684', l: '#ffc93c', r: '#e59d00' },
-    { t: '#b3d6ff', l: '#62a6fa', r: '#2f7de1' },
-    { t: '#b5efc9', l: '#5fd08a', r: '#2ea45c' },
-    { t: '#ffc9cd', l: '#f7848b', r: '#d9434d' },
+    { l: '#f5ae17', image: 'assets/kil/kup-sari.webp' },
+    { l: '#4269ca', image: 'assets/kil/kup-mavi.webp' },
+    { l: '#df5135', image: 'assets/kil/kup-kirmizi.webp' },
   ];
-  function cubes(h, s, tone, box) {
+  function cubes(h, s, tone, box, mixed) {
     const a = s * 0.866, b = s * 0.5, items = [];
     for (let x = 0; x < h.length; x++) for (let y = 0; y < h[x].length; y++) for (let z = 0; z < h[x][y]; z++) items.push([x, y, z]);
     items.sort((p, q) => (p[0] + p[1]) - (q[0] + q[1]) || p[2] - q[2]);
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, out = '';
-    const P = (pts) => pts.map((p) => r1(p[0]) + ',' + r1(p[1])).join(' ');
+    const firstTone = CUBE_TONES.indexOf(tone);
     for (const it of items) {
       const ox = (it[0] - it[1]) * a, oy = (it[0] + it[1]) * b - (it[2] + 1) * s;
       minX = Math.min(minX, ox - a); maxX = Math.max(maxX, ox + a);
       minY = Math.min(minY, oy); maxY = Math.max(maxY, oy + 2 * b + s);
-      out += '<polygon points="' + P([[ox, oy], [ox + a, oy + b], [ox, oy + 2 * b], [ox - a, oy + b]]) + '" fill="' + tone.t + '"/>' +
-        '<polygon points="' + P([[ox - a, oy + b], [ox, oy + 2 * b], [ox, oy + 2 * b + s], [ox - a, oy + b + s]]) + '" fill="' + tone.l + '"/>' +
-        '<polygon points="' + P([[ox, oy + 2 * b], [ox + a, oy + b], [ox + a, oy + b + s], [ox, oy + 2 * b + s]]) + '" fill="' + tone.r + '"/>';
+      // Komşu küpleri farklı renklerle ayır; bakış yönü sorularında tek tonu koru.
+      const color = mixed ? CUBE_TONES[(firstTone + it[0] + it[1] + it[2]) % CUBE_TONES.length] : tone;
+      out += '<image href="' + color.image + '" x="' + r1(ox - a) + '" y="' + r1(oy) +
+        '" width="' + r1(2 * a) + '" height="' + r1(2 * b + s) + '" preserveAspectRatio="none"/>';
     }
     let wire = '';
     if (box) {

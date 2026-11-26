@@ -58,6 +58,7 @@ test('küp sayma: her sütunun tepesi görünür; cevap toplam ya da 27 eksi top
       if (x) assert.ok(h[x - 1][y] >= h[x][y], 'arkadaki sütun daha alçak olamaz');
       if (y) assert.ok(h[x][y - 1] >= h[x][y], 'arkadaki sütun daha alçak olamaz');
     }
+    assert.strictEqual((q.stem.match(/<image href="assets\/kil\/kup-/g) || []).length, sum, 'çizilen küp sayısı');
     assert.strictEqual(value(q), q.prompt.indexOf('tamamlamak') > 0 ? 27 - sum : sum);
   });
 });

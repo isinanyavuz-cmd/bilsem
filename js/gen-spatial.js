@@ -159,7 +159,7 @@
     const tone = rng.pick(S.CUBE_TONES), q = {};
     if (level === 4 && rng.chance(0.5)) {
       // eksik küpler: 3x3x3'lük büyük küpe tamamlama
-      const st = heights(rng, 3, 3, 3, [9, 21]), need = 27 - st.total, c = S.cubes(st.h, 44, tone, [3, 3, 3]);
+      const st = heights(rng, 3, 3, 3, [9, 21]), need = 27 - st.total, c = S.cubes(st.h, 44, tone, [3, 3, 3], true);
       q.prompt = 'Bu yapıyı kesik çizgiyle gösterilen büyük küpe tamamlamak için kaç küp daha gerekir?';
       q.stem = S.svg(c.w, c.h, c.inner, { maxW: Math.min(330, c.w * 1.2) });
       q.meta = { heights: st.h, answer: need };
@@ -168,7 +168,7 @@
     }
     const dims = rng.pick([null, [[3, 2], [2, 3], [3, 3]], [[3, 3]], [[4, 3], [3, 4], [4, 4]], [[4, 4], [4, 4], [5, 4]]][level]);
     const maxH = level < 3 ? 3 : 4, range = [null, [6, 10], [10, 17], [16, 26], [26, 40]][level];
-    const st = heights(rng, dims[0], dims[1], maxH, range), c = S.cubes(st.h, level < 3 ? 44 : 36, tone), lt = layerText(st.h, maxH);
+    const st = heights(rng, dims[0], dims[1], maxH, range), c = S.cubes(st.h, level < 3 ? 44 : 36, tone, null, true), lt = layerText(st.h, maxH);
     q.prompt = 'Bu yapıda toplam kaç küp var?';
     q.stem = S.svg(c.w, c.h, c.inner, { maxW: Math.min(360, c.w * 1.25) });
     q.meta = { heights: st.h, answer: st.total };
