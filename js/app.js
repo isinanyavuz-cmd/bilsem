@@ -41,6 +41,9 @@
     rocket: '<img class="kil-roket" src="assets/kil/roket.webp" alt="">',
     avatar: '<img class="avatar-img kil-avatar" src="assets/kil/avatar.webp" alt="">',
   };
+  /* maskot: sevinc | selam | dusun */
+  const ENES = { sevinc: 'assets/kil/enes-sevinc.webp', selam: 'assets/kil/enes-selam.webp', dusun: 'assets/kil/enes-dusun.webp' };   // tam yollar: tek dosya aracı bunları gömer
+  const enes = (poz) => '<img class="enes enes-' + poz + '" src="' + ENES[poz] + '" alt="">';
 
   /* Avatar seçilmemişse kil karakteri gösterilir. */
   const AVATARS = ['🦊', '🐼', '🐯', '🦁', '🐸', '🐶', '🐱', '🐵', '🦄', '🚀', '⭐', '🌈', '⚽', '🎨', '📚', '🌟'];
@@ -327,7 +330,7 @@
       '<button type="button" class="hero-card hero-daily" data-act="daily">' +
       '<span class="hc"><span class="hc-title">Günün Görevi</span><span class="hc-text">' +
       (done ? 'Bugünkü görev tamam.' : '10 soru · 10 dakika') +
-      '</span><span class="hero-go">' + (done ? 'Tekrar oyna' : 'Başla') + I.back + '</span></span>' + I.rocket + '</button>' +
+      '</span><span class="hero-go">' + (done ? 'Tekrar oyna' : 'Başla') + I.back + '</span></span></button>' +
       '<button type="button" class="hero-card hero-exam" data-act="exam-pick">' + I.exam +
       '<span class="hc"><span class="hc-title">Deneme Sınavı</span><span class="hc-text">Süreli ve karışık sorular</span></span>' + I.back + '</button>' +
       '<button type="button" class="hero-card hero-memory" data-act="span-pick">' + I.span +
@@ -381,7 +384,7 @@
       optsHtml(q, it, exam ? 'exam' : answered ? 'done' : 'live');
     if (answered) {
       const ok = it.chosen === q.answer;
-      html += '<div class="fb ' + (ok ? 'fb-ok' : 'fb-no') + '" role="status">' + (ok ? star(true) : I.avatar) +
+      html += '<div class="fb ' + (ok ? 'fb-ok' : 'fb-no') + '" role="status">' + enes(ok ? 'sevinc' : 'selam') +
         '<div class="fb-msg"><b>' + it.msg + '</b>' + (ok ? '' : 'Doğru cevap ' + LETTERS[q.answer] + ' şıkkı. ') + q.explain + '</div>' +
         '<button type="button" class="btn btn-sun" data-act="next">' + (last ? 'Bitir' : 'Devam') + '</button></div>';
     }
@@ -492,7 +495,7 @@
 
     if (span.phase === 'over') {
       const rec = Store.data.span.best[g.level][g.mode];
-      return '<div class="page result" style="--area: var(--a-hafiza)">' + I.span +
+      return '<div class="page result" style="--area: var(--a-hafiza)">' + enes(g.best ? 'sevinc' : 'dusun') +
         '<h1>' + (g.won ? Span.MAX + ' basamağı da bildin!' : g.best ? 'Güzel hafıza!' : 'Bu sefer olmadı') + '</h1>' +
         '<div class="score">' + g.best + '<small> basamak</small></div>' +
         '<p class="result-sub">' + lvl.name + ' · ' + mode.name + ' · ' + g.hits + ' doğru, ' + (g.trials - g.hits) + ' yanlış · ' + (span.record ? 'Yeni rekor!' : rec ? 'Rekorun ' + rec + ' basamak' : 'Henüz rekor yok') + '</p>' +
@@ -525,7 +528,7 @@
     const nextInfo = g.over ? (g.won ? 'En uzun sayıyı da bildin.' : 'Canların bitti.')
       : span.ok ? 'Sıradaki sayı ' + g.len + ' basamaklı.' : 'Aynı uzunlukta yeni bir sayı gelecek. Kalan can: ' + g.lives + '.';
     return open + '<div class="paper span-result">' + rows + '</div>' +
-      '<div class="fb ' + (span.ok ? 'fb-ok' : 'fb-no') + '" role="status">' + (span.ok ? star(true) : I.avatar) +
+      '<div class="fb ' + (span.ok ? 'fb-ok' : 'fb-no') + '" role="status">' + enes(span.ok ? 'sevinc' : 'selam') +
       '<div class="fb-msg"><b>' + (span.ok ? rng.pick(PRAISE) : 'Olmadı, bir daha deneyelim.') + '</b>' + nextInfo + '</div>' +
       '<button type="button" class="btn btn-sun" data-act="span-next">' + (g.over ? 'Bitir' : 'Devam') + '</button></div></div>';
   }
@@ -550,7 +553,7 @@
     } else {
       sub = EXAMS[ses.exam].name + ' · ' + (ses.fixed ? B.LEVEL_NAMES[ses.fixed] : 'karışık kademe') + ' · ' + r.blank + ' boş · süre ' + fmtTime(r.sec);
     }
-    let html = '<div class="page result">' + I.rocket + '<h1>' + title + '</h1>';
+    let html = '<div class="page result">' + enes(p >= 0.7 ? 'sevinc' : p >= 0.5 ? 'selam' : 'dusun') + '<h1>' + title + '</h1>';
     if (!exam) html += '<div class="big-stars">' + [0, 1, 2].map((i) => star(i < r.stars)).join('') + '</div>';
     html += '<div class="score">' + r.ok + '<small> / ' + r.total + ' doğru</small></div><p class="result-sub">' + sub + '</p>';
     if (ses.mode !== 'practice') html += '<div class="card"><h2>Konulara göre</h2>' + areaBars(ses.items) + '</div>';
@@ -729,8 +732,8 @@
   function loginView() {
     const busy = authBusy || !window.BilsemAuth;
     return '<div class="page login">' +
-      '<header class="top"><div class="brand">' + I.rocket +
-      '<div><span class="brand-name">Enes <b>BİLSEM\'e</b> Hazırlanıyor</span><span class="brand-sub">Devam etmek için giriş yap</span></div></div></header>' +
+      '<header class="login-hero">' + enes('selam') +
+      '<div><span class="brand-name">Enes BİLSEM\'e Hazırlanıyor</span><span class="brand-sub">Devam etmek için giriş yap</span></div></header>' +
       '<section class="card login-card">' +
       '<div class="seg login-tabs" role="group">' +
       '<button type="button" class="' + (authMode === 'in' ? 'on' : '') + '" data-act="auth-mode" data-mode="in" aria-pressed="' + (authMode === 'in') + '">Giriş yap</button>' +
