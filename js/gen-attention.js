@@ -23,10 +23,11 @@
       const n = level + 3, colors = level === 4 ? 4 : 3, k = [0, 7, 11, 15, 21][level];
       const pal = rng.sample(COL, 4), m = randCells(rng, n, k, colors);
       const mk = (g) => ({ html: S.svg(100, 100, G.draw(g, pal, 6, 6, 88), { cls: 'opt-svg' }), key: G.key(g) });
-      const wrong = [];
-      for (let i = 0; i < 12; i++) wrong.push(mk(G.nudge(rng, m, colors, ['move', 'recolor', 'move'])));
+      const nud = (g) => G.nudge(rng, g, colors, ['move', 'recolor', 'move']);
+      const wrong = Q.spread(rng, m, nud, G.key).map(mk);
+      for (let i = 0; i < 6; i++) wrong.push(mk(nud(m)));
       q.stem = S.svg(202, 202, G.draw(m, pal, 6, 6, 190), { maxW: 210 });
-      q.explain = 'Satır satır karşılaştır. Diğer şıklarda tek bir kare başka yerde ya da başka renkte.';
+      q.explain = 'Satır satır karşılaştır. Diğer şıklarda bir ya da iki kare başka yerde ya da başka renkte.';
       return Q.finish(rng, q, mk(m), wrong);
     }
     // şekil dizisi; en zor düzeyde şekillerin yönü de değişir
@@ -37,8 +38,8 @@
     do {
       seq = Array.from({ length: len }, () => ({ shape: rng.pick(shapes), color: rng.pick(cols), rot: turning ? rng.pick([0, 90, 180, 270]) : 0 }));
     } while (new Set(seq.map(S.key)).size < 4);
-    const mutate = () => {
-      const x = seq.map((f) => Object.assign({}, f)), i = rng.int(0, len - 1);
+    const mutate = (from) => {
+      const x = (from || seq).map((f) => Object.assign({}, f)), i = rng.int(0, len - 1);
       const kind = rng.pick(turning ? ['swap', 'color', 'rot', 'rot'] : ['swap', 'color', 'shape']);
       if (kind === 'swap') { const j = i < len - 1 ? i + 1 : i - 1, t = x[i]; x[i] = x[j]; x[j] = t; }
       else if (kind === 'color') x[i].color = rng.pick(cols.filter((c) => c !== x[i].color));
@@ -47,11 +48,11 @@
       return x;
     };
     const mk = (sq) => ({ html: figRow(sq, 46, 'opt-svg opt-svg-row'), key: sq.map(S.key).join('+') });
-    const wrong = [];
-    for (let i = 0; i < 14; i++) wrong.push(mk(mutate()));
+    const wrong = Q.spread(rng, seq, mutate, (sq) => sq.map(S.key).join('+')).map(mk);
+    for (let i = 0; i < 6; i++) wrong.push(mk(mutate()));
     q.stem = figRow(seq, 64);
     q.layout = 'wide';
-    q.explain = 'Soldan sağa tek tek karşılaştır. Diğer şıklarda bir şeklin yeri, rengi, biçimi ya da yönü farklı.';
+    q.explain = 'Soldan sağa tek tek karşılaştır. Diğer şıklarda en az bir şeklin yeri, rengi, biçimi ya da yönü farklı.';
     return Q.finish(rng, q, mk(seq), wrong);
   };
 
@@ -173,7 +174,7 @@
     const dims = [null, [2, 2], [3, 2], [4, 2], [3, 3]][level], n = dims[0] * dims[1];
     const pool = rng.shuffle(PICS), shown = pool.slice(0, n), fresh = pool.slice(n, n + 3);
     const kind = rng.pick(level < 3 ? ['where', 'where', 'absent'] : ['where', 'absent', 'new']);
-    const q = { memo: { html: picGrid(dims[0], dims[1], shown), seconds: n }, stem: '' };
+    const q = { memo: { html: picGrid(dims[0], dims[1], shown), seconds: 6 }, stem: '' };
     q.explain = 'Resimde bunlar vardı: ' + shown.join(' ');
     q.meta = { shown: shown, kind: kind };
     if (kind === 'absent') {

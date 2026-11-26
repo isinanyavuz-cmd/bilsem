@@ -104,7 +104,12 @@
       single.push(m);
     }
     const tfs = [G.rot(patch), G.rot(G.rot(patch)), G.flipH(patch), G.flipV(patch)];
-    const ds = (level >= 3 ? rng.shuffle(tfs).concat(rng.shuffle(single)) : rng.shuffle(single).concat(rng.shuffle(tfs))).map(mk);
+    const recolor = (m) => {
+      const r = rng.int(0, h - 1), c = rng.int(0, h - 1), x = m.map((row) => row.slice());
+      x[r][c] = rng.pick(Array.from({ length: P.pal.length }, (_, i) => i + 1).filter((v) => v !== x[r][c]));
+      return x;
+    };
+    const ds = Q.spread(rng, patch, recolor, G.key, { pool: level >= 3 ? tfs : [] }).concat(rng.shuffle(tfs), rng.shuffle(single)).map(mk);
     const q = { prompt: 'Desendeki boş yere hangi parça gelmeli?', stem: stem };
     q.meta = { kind: P.kind, g: P.g, pal: P.pal, N: P.N, hole: h, r0: P.r0, c0: P.c0, p: P.p, dir: P.dir, patch: patch };
     q.explain = PATTERN_WHY[P.kind];
@@ -165,7 +170,9 @@
       toggles.push(m);
     }
     const first = rots.some(Boolean) ? [plain, wrongDir, xor, inter] : [xor, inter];
-    return Q.finish(rng, q, blackOpt(result), rng.shuffle(first).concat(rng.shuffle(toggles)).map(blackOpt));
+    const flip = (m) => { const x = m.map((row) => row.slice()), r = rng.int(0, n - 1), c = rng.int(0, n - 1); x[r][c] = 1 - x[r][c]; return x; };
+    const spread = Q.spread(rng, result, flip, G.key, { pool: first });
+    return Q.finish(rng, q, blackOpt(result), spread.concat(rng.shuffle(first), rng.shuffle(toggles)).map(blackOpt));
   };
 
   /* ---------- Küp Devirme ---------- */
@@ -283,7 +290,9 @@
     const bump = (vv, i, d) => { const o = vv.slice(); o[i] += d; return o; };
     const ds = [v.slice().reverse(), other];
     for (let i = 0; i < v.length; i++) { if (v[i] < maxH) ds.push(bump(v, i, 1)); if (v[i] > 1) ds.push(bump(v, i, -1)); }
-    return Q.finish(rng, q, mk(v), rng.shuffle(ds).filter((a) => a.length === v.length).map(mk));
+    const nudge = (vv) => { const i = rng.int(0, vv.length - 1), d = rng.pick([1, -1]); return vv[i] + d >= 1 && vv[i] + d <= maxH ? bump(vv, i, d) : null; };
+    const spread = Q.spread(rng, v, nudge, (vv) => vv.join(','), { pool: [v.slice().reverse(), other] });
+    return Q.finish(rng, q, mk(v), spread.concat(rng.shuffle(ds)).filter((a) => a.length === v.length).map(mk));
   };
 
   /* ---------- Küp Açılımı ---------- */
@@ -384,11 +393,21 @@
   B.GEN.net = function (rng, level) {
     const H = hexominoes();
     if (level <= 2) {
-      const good = rng.pick(H.valid), pool = level === 1 ? H.easy : H.hard, picked = [], seen = new Set();
+      const good = rng.pick(H.valid), pool = level === 1 ? H.easy : H.hard, seen = new Set(), cand = [];
       rng.shuffle(pool).forEach((cells) => {
         const k = freeKey(cells);
-        if (picked.length < 3 && !seen.has(k)) { seen.add(k); picked.push(cells); }
+        if (!seen.has(k)) { seen.add(k); cand.push(cells); }
       });
+      // doğru açılım, çeldiricilere en az benzeyen (en uzak) şık olmasın: uzaklık kare kümelerinin farkıdır
+      const toks = (cells) => new Set(freeKey(cells).split(';'));
+      const diff = (a, b) => { let d = 0; a.forEach((t) => { if (!b.has(t)) d++; }); b.forEach((t) => { if (!a.has(t)) d++; }); return d; };
+      let picked = cand.slice(0, 3);
+      for (let t = 0; t < 30; t++) {
+        const trio = t ? rng.sample(cand, 3) : picked, all = [good].concat(trio).map(toks);
+        const sums = all.map((a, i) => all.reduce((s, b, j) => s + (i === j ? 0 : diff(a, b)), 0)), mx = Math.max.apply(null, sums);
+        picked = trio;
+        if (!(sums[0] === mx && sums.filter((v) => v === mx).length === 1)) break;
+      }
       const q = { prompt: 'Hangi açılım katlanınca bir küp olur?', stem: '' };
       q.stem = S.svg(300, 70, S.emoji(150, 36, '🧊', 52), { maxW: 120 });
       q.meta = { good: good, bad: picked };

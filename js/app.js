@@ -5,7 +5,9 @@
   const app = document.getElementById('app');
   const rng = new B.RNG((Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0);
   const LETTERS = ['A', 'B', 'C', 'D'];
-  const EXAMS = [{ n: 20, min: 25, name: 'Kısa deneme' }, { n: 40, min: 50, name: 'Orta deneme' }, { n: 60, min: 75, name: 'Uzun deneme' }];
+  const EXAM_Q_SEC = 60;   // denemede her sorunun kendi süresi (saniye)
+  const EXAM_LOW = 10;     // son kaç saniyede geri sayım görünür
+  const EXAMS = [{ n: 20, name: 'Kısa deneme' }, { n: 40, name: 'Orta deneme' }, { n: 60, name: 'Uzun deneme' }];   // en fazla n × 60 sn = n dakika
   const PRAISE = ['Harika!', 'Süpersin!', 'Aferin!', 'Tam isabet!', 'Çok iyi!', 'Bravo!'];
   const CHEER = ['Olsun, birlikte bakalım.', 'Az kaldı!', 'Bir dahakine olacak.'];
   const DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
@@ -173,7 +175,6 @@
     ses = Object.assign({ idx: 0, startedAt: Date.now(), result: null }, s);
     sheet = null;
     view = 'quiz';
-    if (ses.mode === 'exam') clock = setInterval(tick, 1000);
     enter();
   }
   function startPractice(id, level) {
@@ -186,22 +187,19 @@
     begin({ mode: 'daily', fixed: level || 0, items: makeItems(plan) });
   }
   function startExam(i, level) {
-    const ex = EXAMS[i], specs = [];
-    let pool = [];
-    for (let k = 0; k < ex.n; k++) {
-      if (!pool.length) pool = rng.shuffle(B.CATS.map((c) => c.id));
-      const f = k / ex.n;
-      specs.push({ type: pool.pop(), level: level || (f < 0.25 ? 1 : f < 0.5 ? 2 : f < 0.8 ? 3 : 4) });   // seçilmediyse kolaydan zora
-    }
-    begin({ mode: 'exam', exam: i, fixed: level || 0, left: ex.min * 60, items: makeItems(specs) });
+    const ex = EXAMS[i], types = B.Exam.examCats(rng, ex.n);
+    const specs = types.map((t, k) => ({ type: t, level: level || B.Exam.examLevel(k, ex.n) }));   // seçilmediyse kolaydan zora (En Zor yok)
+    begin({ mode: 'exam', exam: i, fixed: level || 0, deadline: 0, left: EXAM_Q_SEC, items: makeItems(specs) });
   }
   function stopTimers() { clearInterval(clock); clearTimeout(memoT); clock = null; memoT = null; }
 
   function enter() {
     clearTimeout(memoT);
+    clearInterval(clock); clock = null;   // önceki sorunun süresi; yenisi soru görününce başlar
+    if (ses.mode === 'exam') ses.left = EXAM_Q_SEC;
     const it = cur();
     if (it.q.memo && !it.memoSeen) memoT = setTimeout(memoDone, it.q.memo.seconds * 1000);
-    else it.t0 = performance.now();
+    else { it.t0 = performance.now(); qClock(); }
     render();
     window.scrollTo(0, 0);
   }
@@ -211,21 +209,34 @@
     if (!it || it.memoSeen || view !== 'quiz') return;
     it.memoSeen = true;
     it.t0 = performance.now();
+    qClock();
     render();
   }
   function leave() {
     const it = cur();
     if (it && ses.mode === 'exam' && it.t0) { it.ms += performance.now() - it.t0; it.t0 = 0; }
   }
-  function tick() {
+  /* denemede soru süresi: soru görününce (hafıza sorularında resim kapanınca) başlar, bitince sıradaki soruya geçilir */
+  function qClock() {
+    clearInterval(clock); clock = null;
     if (!ses || ses.mode !== 'exam') return;
-    ses.left--;
-    const el = document.getElementById('clock');
-    if (el) {
-      el.querySelector('b').textContent = fmtTime(Math.max(0, ses.left));
-      el.classList.toggle('low', ses.left <= 60);
+    ses.deadline = Date.now() + EXAM_Q_SEC * 1000;
+    ses.left = EXAM_Q_SEC;
+    clock = setInterval(tick, 250);
+  }
+  function tick() {
+    if (!ses || ses.mode !== 'exam' || view !== 'quiz') return;
+    const left = Math.max(0, Math.ceil((ses.deadline - Date.now()) / 1000));
+    if (left !== ses.left) {
+      ses.left = left;
+      const el = document.getElementById('clock');
+      if (el) {
+        el.querySelector('b').textContent = left;
+        el.classList.toggle('hid', left > EXAM_LOW);
+        el.classList.toggle('low', left <= EXAM_LOW);
+      }
     }
-    if (ses.left <= 0) finish();
+    if (left <= 0) next();
   }
 
   function pick(i) {
@@ -251,19 +262,10 @@
   function next() {
     const it = cur();
     if (!it || view !== 'quiz') return;
-    if (ses.mode !== 'exam' && it.chosen == null) return;
-    if (ses.idx >= ses.items.length - 1) {
-      if (ses.mode === 'exam') { sheet = { kind: 'finish' }; render(); } else finish();
-      return;
-    }
+    if (ses.mode === 'exam' ? it.q.memo && !it.memoSeen : it.chosen == null) return;
+    if (ses.idx >= ses.items.length - 1) { finish(); return; }
     leave();
     ses.idx++;
-    enter();
-  }
-  function prev() {
-    if (!ses || ses.idx === 0) return;
-    leave();
-    ses.idx--;
     enter();
   }
   function finish() {
@@ -348,7 +350,7 @@
   function quizTop() {
     const n = ses.items.length, exam = ses.mode === 'exam';
     const right = exam
-      ? '<span class="chip chip-time' + (ses.left <= 60 ? ' low' : '') + '" id="clock">' + I.clock + '<b>' + fmtTime(Math.max(0, ses.left)) + '</b></span>'
+      ? '<span class="chip chip-time ' + (ses.left <= EXAM_LOW ? 'low' : 'hid') + '" id="clock">' + I.clock + '<b>' + ses.left + '</b></span>'
       : '<span class="chip">' + star(true) + '<b>' + ses.items.filter((it) => it.chosen != null && it.chosen === it.q.answer).length + '</b></span>';
     return '<header class="quiz-top"><button type="button" class="icon-btn" data-act="quit" aria-label="Çık">' + I.x + '</button>' +
       '<div class="prog" aria-hidden="true"><div class="prog-bar" style="width:' + pct(ses.idx + 1, n) + '%"></div></div>' +
@@ -361,7 +363,7 @@
       return '<div class="page quiz memo"' + area + '>' + quizTop() + '<h1>Resimlere iyi bak!</h1>' +
         '<div class="paper stem">' + q.memo.html + '</div>' +
         '<div class="memo-bar"><i style="animation-duration:' + q.memo.seconds + 's"></i></div>' +
-        '<button type="button" class="btn btn-ghost" data-act="memo-done">Hazırım</button></div>';
+        (exam ? '' : '<button type="button" class="btn btn-ghost" data-act="memo-done">Hazırım</button>') + '</div>';
     }
     const answered = it.chosen != null && !exam, last = ses.idx === ses.items.length - 1;
     const tag = '<span class="q-tag">' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</span>';
@@ -378,9 +380,7 @@
         '<button type="button" class="btn btn-sun" data-act="next">' + (last ? 'Bitir' : 'Devam') + '</button></div>';
     }
     if (exam) {
-      html += '<div class="exam-nav"><button type="button" class="btn btn-ghost" data-act="prev"' + (ses.idx === 0 ? ' disabled' : '') + '>Önceki</button>' +
-        '<button type="button" class="btn btn-ghost" data-act="finish-ask">Sınavı bitir</button>' +
-        (last ? '' : '<button type="button" class="btn btn-sun" data-act="next">Sonraki</button>') + '</div>';
+      html += '<div class="exam-nav"><button type="button" class="btn btn-sun" data-act="next">' + (last ? 'Bitir' : 'Sonraki') + '</button></div>';
     }
     return html + '</div>';
   }
@@ -650,9 +650,9 @@
       body = '<div class="sheet-head"><div><h2>Deneme Sınavı</h2><p>Bütün konulardan sorular. Önce kademeyi, sonra uzunluğu seç.</p></div>' + closeBtn + '</div>' +
         '<div class="set-row"><span>Kademe</span><span class="seg">' + [0].concat(B.LEVELS).map((l) =>
           '<button type="button" class="' + (l === lv ? 'on' : '') + '" data-act="exam-level" data-level="' + l + '" aria-pressed="' + (l === lv) + '">' + (l ? B.LEVEL_NAMES[l] : 'Karışık') + '</button>').join('') + '</span></div>' +
-        '<p class="tip">' + (lv ? 'Bütün sorular <b>' + B.LEVEL_NAMES[lv] + '</b> kademesinden gelir.' : '<b>Karışık:</b> sorular kolaydan en zora doğru sıralanır.') + '</p><div class="levels">' +
-        EXAMS.map((e, i) => '<button type="button" class="level" data-act="exam" data-i="' + i + '"><span>' + e.name + '<small>' + e.n + ' soru · ' + e.min + ' dakika</small></span></button>').join('') +
-        '</div><p class="note">Sınav sırasında doğru cevap gösterilmez. İstediğin soruya geri dönüp cevabını değiştirebilirsin.</p>';
+        '<p class="tip">' + (lv ? 'Bütün sorular <b>' + B.LEVEL_NAMES[lv] + '</b> kademesinden gelir.' : '<b>Karışık:</b> sorular kolaydan zora doğru sıralanır.') + '</p><div class="levels">' +
+        EXAMS.map((e, i) => '<button type="button" class="level" data-act="exam" data-i="' + i + '"><span>' + e.name + '<small>' + e.n + ' soru · en fazla ' + e.n + ' dakika</small></span></button>').join('') +
+        '</div><p class="note">Her sorunun 60 saniyesi var. Süre bitince sıradaki soruya geçilir; geri dönülmez. Doğru cevaplar sınav bitince gösterilir.</p>';
     } else if (sheet.kind === 'span') {
       const set = Store.data.settings, st = set.spanStart, lv = Span.levelOf(set.spanLevel), rec = Store.data.span.best[lv.id], sec = fmtSec(Span.seconds(st, lv.id)), timed = set.spanTypeTimed !== false;
       body = '<div class="sheet-head"><span class="cat-ico">' + I.span + '</span><div><h2>Sayı Hafızası</h2><p>Sayı bir süre görünür ve kapanır. Sonra süre bitmeden klavyeyle yazarsın.</p></div>' + closeBtn + '</div>' +
@@ -676,10 +676,6 @@
       body = '<div class="sheet-head"><div><h2>Çıkmak istiyor musun?</h2><p>' +
         (view === 'span' ? 'Oyundan çıkarsan bu oyun biter. Ulaştığın rekor kaydedildi.' : ses.mode === 'exam' ? 'Sınavdan çıkarsan cevapların kaydedilmez.' : 'Şimdiye kadar çözdüğün sorular kaydedildi. Yıldız kazanmak için alıştırmayı bitirmelisin.') +
         '</p></div></div><div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="home">Çık</button><button type="button" class="btn btn-sun" data-act="close">Devam et</button></div>';
-    } else if (sheet.kind === 'finish') {
-      const blank = ses.items.filter((it) => it.chosen == null).length;
-      body = '<div class="sheet-head"><div><h2>Sınavı bitirelim mi?</h2><p>' + (blank ? blank + ' soru boş kaldı. Geri dönüp cevaplayabilirsin.' : 'Bütün soruları cevapladın.') +
-        '</p></div></div><div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Geri dön</button><button type="button" class="btn btn-sun" data-act="finish">Bitir</button></div>';
     } else if (sheet.kind === 'account') {
       const a = Store.data.profile && Store.data.profile.avatar;
       const prov = { password: 'E-posta ve şifre', 'google.com': 'Google', 'apple.com': 'Apple' }[user && user.provider] || 'E-posta ve şifre';
@@ -781,11 +777,8 @@
     exam(el) { startExam(Number(el.dataset.i), sheet.level || 0); },
     pick(el) { pick(Number(el.dataset.i)); },
     next: next,
-    prev: prev,
-    'memo-done': memoDone,
+    'memo-done'() { if (ses && ses.mode !== 'exam') memoDone(); },
     quit() { sheet = { kind: 'quit' }; render(); },
-    'finish-ask'() { sheet = { kind: 'finish' }; render(); },
-    finish() { finish(); },
     review(el) { sheet = { kind: 'review', i: Number(el.dataset.i) }; render(); },
     again() {
       sheet = ses.mode === 'practice' ? { kind: 'cat', id: ses.cat } : ses.mode === 'daily' ? { kind: 'daily' } : { kind: 'exam', level: ses.fixed || 0 };
@@ -872,7 +865,7 @@
 
   app.addEventListener('click', (e) => {
     if (e.target.classList && e.target.classList.contains('scrim')) {
-      if (sheet && sheet.kind !== 'finish') { sheet = null; render(); }
+      if (sheet) { sheet = null; render(); }
       return;
     }
     const el = e.target.closest ? e.target.closest('[data-act]') : null;

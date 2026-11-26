@@ -133,20 +133,21 @@
       html: S.svg(100, 100, '<g transform="rotate(' + turn + ' 50 50)">' + partsDraw(ps, lay, true) + '</g>', { cls: 'opt-svg' }),
       key: partsKey(ps),
     });
-    const wrong = [];
-    for (let t = 0; t < 40; t++) {
-      const x = parts.map((p) => Object.assign({}, p)), i = rng.int(0, n - 1), kind = rng.pick(kinds);
+    const mutate = (from) => {
+      const x = from.map((p) => Object.assign({}, p)), i = rng.int(0, n - 1), kind = rng.pick(kinds);
       if (kind === 'shape') x[i].shape = rng.pick(SH.filter((s) => shapes.indexOf(s) < 0));
       else if (kind === 'swap') {
         const j = (i + 1) % n, a = x[i].shape, ar = x[i].rot;
         x[i].shape = x[j].shape; x[i].rot = x[j].rot; x[j].shape = a; x[j].rot = ar;
       } else if (kind === 'rot') x[i].rot = (x[i].rot + rng.pick([90, 180, 270])) % 360;
       else x[i].k = 0.6;
-      wrong.push(mk(x));
-    }
+      return x;
+    };
+    const wrong = Q.spread(rng, parts, mutate, partsKey).map(mk);
+    for (let t = 0; t < 12; t++) wrong.push(mk(mutate(parts)));
     q.stem = S.svg(100, 100, partsDraw(parts, lay, false), { maxW: 220 });
     q.explain = 'Gölgede renkler görünmez ama dış çizgi aynı kalır.' + (turn ? ' Gölge döndürülmüş olsa da parçaların birbirine göre yeri değişmez.' : '') +
-      ' Diğer şıklarda bir parçanın biçimi, yeri, yönü ya da boyu farklı.';
+      ' Diğer şıklarda en az bir parçanın biçimi, yeri, yönü ya da boyu farklı.';
     return Q.finish(rng, q, mk(parts), wrong);
   };
 

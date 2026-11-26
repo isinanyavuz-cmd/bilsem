@@ -61,7 +61,7 @@ Tek dosya sürümü (`tools/tek-dosya.js`) giriş modülünü içermez; hesap gi
 | Günün Görevi | Farklı konulardan 10 soru. Az çalışılan ve zorlanılan konular daha sık gelir. |
 | Konu alıştırması | Seçilen konu ve kademede 5, 10 ya da 15 soru. Her cevaptan sonra açıklama gösterilir. |
 | Tekrar oyna | Her çalışmanın sonunda "Tekrar oyna" önce kademeyi sorar. Günün Görevi ve Deneme Sınavı tek bir kademeyle ya da karışık oynanabilir. |
-| Deneme Sınavı | 20, 40 ya da 60 soru; süreli; cevaplar sınav bitince gösterilir. |
+| Deneme Sınavı | 20, 40 ya da 60 soru (en fazla 20, 40 ya da 60 dakika). Gerçek tablet sınavı gibi her sorunun kendi 60 saniyesi vardır: süre bitince sıradaki soruya otomatik geçilir ve soru boş sayılır; önceki sorulara dönülemez. Son 10 saniyede geri sayım görünür. Görsel hafıza sorularında resimler her kademede 6 saniye görünür (denemede "Hazırım" düğmesi yoktur) ve 60 saniye resim kapandıktan sonra başlar. Kademe seçilmezse sıra: ilk %20 Kolay, sonraki %40 Orta, son %40 Zor (En Zor yalnızca elle seçilirse). Asıl konular yaklaşık iki kat sık gelir. Cevaplar sınav bitince gösterilir. |
 | Sayı Hafızası | Sayı bir süre görünür ve kapanır; süre bitmeden klavyeyle düzden ve tersten yazılır. 3 basamaktan 7 basamağa kadar uzar, üç yanlışta oyun biter. Süre (hem görünme hem her yazım için): Kolay basamak sayısının iki katı, Orta basamak sayısı, Zor basamak sayısının üçte ikisi kadar saniye. Yazma süresi isteğe bağlıdır (veli panelinden): "Süresiz" seçilirse sayı yine süreyle görünür ama yazarken süre yoktur. |
 | Veli paneli | Şifreyle açılır (321321). Konu konu doğru oranı, ortalama süre, son 7 gün, öneriler, ayarlar. |
 

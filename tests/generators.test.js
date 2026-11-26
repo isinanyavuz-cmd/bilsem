@@ -149,7 +149,7 @@ test('şifre çözme: cevap tablodan yeniden hesaplanınca aynı çıkar', () =>
 test('görsel hafıza: sorulan resim gerçekten gösterilmiş ya da gösterilmemiş', () => {
   forEach('memory', (q) => {
     const m = q.meta, ans = q.options[q.answer].key.slice(1), rest = q.options.filter((_, i) => i !== q.answer).map((o) => o.key.slice(1));
-    assert.strictEqual(q.memo.seconds, m.shown.length);
+    assert.strictEqual(q.memo.seconds, 6);
     if (m.kind === 'where') assert.strictEqual(m.shown[m.hole], ans);
     else {
       assert.ok(m.shown.indexOf(ans) < 0, 'yeni ya da olmayan resim gösterilenlerde bulunmamalı');

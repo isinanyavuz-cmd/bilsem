@@ -67,19 +67,23 @@
     inner += '<path d="M' + (14 + A + 8) + ' ' + r1(oy + A / 2) + 'h' + (gap - 16) + 'm-7 -7l7 7l-7 7" fill="none" stroke="#566889" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>';
     inner += paperDraw(fr, fc, cs, folded, 14 + A + gap, oy + (A - fr * cs) / 2);
     const q = { stem: S.svg(W, H, inner, { maxW: Math.min(W * 1.25, 420) }) };
-    q.prompt = 'Kâğıt turuncu çizgiden' + (two ? 'ler sırayla' : '') + ' katlanıp delikler açılıyor. Kâğıt tekrar açılınca nasıl görünür?';
+    q.prompt = 'Kâğıt turuncu çizgi' + (two ? 'lerden sırayla' : 'den') + ' katlanıp delikler açılıyor. Kâğıt tekrar açılınca nasıl görünür?';
     q.meta = { N: N, vf: vf, hf: hf, R0: R0, C0: C0, folded: folded, holes: correct };
     q.explain = 'Katlanmış kâğıttaki her delik, açılınca katlama çizgisinin öbür yanında ayna görüntüsüyle de çıkar. ' + (two ? 'İki kez katlandığı için her delik dört yerde görünür.' : 'Bir kez katlandığı için her delik iki yerde görünür.') + ' Toplam ' + correct.length + ' delik olur.';
     const mk = (cells) => ({ html: S.svg(100, 100, paperDraw(N, N, 82 / N, cells, 9, 9), { cls: 'opt-svg' }), key: 'f' + cellKey(cells) });
     const ds = [actual, unfold(actual, vf, false), unfold(actual, false, hf)];
     ds.push(uniq(actual.concat(actual.map((c) => [N - 1 - c[0], N - 1 - c[1]]))));       // aynalama yerine yarım tur çevirme
     ds.push(uniq(actual.concat(actual.map((c) => [c[1], c[0]]))));                          // köşegen yansıması
-    for (let t = 0; t < 8; t++) {                                                          // doğru açılmışın bir deliği kaymış
-      const c = correct.map((h) => h.slice()), i = rng.int(0, c.length - 1), d = rng.pick([[0, 1], [1, 0], [0, -1], [-1, 0]]);
+    const shift = (cells) => {                                                              // doğru açılmışın bir deliği kaymış
+      const c = cells.map((h) => h.slice()), i = rng.int(0, c.length - 1), d = rng.pick([[0, 1], [1, 0], [0, -1], [-1, 0]]);
       const nr = c[i][0] + d[0], nc = c[i][1] + d[1];
-      if (nr >= 0 && nc >= 0 && nr < N && nc < N) { c[i] = [nr, nc]; ds.push(uniq(c)); }
-    }
-    return Q.finish(rng, q, mk(correct), rng.shuffle(ds).map(mk));
+      if (nr < 0 || nc < 0 || nr >= N || nc >= N) return null;
+      c[i] = [nr, nc];
+      return uniq(c);
+    };
+    const spread = Q.spread(rng, correct, shift, cellKey, { pool: ds });
+    for (let t = 0; t < 8; t++) { const x = shift(correct); if (x) spread.push(x); }
+    return Q.finish(rng, q, mk(correct), spread.concat(rng.shuffle(ds)).map(mk));
   };
 
   /* ---------- Simetri ---------- */
@@ -145,8 +149,13 @@
     q.explain = 'Ayna çizgisinin bir yanındaki her kare, öbür yanda çizgiye aynı uzaklıkta yansır. Çizgiye yakın kareler yine çizgiye yakın kalır.';
     const mk = (m) => ({ html: S.svg(100, 100, G.draw(m, pal, 9, 9, 82), { cls: 'opt-svg' }), key: 'y' + G.key(m) });
     const ds = DIH.map((d) => { const m = given.map((row) => row.slice()); for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const s = d(r, c, N); m[r][c] = inGiven(s[0], s[1]) ? given[s[0]][s[1]] : 0; } return m; });
-    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const m = full.map((row) => row.slice()); m[r][c] = 1 - m[r][c]; ds.push(m); }
-    return Q.finish(rng, q, mk(full), rng.shuffle(ds).map(mk));
+    const flips = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const m = full.map((row) => row.slice()); m[r][c] = 1 - m[r][c]; flips.push(m); }
+    const flip = (m) => { const x = m.map((row) => row.slice()), p = rng.pick(free); x[p[0]][p[1]] = 1 - x[p[0]][p[1]]; return x; };
+    const free = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) free.push([r, c]);
+    const spread = Q.spread(rng, full, flip, G.key, { pool: ds });
+    return Q.finish(rng, q, mk(full), spread.concat(rng.shuffle(ds), rng.shuffle(flips)).map(mk));
   };
 
   /* ---------- Mini Sudoku ---------- */
@@ -228,7 +237,7 @@
     const cn = cand(ask[0], ask[1]);
     const rowC = puzzle[ask[0]].filter(Boolean).map((v) => nameOf(cols[v - 1])), colC = puzzle.map((r) => r[ask[1]]).filter(Boolean).map((v) => nameOf(cols[v - 1]));
     q.explain = cn.length === 1
-      ? 'Satırda ' + (rowC.join(', ') || 'hiçbir renk') + ' var; sütunda ' + (colC.join(', ') || 'hiçbir renk') + ' var' + (box ? '; kutudaki renkler de eleniyor' : '') + '. Geriye ' + nameOf(cols[cn[0] - 1]) + ' kalır.'
+      ? (rowC.length ? 'Satırda ' + rowC.join(', ') + ' var' : 'Satırda hiç renk yok') + '; ' + (colC.length ? 'sütunda ' + colC.join(', ') + ' var' : 'sütunda hiç renk yok') + (box ? '; kutudaki renkler de eleniyor' : '') + '. Geriye ' + nameOf(cols[cn[0] - 1]) + ' kalır.'
       : 'Boş kareleri tek tek eleyerek ilerleyince soru işaretinin yeri ' + nameOf(cols[sol[ask[0]][ask[1]] - 1]) + ' çıkar.';
     q.meta = { n: n, box: box, puzzle: puzzle, ask: ask, cols: cols, answer: sol[ask[0]][ask[1]] };
     const right = cols[sol[ask[0]][ask[1]] - 1];

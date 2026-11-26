@@ -204,7 +204,7 @@
         const s = this.cat(c.id);
         const recent = s.recent.slice(-10);
         const acc = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : 0.5;
-        return { id: c.id, w: 1 + (1 - acc) * 2 + (s.seen < 5 ? 1 : 0) };
+        return { id: c.id, w: (1 + (1 - acc) * 2 + (s.seen < 5 ? 1 : 0)) * (c.core ? 2 : 1) };   // asıl konular iki kat ağırlıklı
       });
       const plan = [];
       while (plan.length < n && pool.length) {
@@ -217,7 +217,30 @@
     },
   };
 
+  /* Deneme sınavı planı (saf: rastgele sayı üreteci dışarıdan gelir).
+     Kademe sıraya göre: ilk %20 Kolay, sonraki %40 Orta, son %40 Zor; En Zor yalnızca elle seçilirse gelir. */
+  function examLevel(k, n) { return k * 5 < n ? 1 : k * 5 < n * 3 ? 2 : 3; }
+  /* Konu seçimi: asıl (core) konular yaklaşık iki kat sık gelir. n yeterliyse her asıl konu bir kez garantidir;
+     kalan yerler torbadan çekilir (asıl konu 2, diğerleri 1 kopya; garanti edilen kopyalar torbadan düşülür).
+     Art arda aynı konu gelmez. */
+  function examCats(rng, n) {
+    const core = Bilsem.CATS.filter((c) => c.core).map((c) => c.id), all = Bilsem.CATS.map((c) => c.id);
+    const picks = core.length <= n ? core.slice() : rng.sample(core, n);
+    let rest = core.length <= n ? rng.shuffle(all) : [];
+    while (picks.length < n) {
+      if (!rest.length) rest = rng.shuffle(all.concat(core));
+      picks.push(rest.pop());
+    }
+    let seq = null;
+    for (let t = 0; t < 200; t++) {
+      seq = rng.shuffle(picks);
+      if (seq.every((id, i) => !i || id !== seq[i - 1])) return seq;
+    }
+    return seq;
+  }
+
   Bilsem.Store = Store;
+  Bilsem.Exam = { examLevel: examLevel, examCats: examCats };
   Bilsem.StoreUtil = { dayKey: dayKey, addDays: addDays, starsFor: starsFor, nextSkill: nextSkill, streak: streak, migrate: migrate, blank: blank, normalizeSpan: normalizeSpan };
 
   if (typeof module !== 'undefined') module.exports = Bilsem;

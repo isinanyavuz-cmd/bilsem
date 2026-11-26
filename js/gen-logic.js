@@ -141,6 +141,15 @@
     const mk = (sq) => ({ html: S.svg(steps.length * (so + 8) + 8, so + 14, arrowRow(sq, so, 6, 9), { cls: 'opt-svg opt-svg-row' }), key: key(sq), steps: sq });
     // yanlış yollar: bir okun yönünü ya da kare sayısını değiştir, iki oku yer değiştir; hedefe varmayanları al
     const inside = [], outside = [];
+    const wrongPath = (from) => {
+      const m = from.map((st) => ({ d: st.d, k: st.k })), i = rng.int(0, m.length - 1), r = rng.next();
+      if (r < 0.4) m[i].d = rng.pick(DKEYS.filter((d) => d !== m[i].d));
+      else if (r < 0.7 && !single) m[i].k = rng.pick([1, 2, 3].filter((k) => k !== m[i].k));
+      else { const j = rng.int(0, m.length - 1), tmp = m[i]; m[i] = m[j]; m[j] = tmp; }
+      return m;
+    };
+    const reaches = (m) => { const end = walk(n, start, m); return !!end && !(end[0] === x && end[1] === y); };
+    Q.spread(rng, steps, wrongPath, key, { ok: reaches }).forEach((m) => inside.push(mk(m)));
     for (let t = 0; t < 80; t++) {
       const m = steps.map((st) => ({ d: st.d, k: st.k })), i = rng.int(0, m.length - 1), r = rng.next();
       if (r < 0.4) m[i].d = rng.pick(DKEYS.filter((d) => d !== m[i].d));

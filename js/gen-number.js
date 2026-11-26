@@ -283,7 +283,13 @@
     const muts = [];
     for (let i = 0; i < len - 1; i++) if (seq[i] !== seq[i + 1]) { const m = seq.slice(); m[i] = seq[i + 1]; m[i + 1] = seq[i]; muts.push(m); }
     for (let i = 0; i < len; i++) for (let k = 0; k < n; k++) if (k !== seq[i]) { const m = seq.slice(); m[i] = k; muts.push(m); }
-    const wrongSeqs = rng.shuffle(muts);
+    const modSeq = (from) => {
+      const m = from.slice(), i = rng.int(0, len - 1);
+      if (rng.chance(0.4) && i < len - 1) { const t = m[i]; m[i] = m[i + 1]; m[i + 1] = t; }
+      else m[i] = rng.pick(Array.from({ length: n }, (_, k) => k).filter((k) => k !== m[i]));
+      return m;
+    };
+    const wrongSeqs = Q.spread(rng, seq, modSeq, (sq) => sq.join(''), { pool: rng.shuffle(muts).slice(0, 4) }).concat(rng.shuffle(muts));
     if (kind === 'decode') {
       const s = 54;
       q.prompt = 'Şifre tablosuna göre alttaki şekiller hangi sayıyı gösterir?';
