@@ -34,46 +34,61 @@
 
   /* sym: şekil kaç derecede bir kendisiyle aynı görünür (90'ın katlarıyla döndürmede). */
   const SHAPES = {
-    circle: { name: 'daire', gen: 'dairenin', abl: 'daireden', sym: 90, d: '<circle r="36"/>' },
-    square: { name: 'kare', gen: 'karenin', abl: 'kareden', sym: 90, d: '<rect x="-32" y="-32" width="64" height="64" rx="5"/>' },
-    triangle: { name: 'üçgen', gen: 'üçgenin', abl: 'üçgenden', sym: 360, d: '<path d="M0 -38L35 24L-35 24Z"/>' },
-    diamond: { name: 'baklava', gen: 'baklavanın', abl: 'baklavadan', sym: 180, d: '<path d="M0 -40L27 0L0 40L-27 0Z"/>' },
-    pentagon: { name: 'beşgen', gen: 'beşgenin', abl: 'beşgenden', sym: 360, d: '<polygon points="' + polyPts(5, 38) + '"/>' },
-    hexagon: { name: 'altıgen', gen: 'altıgenin', abl: 'altıgenden', sym: 180, d: '<polygon points="' + polyPts(6, 38) + '"/>' },
-    star: { name: 'yıldız', gen: 'yıldızın', abl: 'yıldızdan', sym: 360, d: '<polygon points="' + starPts(40, 17) + '"/>' },
-    heart: { name: 'kalp', gen: 'kalbin', abl: 'kalpten', sym: 360, d: '<path d="M0 33C-14 21-38 7-38-12C-38-26-27-34-16-34C-8-34-2-29 0-23C2-29 8-34 16-34C27-34 38-26 38-12C38 7 14 21 0 33Z"/>' },
-    plus: { name: 'artı', sym: 90, d: '<path d="M-12 -36H12V-12H36V12H12V36H-12V12H-36V-12H-12Z"/>' },
-    arrow: { name: 'ok', sym: 360, d: '<path d="M0 -40L32 -4H14V38H-14V-4H-32Z"/>' },
-    moon: { name: 'ay', sym: 360, d: '<path d="M18 -36A36 36 0 0 0 18 36A44 44 0 0 1 18 -36Z"/>' },
-    drop: { name: 'damla', sym: 360, d: '<path d="M0 -40C8 -24 26 -6 26 12A26 26 0 0 1 -26 12C-26 -6 -8 -24 0 -40Z"/>' },
-    semi: { name: 'yarım daire', sym: 360, d: '<path d="M-36 18A36 36 0 0 1 36 18Z"/>' },
-    pac: { name: 'dilimli daire', sym: 360, d: '<path d="M0 0L31 -18A36 36 0 1 0 31 18Z"/>' },
-    flag: { name: 'bayrak', sym: 360, chiral: true, d: '<path d="M-22 -40H-13V-36L26 -20L-13 -4V40H-22Z"/>' },
-    ell: { name: 'L şekli', sym: 360, chiral: true, d: '<path d="M-28 -38H-4V14H30V38H-28Z"/>' },
+    circle: { art: 'assets/kil/sekil-circle.webp', name: 'daire', gen: 'dairenin', abl: 'daireden', sym: 90, d: '<circle r="36"/>' },
+    square: { art: 'assets/kil/sekil-square.webp', name: 'kare', gen: 'karenin', abl: 'kareden', sym: 90, d: '<rect x="-32" y="-32" width="64" height="64" rx="5"/>' },
+    triangle: { art: 'assets/kil/sekil-triangle.webp', name: 'üçgen', gen: 'üçgenin', abl: 'üçgenden', sym: 360, d: '<path d="M0 -38L35 24L-35 24Z"/>' },
+    diamond: { art: 'assets/kil/sekil-diamond.webp', name: 'baklava', gen: 'baklavanın', abl: 'baklavadan', sym: 180, d: '<path d="M0 -40L27 0L0 40L-27 0Z"/>' },
+    pentagon: { art: 'assets/kil/sekil-pentagon.webp', name: 'beşgen', gen: 'beşgenin', abl: 'beşgenden', sym: 360, d: '<polygon points="' + polyPts(5, 38) + '"/>' },
+    hexagon: { art: 'assets/kil/sekil-hexagon.webp', name: 'altıgen', gen: 'altıgenin', abl: 'altıgenden', sym: 180, d: '<polygon points="' + polyPts(6, 38) + '"/>' },
+    star: { art: 'assets/kil/sekil-star.webp', name: 'yıldız', gen: 'yıldızın', abl: 'yıldızdan', sym: 360, d: '<polygon points="' + starPts(40, 17) + '"/>' },
+    heart: { art: 'assets/kil/sekil-heart.webp', name: 'kalp', gen: 'kalbin', abl: 'kalpten', sym: 360, d: '<path d="M0 33C-14 21-38 7-38-12C-38-26-27-34-16-34C-8-34-2-29 0-23C2-29 8-34 16-34C27-34 38-26 38-12C38 7 14 21 0 33Z"/>' },
+    plus: { art: 'assets/kil/sekil-plus.webp', name: 'artı', sym: 90, d: '<path d="M-12 -36H12V-12H36V12H12V36H-12V12H-36V-12H-12Z"/>' },
+    arrow: { art: 'assets/kil/sekil-arrow.webp', name: 'ok', sym: 360, d: '<path d="M0 -40L32 -4H14V38H-14V-4H-32Z"/>' },
+    moon: { art: 'assets/kil/sekil-moon.webp', name: 'ay', sym: 360, d: '<path d="M18 -36A36 36 0 0 0 18 36A44 44 0 0 1 18 -36Z"/>' },
+    drop: { art: 'assets/kil/sekil-drop.webp', name: 'damla', sym: 360, d: '<path d="M0 -40C8 -24 26 -6 26 12A26 26 0 0 1 -26 12C-26 -6 -8 -24 0 -40Z"/>' },
+    semi: { art: 'assets/kil/sekil-semi.webp', name: 'yarım daire', sym: 360, d: '<path d="M-36 18A36 36 0 0 1 36 18Z"/>' },
+    pac: { art: 'assets/kil/sekil-pac.webp', name: 'dilimli daire', sym: 360, d: '<path d="M0 0L31 -18A36 36 0 1 0 31 18Z"/>' },
+    flag: { art: 'assets/kil/sekil-flag.webp', name: 'bayrak', sym: 360, chiral: true, d: '<path d="M-22 -40H-13V-36L26 -20L-13 -4V40H-22Z"/>' },
+    ell: { art: 'assets/kil/sekil-ell.webp', name: 'L şekli', sym: 360, chiral: true, d: '<path d="M-28 -38H-4V14H30V38H-28Z"/>' },
   };
 
   const SIZE_NAMES = { 1: 'büyük', 0.72: 'orta boy', 0.46: 'küçük' };
   const FILL_NAMES = { solid: 'içi dolu', empty: 'içi boş', stripe: 'çizgili' };
 
+  /* Mat kil gölgesi: three.js ile bir kez çizilmiş renksiz resim (tools/kil-sekiller.js).
+     Şeklin rengi üstüne "hard-light" ile biner; düz yüzey rengi bozmaz, kenarlar yuvarlak görünür.
+     Kırpma yolu resmi tam şeklin içinde tutar. */
+  function clay(id) {
+    return '<image href="' + SHAPES[id].art + '" x="-50" y="-50" width="100" height="100" clip-path="url(#bz-cp-' + id +
+      ')" style="mix-blend-mode:hard-light" stroke="none"/>';
+  }
+  const HUCRE = 'assets/kil/sekil-hucre.webp';
+
   /* Tek bir şekil; merkez (0,0), yaklaşık 40 birim yarıçap. */
   function one(f) {
     const sh = SHAPES[f.shape], col = f.color === 'ink' ? { fill: INK } : COLORS[f.color];
     const size = f.size || 1;
-    let body;
+    // yumuşak gölge: masaya bırakılmış kil parçası gibi
+    let body = '<g transform="translate(2.5 4)" fill="' + INK + '" fill-opacity="0.14">' + sh.d + '</g>';
     if (f.fill === 'empty') {
       // içi boş: koyu çizgiyle çevrili renkli halka; sarı gibi açık renkler de seçilir
-      body = '<g fill="#fff" stroke="' + INK + '" stroke-width="13">' + sh.d + '</g><g fill="none" stroke="' + col.fill + '" stroke-width="7">' + sh.d + '</g>';
+      body += '<g fill="#fff" stroke="' + INK + '" stroke-width="13">' + sh.d + '</g><g fill="none" stroke="' + col.fill + '" stroke-width="7">' + sh.d + '</g>';
     } else if (f.fill === 'stripe') {
-      body = '<g fill="url(#bz-st-' + f.color + ')" stroke="' + INK + '" stroke-width="4">' + sh.d + '</g>';
+      body += '<g fill="url(#bz-st-' + f.color + ')" stroke="' + INK + '" stroke-width="4">' + sh.d + '</g>';
     } else {
-      body = '<g fill="' + col.fill + '" stroke="' + INK + '" stroke-width="4">' + sh.d + '</g>';
+      body += '<g fill="' + col.fill + '" stroke="' + INK + '" stroke-opacity="0.7" stroke-width="3.5">' + sh.d + '</g>';
     }
+    if (f.color !== 'ink') body += clay(f.shape);   // gölge siluetleri düz kalır
     const t = [];
-    if (f.rot) t.push('rotate(' + f.rot + ')');
+    // Işık resimle birlikte döner. Aynı görünen iki şeklin (anahtarları eşit) gölgesi de aynı olsun diye
+    // dönüş simetri açısına indirgenir; daire hiç döndürülmez.
+    const rot = f.shape === 'circle' ? 0 : (((f.rot || 0) % sh.sym) + sh.sym) % sh.sym;
+    if (rot) t.push('rotate(' + rot + ')');
     if (f.mirror || size !== 1) t.push('scale(' + (f.mirror ? -size : size) + ' ' + size + ')');
     let inner = '';
     if (f.inner) {
-      inner = '<g transform="scale(0.36)" fill="' + COLORS[f.inner.color].fill + '" stroke="' + INK + '" stroke-width="9">' + SHAPES[f.inner.shape].d + '</g>';
+      inner = '<g transform="scale(0.36)"><g fill="' + COLORS[f.inner.color].fill + '" stroke="' + INK + '" stroke-width="9">' + SHAPES[f.inner.shape].d + '</g>' +
+        clay(f.inner.shape) + '</g>';
     }
     return '<g' + (t.length ? ' transform="' + t.join(' ') + '"' : '') + ' stroke-linejoin="round" stroke-linecap="round">' + body + inner + '</g>';
   }
@@ -178,7 +193,10 @@
       let o = '<g transform="translate(' + r1(x) + ' ' + r1(y) + ')"><rect width="' + size + '" height="' + size + '" rx="5" fill="#fff"/>';
       for (let r = 0; r < n; r++) {
         for (let k = 0; k < n; k++) {
-          if (m[r][k]) o += '<rect x="' + r1(k * c) + '" y="' + r1(r * c) + '" width="' + r1(c) + '" height="' + r1(c) + '" fill="' + COLORS[pal[m[r][k] - 1]].fill + '"/>';
+          if (m[r][k]) {
+            o += '<rect x="' + r1(k * c) + '" y="' + r1(r * c) + '" width="' + r1(c) + '" height="' + r1(c) + '" fill="' + COLORS[pal[m[r][k] - 1]].fill + '"/>' +
+              '<image href="' + HUCRE + '" x="' + r1(k * c) + '" y="' + r1(r * c) + '" width="' + r1(c) + '" height="' + r1(c) + '" style="mix-blend-mode:hard-light"/>';
+          }
         }
       }
       let lines = '';
@@ -272,11 +290,12 @@
     };
   }
 
-  /* Çizgili dolgu desenleri; sayfada bir kez bulunmalı. */
+  /* Çizgili dolgu desenleri ve kil gölgesinin kırpma yolları; sayfada bir kez bulunmalı. */
   function defs() {
     return '<svg class="bz-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>' + COLOR_IDS.map((id) =>
       '<pattern id="bz-st-' + id + '" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
-      '<rect width="12" height="12" fill="#fff"/><rect width="6" height="12" fill="' + COLORS[id].fill + '"/></pattern>').join('') + '</defs></svg>';
+      '<rect width="12" height="12" fill="#fff"/><rect width="6" height="12" fill="' + COLORS[id].fill + '"/></pattern>').join('') +
+      Object.keys(SHAPES).map((id) => '<clipPath id="bz-cp-' + id + '">' + SHAPES[id].d + '</clipPath>').join('') + '</defs></svg>';
   }
 
   Bilsem.Shapes = {
