@@ -1,7 +1,7 @@
 # Enes BİLSEM'e Hazırlanıyor
 
 2. ve 3. sınıf için BİLSEM genel zihinsel yetenek sınavına hazırlık uygulaması.
-38 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
+38 soru türü (2. sınıf 20, 3. sınıf hepsini görür), her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
 bölümü. Sorular hazır bir havuzdan gelmez; her seferinde yeniden üretilir, bu
 yüzden ezberlenemez.
 
@@ -53,6 +53,19 @@ Yapılandırma girilmeden uygulama giriş ekranında "ayarlanmadı" uyarısı g�
 gönderilen bağlantıyla yapılır ("Şifremi unuttum"). Bağlantının Türkçe görünmesi için Firebase'de
 Authentication → Templates bölümünden "Şifre sıfırlama" metnini düzenleyebilirsiniz.
 Tek dosya sürümü (`tools/tek-dosya.js`) giriş modülünü içermez; hesap girişi yalnızca yayındaki sürümde çalışır.
+
+## Sınıflar
+
+Ana ekranın üstündeki anahtarla 2. ya da 3. sınıf seçilir. Seçim hesapta saklanır (`settings.grade`); yeni ve eski kayıtlar 2. sınıfla açılır.
+
+| Sınıf | Görünen türler |
+|---|---|
+| 2. sınıf | İlk 20 tür |
+| 3. sınıf | İlk 20 tür + sonradan eklenen 18 tür (`Bilsem.G3_ONLY`, `js/core.js`) |
+
+3. sınıfta ilk 20 tür Orta kademeden başlar (Kolay kademe önerilmez); yeni 18 tür Kolay'dan başlar. Günün Görevi ve Deneme Sınavı seçili sınıfın türlerinden gelir; Sayı Hafızası ve Veli paneli ilerleme tablosu da buna uyar. Bir türün ilerlemesi (yıldız, beceri puanı) iki sınıfta ortaktır; Günün Görevi'nin "bugün yapıldı" bilgisi de ortaktır.
+
+Yeni bir türü yalnızca 3. sınıfa koymak için kimliğini `G3_ONLY` listesine ekle.
 
 ## Çalışma biçimleri
 
