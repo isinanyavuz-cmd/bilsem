@@ -27,14 +27,14 @@ function withEnv(fn) {
 
 function progressWith(stars) {
   const d = U.blank();
-  d.cats.sayi = { stars: [stars, 0, 0, 0], seen: 3, ok: 2, ms: 0, recent: [1, 0, 1], skill: 1 };
+  d.cats.cubes = { stars: [stars, 0, 0, 0], seen: 3, ok: 2, ms: 0, recent: [1, 0, 1], skill: 1 };
   return JSON.stringify(d);
 }
 
 test('hydrate: geçerli kaydı yükler, bozuk kaydı reddeder', () => {
   withEnv(() => {
     assert.equal(Store.hydrate(progressWith(2)), true);
-    assert.equal(Store.data.cats.sayi.stars[0], 2);
+    assert.equal(Store.data.cats.cubes.stars[0], 2);
     assert.equal(Store.hydrate('{bozuk'), false);
     assert.equal(Store.hydrate(JSON.stringify({ v: 9 })), false);
   });
@@ -45,7 +45,7 @@ test('attach: bulutta kayıt varsa onu kullanır ve buluta geri göndermez', () 
     ls.setItem('bilsem.v3', progressWith(1));              // bu cihazdaki eski kayıt
     const src = Store.attach('uid-a', progressWith(3));
     assert.equal(src, 'cloud');
-    assert.equal(Store.data.cats.sayi.stars[0], 3);
+    assert.equal(Store.data.cats.cubes.stars[0], 3);
     assert.equal(ls.getItem('bilsem.owner'), 'uid-a');
     assert.equal(pushes.length, 0);
   });
@@ -56,7 +56,7 @@ test('attach: bulutta kayıt yok ve cihaz henüz hesapsızsa yerel ilerleme ilk 
     ls.setItem('bilsem.v3', progressWith(2));
     const src = Store.attach('uid-a', null);
     assert.equal(src, 'adopted');
-    assert.equal(Store.data.cats.sayi.stars[0], 2);
+    assert.equal(Store.data.cats.cubes.stars[0], 2);
     assert.equal(pushes.length, 1, 'aktarılan kayıt buluta gönderilmeli');
   });
 });
@@ -67,7 +67,7 @@ test('attach: cihaz başka bir hesaba bağlıyken yeni hesap yerel ilerlemeyi al
     ls.setItem('bilsem.owner', 'uid-eski');
     const src = Store.attach('uid-yeni', null);
     assert.equal(src, 'blank');
-    assert.equal(Store.data.cats.sayi, undefined);
+    assert.equal(Store.data.cats.cubes, undefined);
     assert.equal(ls.getItem('bilsem.owner'), 'uid-yeni');
     assert.equal(pushes.length, 1);
   });
@@ -75,10 +75,10 @@ test('attach: cihaz başka bir hesaba bağlıyken yeni hesap yerel ilerlemeyi al
 
 test('attach: eski sürüm (v2) yerel kayıt taşınarak aktarılır', () => {
   withEnv((ls) => {
-    const old = { v: 2, settings: {}, cats: { sayi: { stars: [0, 2, 0, 0], seen: 1, ok: 1, ms: 0, recent: [1], skill: 2 } }, days: {}, exams: [], span: {} };
+    const old = { v: 2, settings: {}, cats: { cubes: { stars: [0, 2, 0, 0], seen: 1, ok: 1, ms: 0, recent: [1], skill: 2 } }, days: {}, exams: [], span: {} };
     ls.setItem('bilsem.v2', JSON.stringify(old));
     assert.equal(Store.attach('uid-a', null), 'adopted');
-    assert.equal(Store.data.cats.sayi.stars[2], 2, 'eski Orta (2. kademe) yeni Zor (3. kademe) olur');
+    assert.equal(Store.data.cats.cubes.stars[2], 2, 'eski Orta (2. kademe) yeni Zor (3. kademe) olur');
   });
 });
 
@@ -88,7 +88,7 @@ test('detach: çıkışta yerel ilerleme ve hesap bilgisi silinir', () => {
     Store.detach();
     assert.equal(ls.getItem('bilsem.v3'), null);
     assert.equal(ls.getItem('bilsem.owner'), null);
-    assert.equal(Store.data.cats.sayi, undefined);
+    assert.equal(Store.data.cats.cubes, undefined);
   });
 });
 
@@ -96,9 +96,9 @@ test('save: her değişiklik yerel kayda yazılır ve buluta gönderilir', () =>
   withEnv((ls, pushes) => {
     Store.attach('uid-a', progressWith(0));
     pushes.length = 0;
-    Store.setStars('sayi', 1, 3);
+    Store.setStars('cubes', 1, 3);
     Store.save();
     assert.equal(pushes.length, 1);
-    assert.equal(JSON.parse(ls.getItem('bilsem.v3')).cats.sayi.stars[0], 3);
+    assert.equal(JSON.parse(ls.getItem('bilsem.v3')).cats.cubes.stars[0], 3);
   });
 });

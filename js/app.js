@@ -94,16 +94,7 @@
     net: () => [[1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2]].map((p) => '<rect x="' + (p[0] * 24 + 4) + '" y="' + (p[1] * 24 + 14) + '" width="24" height="24" fill="#cfe3ff" stroke="#1d2b4a" stroke-width="3" stroke-linejoin="round"/>').join(''),
     sym: () => '<rect x="10" y="14" width="30" height="30" fill="#3d8ef7"/><rect x="40" y="44" width="30" height="30" fill="#3d8ef7"/><rect x="60" y="14" width="30" height="30" fill="#cfe0fa" stroke="#3d8ef7" stroke-width="3" stroke-dasharray="6 4"/><path d="M50 4V96" stroke="#f08c00" stroke-width="4" stroke-dasharray="8 6" stroke-linecap="round"/>',
     fold: () => '<rect x="12" y="22" width="76" height="56" rx="6" fill="#ffe9a8" stroke="#1d2b4a" stroke-width="3.4"/><path d="M50 22V78" stroke="#f08c00" stroke-width="3.4" stroke-dasharray="6 5"/><circle cx="28" cy="40" r="7" fill="#fff" stroke="#1d2b4a" stroke-width="3"/><circle cx="72" cy="40" r="7" fill="#fff" stroke="#1d2b4a" stroke-width="3"/>',
-    magic: () => [[2, 7, 6], [9, 5, 1], [4, 3, 8]].map((row, r) => row.map((v, c) => S.tile(8 + c * 29, 8 + r * 29, 27) + S.text(21.5 + c * 29, 21.5 + r * 29, r === 1 && c === 1 ? '?' : v, 17, r === 1 && c === 1 ? { fill: '#e08600' } : {})).join('')).join(''),
-    liar: () => S.emoji(27, 38, '😇', 30) + S.emoji(73, 38, '😈', 30) + S.text(50, 78, '?', 28, { fill: '#e08600' }),
     sudoku: () => [['red', 'blue'], ['blue', 'red']].map((row, r) => row.map((col, c) => S.tile(14 + c * 38, 14 + r * 38, 36) + (r === 1 && c === 1 ? S.text(14 + c * 38 + 18, 14 + r * 38 + 18, '?', 24, { fill: '#e08600' }) : '<circle cx="' + (32 + c * 38) + '" cy="' + (32 + r * 38) + '" r="11" fill="' + S.COLORS[col].fill + '" stroke="#1d2b4a" stroke-width="3"/>')).join('')).join(''),
-    maze: () => [[24, 30, 62, 30], [24, 30, 62, 70], [24, 70, 62, 30], [24, 70, 62, 70]].map((l) => '<path d="M' + l[0] + ' ' + l[1] + 'L' + l[2] + ' ' + l[3] + '" stroke="#8aa0c4" stroke-width="4" stroke-linecap="round"/>').join('') +
-      [[24, 30], [24, 70], [62, 30], [62, 70]].map((c) => '<rect x="' + (c[0] - 11) + '" y="' + (c[1] - 11) + '" width="22" height="22" rx="6" fill="#fff" stroke="#1d2b4a" stroke-width="3"/>').join('') + S.emoji(88, 50, '🧀', 20),
-    back: () => S.text(22, 50, '?', 30, { fill: '#e08600' }) + '<path d="M42 50h16m-7 -7l7 7l-7 7" fill="none" stroke="#566889" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 50 50)"/>' + S.text(78, 50, '12', 28),
-    cook: () => S.emoji(30, 40, '🍲', 34) + S.emoji(72, 40, '🍳', 34) + '<path d="M16 72h28M58 72h28" stroke="#f2545b" stroke-width="7" stroke-linecap="round"/>',
-    sticks: () => '<path d="M16 20h68v60H16z" fill="none" stroke="#1d2b4a" stroke-width="3" stroke-dasharray="4 5"/><rect x="14" y="14" width="46" height="12" rx="6" fill="#3d8ef7" stroke="#1d2b4a" stroke-width="3"/><rect x="60" y="14" width="26" height="12" rx="6" fill="#ffd233" stroke="#1d2b4a" stroke-width="3"/><rect x="14" y="74" width="26" height="12" rx="6" fill="#ffd233" stroke="#1d2b4a" stroke-width="3"/><rect x="40" y="74" width="46" height="12" rx="6" fill="#3d8ef7" stroke="#1d2b4a" stroke-width="3"/>',
-    dots: () => [0, 1, 2].map((r) => [0, 1, 2].map((c) => '<circle cx="' + (22 + c * 28) + '" cy="' + (22 + r * 28) + '" r="5.5" fill="#1d2b4a"/>').join('')).join('') + '<path d="M50 22L78 50L50 78L22 50Z" fill="none" stroke="#f08c00" stroke-width="4" stroke-linejoin="round"/>',
-    flip: () => S.Grid.draw([[1, 0, 0], [1, 1, 0], [1, 0, 0]], ['blue', 'yellow'], 8, 28, 40) + '<path d="M54 30a20 20 0 0 1 0 38" fill="none" stroke="#f08c00" stroke-width="5" stroke-linecap="round"/><path d="M60 72l-12 -3l8 -9z" fill="#f08c00"/>' + S.Grid.draw([[0, 0, 1], [0, 1, 1], [0, 0, 1]], ['blue', 'yellow'], 54, 28, 40),
     cipher: () => ['K', 'U', 'Ş'].map((ch, i) => S.tile(8 + i * 28, 14, 26) + S.text(21 + i * 28, 27, ch, 17)).join('') + '<path d="M50 48v10m-5 -5l5 5l5 -5" fill="none" stroke="#566889" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>' + ['L', 'Ü', 'T'].map((ch, i) => S.tile(8 + i * 28, 62, 26, { fill: '#e8ddff' }) + S.text(21 + i * 28, 75, ch, 17)).join(''),
     equiv: () => S.figAt(F('circle', 'red'), 4, 20, 26) + S.figAt(F('circle', 'red'), 4, 52, 26) + S.text(46, 50, '=', 28, { fill: '#566889' }) + S.figAt(F('square', 'blue'), 58, 34, 34),
     stack: () => [['#3d8ef7', 'M12 72L88 28'], ['#ffd233', 'M10 40L90 58'], ['#f2545b', 'M24 16L76 86']].map((l) =>
@@ -114,15 +105,12 @@
     same: () => { const m = [[1, 0, 2], [0, 1, 0], [2, 0, 0]], p = ['purple', 'yellow']; return S.Grid.draw(m, p, 5, 29, 42) + S.Grid.draw(m, p, 53, 29, 42); },
     count: () => S.figAt(F('star', 'yellow'), 2, 4, 46) + S.figAt(F('star', 'yellow'), 50, 18, 46) + S.figAt(F('star', 'yellow'), 14, 50, 46),
     memory: () => S.tile(6, 28, 42) + S.emoji(27, 49, '🐱', 26) + S.qtile(52, 28, 42),
-    order: () => [['#3d8ef7', 14, 34], ['#ffc93c', 40, 52], ['#f2545b', 66, 70]].map((b) =>
-      '<rect x="' + b[1] + '" y="' + (88 - b[2]) + '" width="20" height="' + b[2] + '" rx="6" fill="' + b[0] + '" stroke="#1d2b4a" stroke-width="3.4"/>').join(''),
     path: () => greenTile(8, 14, 90) + greenTile(52, 14, 90) + greenTile(52, 54, 180),
     machine: () => '<rect x="26" y="22" width="48" height="56" rx="12" fill="#a565f2" stroke="#1d2b4a" stroke-width="3.4"/>' + S.text(50, 50, '+2', 24, { fill: '#fff' }) +
       S.text(11, 50, '3', 24) + S.text(89, 50, '5', 24),
     shadow: () => S.figAt(F('star', 'yellow'), 2, 14, 54) + S.figAt(F('star', 'ink'), 44, 32, 54),
     balance: () => '<path d="M50 30V78M34 82h32" stroke="#1d2b4a" stroke-width="5" stroke-linecap="round"/><path d="M18 24L82 38" stroke="#1d2b4a" stroke-width="5" stroke-linecap="round"/>' +
       '<circle cx="50" cy="31" r="5" fill="#ffc93c" stroke="#1d2b4a" stroke-width="2.6"/>' + S.figAt(F('circle', 'red'), 4, 26, 30) + S.figAt(F('square', 'blue'), 68, 42, 28),
-    who: () => S.emoji(27, 40, '🐱', 30) + S.emoji(73, 40, '🐶', 30) + S.text(50, 76, '?', 30, { fill: '#e08600' }),
   };
   const icon = (id) => S.svg(100, 100, ICONS[id](), { cls: 'cat-svg' });
 
@@ -380,9 +368,8 @@
     const prompt = '<div class="q-prompt"><h1>' + q.prompt + '</h1>' +
       (trVoice ? '<button type="button" class="icon-btn" data-act="speak" aria-label="Soruyu sesli oku">' + I.sound + '</button>' : '') + '</div>';
     const stem = q.stem ? '<div class="paper stem">' + q.stem + '</div>' : '';
-    // öncüllü sorularda (Kim Hangisi, Sıralama) soru cümlesi öncüllerin altında durur
     let html = '<div class="page quiz' + (q.type === 'cubes' ? ' quiz-cubes' : '') + '"' + area + '>' + quizTop() +
-      (q.promptBelow ? tag + stem + prompt : '<div class="q-head">' + tag + prompt + '</div>' + stem) +
+      '<div class="q-head">' + tag + prompt + '</div>' + stem +
       optsHtml(q, it, exam ? 'exam' : answered ? 'done' : 'live');
     if (answered) {
       const ok = it.chosen === q.answer;
@@ -714,10 +701,9 @@
       const i = sheet.i, it = ses.items[i], q = it.q, cat = B.catById(q.type);
       const state = it.chosen == null ? 'Boş bırakıldı.' : it.chosen === q.answer ? 'Doğru cevapladın.' : 'Yanlış cevapladın.';
       body = '<div class="sheet-head"><div><h2>Soru ' + (i + 1) + '</h2><p>' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</p></div>' + closeBtn + '</div>' +
-        (q.promptBelow ? '' : '<p class="rv-prompt">' + q.prompt + '</p>') +
+        '<p class="rv-prompt">' + q.prompt + '</p>' +
         (q.memo ? '<div class="paper stem">' + q.memo.html + '</div>' : '') +
         (q.stem ? '<div class="paper stem">' + q.stem + '</div>' : '') +
-        (q.promptBelow ? '<p class="rv-prompt">' + q.prompt + '</p>' : '') +
         optsHtml(q, it, 'done') +
         '<p class="tip"><b>' + state + '</b> Doğru cevap ' + LETTERS[q.answer] + ' şıkkı. ' + q.explain + '</p>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="review" data-i="' + (i - 1) + '"' + (i === 0 ? ' disabled' : '') + '>Önceki soru</button>' +

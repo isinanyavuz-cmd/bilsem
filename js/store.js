@@ -89,6 +89,10 @@
           set.spanStart = Math.max(Sp.MIN, Math.min(Sp.MAX, set.spanStart));
           set.spanLevel = Sp.levelOf(set.spanLevel).id;
           set.spanTypeTimed = set.spanTypeTimed !== false;
+          /* Kaldırılmış (ya da bilinmeyen) kategorilerin kayıtları toplamlara karışmasın diye atılır. */
+          const cats = {};
+          Object.keys(this.data.cats || {}).forEach((k) => { if (Bilsem.catById(k)) cats[k] = this.data.cats[k]; });
+          this.data.cats = cats;
           return true;
         }
       } catch (e) { /* bozuk kayıt */ }

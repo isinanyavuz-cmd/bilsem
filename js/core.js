@@ -57,21 +57,11 @@
     { id: 'count', area: 'dikkat', name: 'Şekil Sayma', desc: 'Dikkatle say', tip: 'Saydığın şekli aklında işaretle. Soldan sağa, satır satır ilerle.' },
     { id: 'memory', area: 'dikkat', name: 'Görsel Hafıza', desc: 'Bak, aklında tut, hatırla', tip: 'Resimleri kendi kendine bir hikâye gibi söyle: "köpek topu kovalıyor".' },
     { id: 'shadow', area: 'dikkat', name: 'Gölge Bulma', desc: 'Resmin gölgesi hangisi?', tip: 'Renkleri unut, yalnızca dış çizgiye bak. Parçaların yerini, yönünü ve boyunu tek tek kontrol et.' },
-    { id: 'magic', area: 'sayisal', name: 'Sihirli Kare', desc: 'Satır, sütun, köşegen toplamı aynı', tip: 'Üç sayısı da belli olan bir satır ya da sütun bul: toplamı sana verir. Sonra iki sayısı belli olan çizgiyi tamamla.' },
-    { id: 'liar', area: 'sozel', name: 'Yalancı mı, Doğrucu mu?', desc: 'Kim doğru söylüyor?', tip: 'Birinin doğru söylediğini varsay ve söylediklerini kontrol et. Çelişki çıkarsa o kişi yalan söylüyordur.' },
     { id: 'sudoku', area: 'sozel', name: 'Mini Sudoku', desc: 'Her renk bir kez', tip: 'Soru işaretinin satırına ve sütununa bak: orada olan renkler olamaz. Kutudaki renkleri de ele.' },
-    { id: 'maze', area: 'sozel', name: 'Kapılardan Geçiş', desc: 'Kaç farklı yol var?', tip: 'Her odaya kaç yoldan gelinebildiğini soldan sağa yaz. Bir odanın sayısı, ona gelen odaların sayılarının toplamıdır.' },
-    { id: 'back', area: 'sayisal', name: 'Geriye Doğru', desc: 'Sondan başa doğru çöz', tip: 'Sonuçtan başla ve her işlemin tersini yap: ekleneni çıkar, çarpılanı böl, yarısını alınanı iki ile çarp.' },
-    { id: 'cook', area: 'sayisal', name: 'Ocak Planı', desc: 'İki ocakta en kısa süre', tip: 'Yemekleri iki ocağa süreler birbirine yakın olacak şekilde böl. Toplam süre, uzun süren ocağın bitişidir.' },
-    { id: 'sticks', area: 'uzamsal', name: 'Çubukla Kare', desc: 'Hangi takım kare yapar?', tip: 'Önce toplam uzunluğu 4\'e böl: bir kenarın uzunluğu çıkar. Sonra çubukları uç uca ekleyip o uzunluğu yapıp yapamadığına bak.' },
-    { id: 'dots', area: 'uzamsal', name: 'Noktalı Kâğıt', desc: 'Noktalardan kaç kare çıkar?', tip: 'Önce düz kareleri say. Sonra eğik kareleri unutma: bir kenarı "bir sağa, bir yukarı" gibi eğik giden kareler de var.' },
-    { id: 'flip', area: 'uzamsal', name: 'Kartı Çevir', desc: 'Çevirince ne görünür?', tip: 'Sağ ya da sol kenardan çevirmek resmi sağ-sol ters yapar. Üst ya da alt kenardan çevirmek aşağı-yukarı ters yapar.' },
     { id: 'cipher', area: 'sozel', name: 'Harf Şifresi', desc: 'Şifre kuralını bul', tip: 'Örnekte her harfin yerine hangi harfin yazıldığına bak. Aynı kuralı alfabeyi sayarak yeni kelimeye uygula.' },
     { id: 'equiv', area: 'sayisal', name: 'Figürsel Eşitlik', desc: 'Şekillerle denge kur', tip: 'Her şekle bir sayı değeri ver ve eşitlikleri tutturmaya çalış. Sonra son eşitliğin sol tarafının değerini bul.' },
-    { id: 'order', area: 'sozel', name: 'Sıralama', desc: 'Kim önde, kim arkada?', tip: 'Okuduğun her cümlede isimleri sıraya diz. Parmaklarını kullanabilirsin.' },
     { id: 'path', area: 'sozel', name: 'Ok Yolu', desc: 'Okları takip et', tip: 'Parmağını başlangıç karesine koy ve her ok için bir kare ilerle.' },
     { id: 'balance', area: 'sozel', name: 'Terazi', desc: 'Hangisi daha ağır?', tip: 'Terazinin aşağı inen kefesi daha ağırdır. Şekilleri ağırdan hafife doğru sıraya diz.' },
-    { id: 'who', area: 'sozel', name: 'Kim Hangisi?', desc: 'İpuçlarıyla eşleştir', tip: 'Kesin bildiklerini önce yerleştir. Sonra "değil" diyen ipuçlarıyla kalanları ele.' },
   ];
   Bilsem.catById = function (id) { return Bilsem.CATS.find((c) => c.id === id); };
   Bilsem.LEVELS = [1, 2, 3, 4];

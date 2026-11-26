@@ -1,7 +1,7 @@
 # Enes BİLSEM'e Hazırlanıyor
 
 2. ve 3. sınıf için BİLSEM genel zihinsel yetenek sınavına hazırlık uygulaması.
-38 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
+28 soru türü, her biri dört kademede (Kolay, Orta, Zor, En Zor), ayrıca bir Sayı Hafızası
 bölümü. Sorular hazır bir havuzdan gelmez; her seferinde yeniden üretilir, bu
 yüzden ezberlenemez.
 
@@ -73,10 +73,10 @@ uzunluğu bu yüzden seçilebilir bırakıldı.
 | Alan | Türler |
 |---|---|
 | Şekil Bulmacaları | Şekil Örüntüsü, Şekil Tablosu, Şekil Benzetmesi, Farklı Olan, Desen Tamamlama, Şeffaf Kâğıt, Simetri |
-| Döndür ve Hayal Et | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
-| Sayı Bulmacaları | Sayı Örüntüsü, Meyve İşlemleri, Şifre Çözme, Sayı Makinesi, Sihirli Kare, Geriye Doğru, Ocak Planı, Figürsel Eşitlik |
+| Döndür ve Hayal Et | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş |
+| Sayı Bulmacaları | Sayı Örüntüsü, Meyve İşlemleri, Şifre Çözme, Sayı Makinesi, Figürsel Eşitlik |
 | Dikkat ve Hafıza | Aynısını Bul, Şekil Sayma, Görsel Hafıza, Gölge Bulma |
-| Mantık Yürütme | Sıralama, Ok Yolu, Terazi, Kim Hangisi?, Yalancı mı Doğrucu mu?, Mini Sudoku, Kapılardan Geçiş, Harf Şifresi |
+| Mantık Yürütme | Ok Yolu, Terazi, Mini Sudoku, Harf Şifresi |
 
 ## Kademeler
 
@@ -93,7 +93,6 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Sayı Makinesi | ekleme, çıkarma, 2 katı | 2 katı ± 1, 3 katı | 3 katı ± 1, kendisiyle çarpma, yarısı | iki sayı girer, bir sayı çıkar |
 | Terazi | 4 şekil, en ağır ya da en hafif | 4–5 şekil sıralanır | 6 şekil, "kaç şekil daha ağır?" | dengede duran terazilerle "kaç tane eder?" |
 | Ok Yolu | 5×5 alan, 5–6 ok | 5×5 alan, 6–8 ok, yol seçme | 6×6 alan, tekrar sayılı oklar | baktığı yöne göre komut alan robot |
-| Kim Hangisi? | 3 kişi, 2 ipucu | 3–4 kişi, "değil" ipuçları | 4 kişi, en az sayıda ipucu | "ne … ne …" ve "ya … ya da …" ipuçları |
 | Desen Tamamlama | 6×6 desende 2×2 boşluk; 2 renkli yinelenen kalıp | 3 renkli ya da 3×3 kalıp | çapraz çizgiler; ortadan aynalanmış desen | 6×6 çeyrek tur simetrisi; 8×8 desende 3×3 boşluk, aynalama ya da çeyrek tur |
 | Şeffaf Kâğıt | 3×3, iki kâğıt | 4×4, iki kâğıt | 3×3, kâğıdın biri çevrilir | 4×4, iki ya da üç kâğıt; çeyrek, yarım tur ya da ters yöne çevirme |
 | Küp Devirme | alt yüz ya da bir devirme sonrası üst yüz (karşılıklı yüzlerden) | bir devirme; üst, sağ ya da sol yüz | iki devirme | üç devirme |
@@ -101,22 +100,13 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Küp Açılımı | hangi açılım küp olur? (bariz yanlış çeldiriciler) | aynısı, inandırıcı çeldiricilerle | verilen renkli açılımda karşı yüzün rengi | 7 kareden hangisi çıkarılırsa açılım olur (Kangaroo tarzı) |
 | Katla ve Deş | 4×4 kâğıt, bir katlama, 1 delik | 6×6 kâğıt, bir katlama, 2 delik | iki katlama (dikey sonra yatay), 1–2 delik | 6×6, iki katlama, 2–3 delik |
 | Simetri | 4×4, dikey ayna çizgisi, yarıyı tamamla | 6×6, dikey ya da yatay çizgi | 5×5, çapraz ayna çizgisi | kaç simetri ekseni var? (0–4; yalnızca dönme simetrisi olan şekiller de var) |
-| Sihirli Kare | 3×3, 1–11 arası sayılar, toplam verilir, 1 gizli | daha büyük sayılar, toplam verilir | toplam verilmez, 2 gizli sayı | toplam verilmez, 3 gizli sayı |
-| Yalancı mı Doğrucu mu? | 3 çocuk; "X doğru/yalan söylüyor", "hepimiz yalanız" | 3 çocuk; "ben ve X yalan söylüyoruz" gibi ikili ifadeler | 4 çocuk; "aramızda tam bir yalancı var" | 4 çocuk; tüm ifade türleri |
 | Mini Sudoku | 3×3, 3 renk, 4 boş kare | 4×4, her satır ve sütunda 4 renk | 4×4, 2×2 kutular da | 4×4 kutulu, çok az ipucu |
-| Kapılardan Geçiş | 3 katlı labirent, 4–6 yol | 3×3'lük labirent, kaç farklı yol? | 4 katlı labirent | 5 katlı, her katta 3 oda |
-| Ocak Planı | 4 yemek, 2 ocak, en kısa süre | 5 yemek | 5 yemek; sırayla ocağa koymak yanlış sonuç verir | 6 yemek |
-| Çubukla Kare | 1 cm ve 3 cm'lik çubuklar | daha çok çubuk | 2 cm ve 3 cm; toplamı 4'e bölünür ama kare olmayan çeldirici | 2 cm ve 5 cm |
-| Noktalı Kâğıt | 3×3 nokta, kaç kare (eğik kareler dâhil)? | 4×3 nokta | 4×4 noktada bazıları eksik | 4×4; kaç farklı büyüklükte kare? |
-| Geriye Doğru | tek işlem | iki işlem | üç işlem (yarısı, çarpma dâhil) | dört işlem ya da robotun kafaları (3 kesişte 1 kafa uzar) |
-| Kartı Çevir | sağ ya da üst kenardan çevrilince görünen yüz verilir; öbür eksenden çevirsek? | karşı kenar da olabilir (aynı görüntü) | 4×4 resim, 3 çevirme dizisi | 4×4 resim, 5 çevirme dizisi |
 | Harf Şifresi | örnek kelimeden kural çıkar: alfabede 1 ileri ya da geri kayma | 2–3 harf kayma | alfabeyi tersten yazma (A yerine Z) ya da kayma ve tersten yazma | kayma ya da ters alfabe, ayrıca kelime tersten yazılır |
 | Figürsel Eşitlik | iki şekil, bir eşitlik | iki şekil, iki eşitlik | üç şekil, iki eşitlik | üç şekil, üç eşitlik; her şekil sayısı 9'a kadar değer alabilir |
 
 3. sınıf için eklenen beş türde (Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı) En Zor kademe 3. sınıf düzeyindedir; Kolay kademe 2. sınıfa da uygundur. Sınıf seçimi yoktur: tüm türler tek havuzda, kademeler ilerlemeye göre otomatik önerilir.
-Yalancı mı Doğrucu mu?, Sihirli Kare ve Mini Sudoku'da bulmacanın tek çözümlü olduğu üretimde denetlenir. Cevaplar kuraldan hesaplanır: Küp Devirme'de küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
+Mini Sudoku'da bulmacanın tek çözümlü olduğu üretimde denetlenir. Cevaplar kuraldan hesaplanır: Küp Devirme'de küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
 
-Öncüllü sorularda (Kim Hangisi?, Sıralama) soru cümlesi öncüllerin altında gösterilir.
 
 Sayı Hafızası'nın düzeyleri ayrıdır (Kolay, Orta, Zor) ve yalnızca süreyi belirler.
 
@@ -142,16 +132,14 @@ sürümün hangisi olduğunu gösterir.
 
 Testler her soru türünü her seviyede yüzlerce kez üretip şunları denetler:
 şıklar birbirinden farklı mı, tek doğru cevap var mı, açıklama dolu mu, doğru
-cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu, sıralama, terazi ve
-"Kim Hangisi?" gibi türlerde cevabın gerçekten doğru olduğu ayrıca hesaplanır.
+cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu ve terazi gibi türlerde cevabın gerçekten doğru olduğu ayrıca hesaplanır.
 
 | Dosya | Görev |
 |---|---|
 | `js/core.js` | Tohumlu rastgele sayı üreteci, kategori listesi, şık yardımcıları |
 | `js/shapes.js` | Şekil, kareli şekil ve küp çizimleri (SVG metni; DOM gerekmez) |
 | `js/gen-*.js` | Soru üreticileri: `Bilsem.GEN[tür](rng, kademe)`; kademe 1–4 |
-| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
-| `js/gen-sinif3c.js` | Kangaroo tarzı türler: Kapılardan Geçiş, Ocak Planı, Çubukla Kare, Noktalı Kâğıt, Geriye Doğru, Kartı Çevir |
+| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı, Katla ve Deş |
 | `js/gen-bilsem.js` | BİLSEM'in resmî tiplerinden: Harf Şifresi, Figürsel Eşitlik |
 | `js/span.js` | Sayı Hafızası: sayı üretimi ve oyun kuralları |
 | `js/store.js` | Yıldızlar, gün serisi, konu istatistikleri, rekorlar (`localStorage`) |

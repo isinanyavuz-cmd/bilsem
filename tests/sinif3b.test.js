@@ -56,60 +56,6 @@ test('simetri: tamamlanan yarı ayna görüntüsüdür; eksen sayısı elle say�
   });
 });
 
-test('yalancı mı doğrucu mu: tek tutarlı durum vardır ve cevap odur', () => {
-  // ifadeler üreticiden bağımsız yorumlanır
-  const truth = (s, i, t) => {
-    const liars = t.map((v, k) => (v ? -1 : k)).filter((k) => k >= 0);
-    if (s.t === 'T') return t[s.x] === true;
-    if (s.t === 'F') return t[s.x] === false;
-    if (s.t === 'bothLie') return t[i] === false && t[s.x] === false;
-    if (s.t === 'bothTrue') return t[i] === true && t[s.x] === true;
-    if (s.t === 'atLeast') return liars.length >= 1;
-    if (s.t === 'one') return liars.length === 1;
-    if (s.t === 'all') return liars.length === t.length;
-    throw new Error(s.t);
-  };
-  forEach('liar', (q) => {
-    const m = q.meta, n = m.stmts.length, sols = [];
-    for (let mask = 0; mask < (1 << n); mask++) {
-      const t = Array.from({ length: n }, (_, i) => (mask >> i) % 2 === 1);
-      // doğru söyleyenin ifadesi doğru, yalan söyleyenin ifadesi yanlış olmalı
-      if (m.stmts.every((s, i) => truth(s, i, t) === t[i])) sols.push(t);
-    }
-    assert.strictEqual(sols.length, 1);
-    assert.deepStrictEqual(sols[0], m.sol);
-    const names = Array.from(q.stem.matchAll(/<b>\S+ ([^:<]+):<\/b>/g)).map((x) => x[1]);
-    assert.strictEqual(names.length, n);
-    const liars = m.sol.filter((v) => !v).length;
-    if (m.mode === 'count') assert.strictEqual(q.options[q.answer].value, liars);
-    else {
-      const who = m.mode === 'who-true' ? m.sol.indexOf(true) : m.sol.indexOf(false);
-      assert.strictEqual(correctKey(q), 'p' + names[who]);
-      assert.strictEqual(m.sol.filter((v) => v === (m.mode === 'who-true')).length, 1);
-    }
-    for (const s of m.stmts) assert.ok(s.x >= 0 && s.x < n);
-    m.stmts.forEach((s, i) => assert.ok(s.x !== i || !/T|F|bothLie|bothTrue/.test(s.t)));
-  });
-});
-
-test('sihirli kare: kare gerçekten sihirli, gizli sayılar tek çözümlü (1-60 arası tüm sayılar denenir)', () => {
-  const sums = (g) => [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]].map((l) => l.reduce((a, i) => a + g[i], 0));
-  forEach('magic', (q, lv) => {
-    const m = q.meta, g = m.grid;
-    assert.ok(new Set(sums(g)).size === 1 && sums(g)[0] === m.sum);
-    assert.strictEqual(q.options[q.answer].value, g[m.tgt]);
-    assert.strictEqual(m.hid.length, [0, 1, 1, 2, 3][lv]);
-    // gizli hücrelere olası tüm değerler denenir: sihirli kareyi bozmayanlar sayılır
-    const hid = m.hid, cur = g.slice(), found = new Set();
-    const go = (k) => {
-      if (k === hid.length) { if (new Set(sums(cur)).size === 1) found.add(cur[m.tgt]); return; }
-      for (let v = 1; v <= 60; v++) { cur[hid[k]] = v; go(k + 1); }
-    };
-    go(0);
-    assert.deepStrictEqual(Array.from(found), [g[m.tgt]]);
-  }, 40);
-});
-
 test('mini sudoku: bulmaca tek çözümlü, cevap o çözümdeki renk', () => {
   forEach('sudoku', (q) => {
     const m = q.meta, n = m.n, g = m.puzzle.map((r) => r.slice());

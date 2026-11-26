@@ -1,4 +1,4 @@
-/* Sayı makinesi, gölge bulma, terazi, kim hangisi */
+/* Sayı makinesi, gölge bulma, terazi */
 (function (root) {
   'use strict';
   const B = root.Bilsem, S = B.Shapes, Q = B.Q;
@@ -232,107 +232,7 @@
   };
   function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
 
-  /* ---------- Kim Hangisi? ---------- */
-  // [ad, tamlayan hâli]
-  const KIDS = [['Ali', "Ali'nin"], ['Ayşe', "Ayşe'nin"], ['Can', "Can'ın"], ['Elif', "Elif'in"], ['Mert', "Mert'in"], ['Zeynep', "Zeynep'in"],
-    ['Efe', "Efe'nin"], ['Defne', "Defne'nin"], ['Kerem', "Kerem'in"], ['Ada', "Ada'nın"], ['Deniz', "Deniz'in"], ['Yusuf', "Yusuf'un"],
-    ['Ela', "Ela'nın"], ['Emir', "Emir'in"], ['Duru', "Duru'nun"], ['Mina', "Mina'nın"], ['Ömer', "Ömer'in"], ['Selin', "Selin'in"],
-    ['Bora', "Bora'nın"], ['Arda', "Arda'nın"], ['Asya', "Asya'nın"], ['Poyraz', "Poyraz'ın"]];
-  const NUMW = { 3: 'Üç', 4: 'Dört' };
-  // items: [resim, ad, belirtme hâli]
-  const THEMES = [
-    { items: [['🐱', 'kedi'], ['🐶', 'köpek'], ['🐦', 'kuş'], ['🐟', 'balık'], ['🐰', 'tavşan']], intro: 'arkadaşın her birinin farklı bir hayvanı var', what: 'hayvanı',
-      either: (it, a, b) => cap(it[1]) + ', ' + a[1] + ' ya da ' + b[1] + '.' },
-    { items: [['🍎', 'elma', 'elmayı'], ['🍌', 'muz', 'muzu'], ['🍓', 'çilek', 'çileği'], ['🍇', 'üzüm', 'üzümü'], ['🍉', 'karpuz', 'karpuzu']], intro: 'arkadaşın her biri farklı bir meyveyi seviyor', what: 'en sevdiği meyve',
-      either: (it, a, b) => cap(it[2]) + ' ' + a[0] + ' ya da ' + b[0] + ' seviyor.' },
-    { items: [['⚽', 'top'], ['🚲', 'bisiklet'], ['🎸', 'gitar'], ['🎈', 'balon'], ['🚀', 'roket']], intro: 'arkadaşın her birinin farklı bir oyuncağı var', what: 'oyuncağı',
-      either: (it, a, b) => cap(it[1]) + ', ' + a[1] + ' ya da ' + b[1] + '.' },
-  ];
-
-  function perms(n) {
-    const out = [];
-    (function go(a, rest) {
-      if (!rest.length) { out.push(a); return; }
-      rest.forEach((v, i) => go(a.concat([v]), rest.slice(0, i).concat(rest.slice(i + 1))));
-    })([], Array.from({ length: n }, (_, i) => i));
-    return out;
-  }
-  /* İpucu türleri: is (çocuğun eşyası bu), not (bu değil), not2 (ikisi de değil), either (eşya bu iki çocuktan birinin) */
-  function clueOk(c, p) {
-    if (c.t === 'is') return p[c.kid] === c.item;
-    if (c.t === 'not') return p[c.kid] !== c.item;
-    if (c.t === 'not2') return p[c.kid] !== c.items[0] && p[c.kid] !== c.items[1];
-    return p[c.kids[0]] === c.item || p[c.kids[1]] === c.item;
-  }
-  function solutions(n, clues) { return perms(n).filter((p) => clues.every((c) => clueOk(c, p))); }
-
-  /* Çözümü tek olan, gereksiz ipucu içermeyen bir ipucu kümesi arar. Doğru eşleşme: çocuk i -> eşya i. */
-  function searchClues(rng, n, hard) {
-    const pool = [];
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        if (j === i) continue;
-        pool.push({ t: 'not', kid: i, item: j });
-        if (hard) {
-          for (let k = j + 1; k < n; k++) if (k !== i) pool.push({ t: 'not2', kid: i, items: [j, k] });
-          pool.push({ t: 'either', item: i, kids: rng.shuffle([i, j]) });
-        }
-      }
-    }
-    const order = rng.shuffle(pool);
-    let clues = hard ? [] : [{ t: 'is', kid: rng.int(0, n - 1), item: 0 }];
-    if (!hard) clues[0].item = clues[0].kid;
-    for (const c of order) {
-      if (solutions(n, clues).length === 1) break;
-      if (solutions(n, clues.concat([c])).length < solutions(n, clues).length) clues.push(c);
-    }
-    if (solutions(n, clues).length !== 1) return null;
-    for (const c of rng.shuffle(clues)) {            // gereksizleri at
-      const rest = clues.filter((x) => x !== c);
-      if (rest.length && solutions(n, rest).length === 1) clues = rest;
-    }
-    return clues;
-  }
-
-  B.GEN.who = function (rng, level) {
-    const n = level === 1 ? 3 : level === 2 ? rng.pick([3, 4]) : 4;
-    const th = rng.pick(THEMES), kids = rng.sample(KIDS, n), items = rng.sample(th.items, n);   // çocuk i'nin eşyası items[i]
-    let clues;
-    if (level === 1) {
-      // biri doğrudan söylenir, bir "değil" ipucu kalan ikisini ayırır
-      clues = [{ t: 'is', kid: 0, item: 0 }, { t: 'not', kid: 1, item: 2 }];
-    } else if (level === 2) {
-      clues = n === 3
-        ? [{ t: 'not', kid: 0, item: 1 }, { t: 'not', kid: 0, item: 2 }, { t: 'not', kid: 1, item: 2 }]
-        : [{ t: 'is', kid: 0, item: 0 }, { t: 'is', kid: 1, item: 1 }, { t: 'not', kid: 2, item: 3 }];
-    } else {
-      clues = searchClues(rng, n, level === 4);
-      if (!clues || clues.length < 3 || clues.length > 5) throw new Error('ipucu kümesi uygun değil');
-      if (level === 4 && !clues.some((c) => c.t !== 'not')) throw new Error('ipuçları fazla düz');
-    }
-    if (solutions(n, clues).length !== 1) throw new Error('ipuçları tek çözüm vermiyor');
-    clues = rng.shuffle(clues);
-    const given = clues.filter((c) => c.t === 'is').map((c) => c.kid);
-    const ask = rng.pick(Array.from({ length: n }, (_, i) => i).filter((i) => given.indexOf(i) < 0));
-    const facts = clues.map((c) => {
-      if (c.t === 'either') return th.either(items[c.item], kids[c.kids[0]], kids[c.kids[1]]);
-      const head = kids[c.kid][1] + ' ' + th.what + ' ';
-      if (c.t === 'not2') return head + 'ne ' + items[c.items[0]][1] + ' ne ' + items[c.items[1]][1] + '.';
-      return head + items[c.item][1] + (c.t === 'is' ? '.' : ' değil.');
-    });
-    const names = rng.shuffle(items.map((it) => it[1]));   // sıra ipucu vermesin
-    const intro = NUMW[n] + ' ' + th.intro + ': ' + names.slice(0, -1).join(', ') + ' ve ' + names[n - 1] + '.';
-    const q = { prompt: kids[ask][1] + ' ' + th.what + ' hangisi?' };
-    q.stem = '<div class="story"><p>' + intro + '</p><ul>' + facts.map((f) => '<li>' + f + '</li>').join('') + '</ul></div>';
-    q.promptBelow = true;       // önce öncüller okunur, soru cümlesi altlarında durur
-    q.speech = intro + ' ' + facts.join(' ') + ' ' + q.prompt;
-    q.meta = { n: n, clues: clues, ask: ask };
-    q.explain = 'İpuçlarını tek tek eleyince: ' + kids.map((k, i) => k[0] + ' → ' + items[i][1]).join(', ') + '.';
-    const opt = (it) => ({ html: '<span class="opt-pair"><span class="opt-emoji">' + it[0] + '</span><span class="opt-cap">' + it[1] + '</span></span>', key: 'w' + it[1] });
-    return Q.finish(rng, q, opt(items[ask]), rng.shuffle(items.filter((_, i) => i !== ask)).map(opt), n);
-  };
-
-  B.ExtraUtil = { solutions: solutions, RULES1: RULES1, RULES2: RULES2 };
+  B.ExtraUtil = { RULES1: RULES1, RULES2: RULES2 };
 
   if (typeof module !== 'undefined') module.exports = B;
 })(typeof window !== 'undefined' ? window : globalThis);

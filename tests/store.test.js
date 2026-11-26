@@ -83,11 +83,11 @@ test('ilk sürüm kaydı taşınır: eski orta 1. kademe, eski zor 2. kademe olu
 });
 
 test('üç kademeli kayıt taşınır: her kademe bir yukarı kayar, altına yeni Kolay eklenir', () => {
-  const d = U.migrate({ v: 2, cats: { same: { stars: [2, 1, 0], seen: 12, skill: 2.3 }, who: { stars: [0, 0, 0], seen: 0, skill: 1 }, path: { stars: [3, 3, 3], seen: 90, skill: 3.9 } } });
+  const d = U.migrate({ v: 2, cats: { same: { stars: [2, 1, 0], seen: 12, skill: 2.3 }, odd: { stars: [0, 0, 0], seen: 0, skill: 1 }, path: { stars: [3, 3, 3], seen: 90, skill: 3.9 } } });
   assert.strictEqual(d.v, 3);
   assert.deepStrictEqual(d.cats.same.stars, [0, 2, 1, 0]);
   assert.strictEqual(d.cats.same.skill, 3.3);
-  assert.strictEqual(d.cats.who.skill, 1, 'hiç çözülmemiş konu yeni Kolay kademeden başlar');
+  assert.strictEqual(d.cats.odd.skill, 1, 'hiç çözülmemiş konu yeni Kolay kademeden başlar');
   assert.deepStrictEqual(d.cats.path.stars, [0, 3, 3, 3]);
   assert.strictEqual(d.cats.path.skill, 4.9);
   assert.deepStrictEqual(U.migrate({ v: 3, x: 1 }), { v: 3, x: 1 }, 'güncel kayıt değişmez');
@@ -126,4 +126,15 @@ test('sayı hafızası: düzeylerden önceki rekorlar Kolay düzeye geçer ve 7 
   assert.deepStrictEqual(again, n, 'yeni biçim değişmeden kalır');
   assert.deepStrictEqual(U.normalizeSpan(undefined, 7), U.blank().span);
   assert.deepStrictEqual([U.blank().settings.spanStart, U.blank().settings.spanLevel], [3, 1]);
+});
+
+test('kaldırılmış kategorilerin kayıtları yüklenirken atılır ve toplamlara karışmaz', () => {
+  const S = B.Store;
+  const raw = JSON.stringify({ v: 3, cats: {
+    cubes: { stars: [1, 0, 0, 0], seen: 4, ok: 3, ms: 10, recent: [1], skill: 1 },
+    liar: { stars: [3, 3, 3, 3], seen: 99, ok: 99, ms: 1, recent: [1], skill: 4 },
+  }, days: {}, exams: [] });
+  assert.strictEqual(S.hydrate(raw), true);
+  assert.deepStrictEqual(Object.keys(S.data.cats), ['cubes']);
+  assert.strictEqual(S.totalStars(), 1);
 });

@@ -1,71 +1,7 @@
-/* Mantık yürütme: sıralama, ok yolu */
+/* Mantık yürütme: ok yolu */
 (function (root) {
   'use strict';
   const B = root.Bilsem, S = B.Shapes, Q = B.Q, r1 = S.r1;
-
-  /* ---------- Sıralama ---------- */
-  // [ad, ayrılma hâli] — ek, ünlü ve ünsüz uyumuna göre elle yazıldı
-  const NAMES = [['Ali', "Ali'den"], ['Ayşe', "Ayşe'den"], ['Can', "Can'dan"], ['Elif', "Elif'ten"], ['Mert', "Mert'ten"], ['Zeynep', "Zeynep'ten"],
-    ['Efe', "Efe'den"], ['Defne', "Defne'den"], ['Kerem', "Kerem'den"], ['Ada', "Ada'dan"], ['Deniz', "Deniz'den"], ['Yusuf', "Yusuf'tan"],
-    ['Ela', "Ela'dan"], ['Emir', "Emir'den"], ['Duru', "Duru'dan"], ['Mina', "Mina'dan"], ['Ömer', "Ömer'den"], ['Selin', "Selin'den"],
-    ['Bora', "Bora'dan"], ['Arda', "Arda'dan"], ['Asya', "Asya'dan"], ['Poyraz', "Poyraz'dan"]];
-  const ATTRS = [
-    { intro: 'Çocukların boyları birbirinden farklı.', more: 'uzun', less: 'kısa', most: 'En uzun kim?', least: 'En kısa kim?', from: 'en uzundan', to: 'en kısaya' },
-    { intro: 'Çocuklar koşu yarışı yaptı.', more: 'hızlı', less: 'yavaş', most: 'En hızlı kim?', least: 'En yavaş kim?', from: 'en hızlıdan', to: 'en yavaşa' },
-    { intro: 'Çocukların yaşları birbirinden farklı.', more: 'büyük', less: 'küçük', most: 'Yaşı en büyük olan kim?', least: 'Yaşı en küçük olan kim?', from: 'en büyükten', to: 'en küçüğe' },
-    { intro: 'Çocuklar sırayla tartıldı.', more: 'ağır', less: 'hafif', most: 'En ağır kim?', least: 'En hafif kim?', from: 'en ağırdan', to: 'en hafife' },
-  ];
-
-  B.GEN.order = function (rng, level) {
-    const n = level === 1 ? 4 : level === 2 ? rng.pick([4, 5]) : level === 3 ? 5 : 6;
-    const kids = rng.sample(NAMES, n);            // 0 en çok (en uzun, en hızlı…), sonuncu en az
-    const at = rng.pick(ATTRS), facts = [], pairs = [];
-    const simple = (hi, lo) => {
-      pairs.push([hi, lo]);
-      return rng.chance(0.5) ? kids[lo][0] + ', ' + kids[hi][1] + ' ' + at.less + '.' : kids[hi][0] + ', ' + kids[lo][1] + ' ' + at.more + '.';
-    };
-    // komşu çiftlerin hepsi söylenir; üst düzeylerde bazıları tek cümlede birleşir ("... ama ...")
-    for (let i = 0; i < n - 1;) {
-      if (level > 2 && i + 1 < n - 1 && rng.chance(0.55)) {
-        pairs.push([i, i + 1], [i + 1, i + 2]);
-        facts.push(kids[i + 1][0] + ', ' + kids[i][1] + ' ' + at.less + ' ama ' + kids[i + 2][1] + ' ' + at.more + '.');
-        i += 2;
-      } else { facts.push(simple(i, i + 1)); i += 1; }
-    }
-    if (level > 2) { const a = rng.int(0, n - 3); facts.push(simple(a, rng.int(a + 2, n - 1))); }   // gereksiz ama doğru bir ipucu
-    const list = rng.shuffle(facts);
-
-    const ask = rng.pick([null, ['end'], ['rank', 'rank', 'end'], ['rank', 'count'], ['count', 'count', 'between', 'rank']][level]);
-    const q = { promptBelow: true, meta: { order: kids.map((k) => k[0]), pairs: pairs, ask: ask } };   // soru cümlesi öncüllerin altında durur
-    q.explain = at.from.charAt(0).toUpperCase() + at.from.slice(1) + ' ' + at.to + ' sıralama: ' + kids.map((k) => k[0]).join(', ') + '.';
-    let idx;
-    if (ask === 'count') {
-      const r = rng.int(0, n - 1), more = rng.chance(0.5), ans = more ? r : n - 1 - r;
-      q.prompt = kids[r][1] + ' ' + (more ? at.more : at.less) + ' kaç çocuk var?';
-      q.meta.answer = ans;
-      q.stem = story(at.intro, list);
-      q.speech = at.intro + ' ' + list.join(' ') + ' ' + q.prompt;
-      return Q.finishNum(rng, q, ans, { min: 0, max: n - 1 });
-    }
-    if (ask === 'end') {
-      idx = rng.chance(0.5) ? 0 : n - 1;
-      q.prompt = idx === 0 ? at.most : at.least;
-    } else if (ask === 'between') {
-      idx = rng.int(1, n - 2);
-      q.prompt = 'Sıralamada ' + kids[idx - 1][0] + ' ile ' + kids[idx + 1][0] + ' arasında kim var?';
-    } else {
-      idx = rng.int(1, n - 2);
-      q.prompt = 'Çocuklar ' + at.from + ' ' + at.to + ' doğru sıralanırsa ' + (idx + 1) + '. sırada kim olur?';
-    }
-    q.meta.answer = kids[idx][0];
-    q.stem = story(at.intro, list);
-    q.speech = at.intro + ' ' + list.join(' ') + ' ' + q.prompt;
-    const banned = ask === 'between' ? [idx - 1, idx, idx + 1] : [idx];
-    return Q.finish(rng, q, Q.text(kids[idx][0]), rng.shuffle(kids.filter((_, i) => banned.indexOf(i) < 0)).map((k) => Q.text(k[0])), Math.min(4, n - banned.length + 1));
-  };
-  function story(intro, facts) {
-    return '<div class="story"><p>' + intro + '</p><ul>' + facts.map((f) => '<li>' + f + '</li>').join('') + '</ul></div>';
-  }
 
   /* ---------- Ok Yolu ---------- */
   const ITEMS = [['🥕', 'havuca'], ['🍎', 'elmaya'], ['🧀', 'peynire'], ['🍌', 'muza'], ['🍓', 'çileğe'], ['🌽', 'mısıra'], ['🍇', 'üzüme'], ['🍉', 'karpuza']];
@@ -217,7 +153,7 @@
     return Q.finish(rng, q, mk(steps), inside.concat(outside));
   };
 
-  B.LogicUtil = { walk: walk, NAMES: NAMES };
+  B.LogicUtil = { walk: walk };
 
   if (typeof module !== 'undefined') module.exports = B;
 })(typeof window !== 'undefined' ? window : globalThis);
