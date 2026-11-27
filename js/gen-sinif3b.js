@@ -1,4 +1,4 @@
-/* 3. sınıf türleri, ikinci tur: Katlama, Simetri, Yalancı–Doğrucu, Sihirli Kare, Mini Sudoku.
+/* 3. sınıf türleri, ikinci tur: Katlama, Simetri, Mini Sudoku.
    Her sorunun cevabı kuraldan hesaplanır; bulmacalarda çözümün tek olduğu üretimde denetlenir. */
 (function (root) {
   'use strict';
@@ -67,19 +67,29 @@
     inner += '<path d="M' + (14 + A + 8) + ' ' + r1(oy + A / 2) + 'h' + (gap - 16) + 'm-7 -7l7 7l-7 7" fill="none" stroke="#566889" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>';
     inner += paperDraw(fr, fc, cs, folded, 14 + A + gap, oy + (A - fr * cs) / 2);
     const q = { stem: S.svg(W, H, inner, { maxW: Math.min(W * 1.25, 420) }) };
-    q.prompt = 'Kâğıt turuncu çizgiden' + (two ? 'ler sırayla' : '') + ' katlanıp delikler açılıyor. Kâğıt tekrar açılınca nasıl görünür?';
+    q.prompt = 'Kâğıt turuncu çizgi' + (two ? 'lerden sırayla' : 'den') + ' katlanıp delikler açılıyor. Kâğıt tekrar açılınca nasıl görünür?';
     q.meta = { N: N, vf: vf, hf: hf, R0: R0, C0: C0, folded: folded, holes: correct };
     q.explain = 'Katlanmış kâğıttaki her delik, açılınca katlama çizgisinin öbür yanında ayna görüntüsüyle de çıkar. ' + (two ? 'İki kez katlandığı için her delik dört yerde görünür.' : 'Bir kez katlandığı için her delik iki yerde görünür.') + ' Toplam ' + correct.length + ' delik olur.';
     const mk = (cells) => ({ html: S.svg(100, 100, paperDraw(N, N, 82 / N, cells, 9, 9), { cls: 'opt-svg' }), key: 'f' + cellKey(cells) });
     const ds = [actual, unfold(actual, vf, false), unfold(actual, false, hf)];
     ds.push(uniq(actual.concat(actual.map((c) => [N - 1 - c[0], N - 1 - c[1]]))));       // aynalama yerine yarım tur çevirme
     ds.push(uniq(actual.concat(actual.map((c) => [c[1], c[0]]))));                          // köşegen yansıması
-    for (let t = 0; t < 8; t++) {                                                          // doğru açılmışın bir deliği kaymış
-      const c = correct.map((h) => h.slice()), i = rng.int(0, c.length - 1), d = rng.pick([[0, 1], [1, 0], [0, -1], [-1, 0]]);
+    const shift = (cells) => {                                                              // doğru açılmışın bir deliği kaymış
+      const c = cells.map((h) => h.slice()), i = rng.int(0, c.length - 1), d = rng.pick([[0, 1], [1, 0], [0, -1], [-1, 0]]);
       const nr = c[i][0] + d[0], nc = c[i][1] + d[1];
-      if (nr >= 0 && nc >= 0 && nr < N && nc < N) { c[i] = [nr, nc]; ds.push(uniq(c)); }
-    }
-    return Q.finish(rng, q, mk(correct), rng.shuffle(ds).map(mk));
+      if (nr < 0 || nc < 0 || nr >= N || nc >= N) return null;
+      c[i] = [nr, nc];
+      return uniq(c);
+    };
+    // Doğru açılım tüm yansımaları içerdiğinden en çok deliği olan şık olurdu. Fazladan delikli çeldiriciler de var:
+    // bir yansıma fazladan uygulanmış ya da bir delik fazladan sayılmış hâller.
+    const extra = [uniq(correct.concat(correct.map((c) => [N - 1 - c[0], N - 1 - c[1]]))), uniq(correct.concat(correct.map((c) => [c[1], c[0]])))];
+    if (!two) extra.push(unfold(actual, true, true));
+    for (let t = 0; t < 4; t++) { const c = [rng.int(0, N - 1), rng.int(0, N - 1)]; extra.push(uniq(correct.concat([c]))); }
+    const more = rng.shuffle(extra.filter((c) => c.length > correct.length));
+    const spread = Q.spread(rng, correct, shift, cellKey, { pool: ds });
+    for (let t = 0; t < 8; t++) { const x = shift(correct); if (x) spread.push(x); }
+    return Q.finish(rng, q, mk(correct), spread.slice(0, 3).concat(more.slice(0, 3), spread.slice(3), rng.shuffle(ds), more.slice(3)).map(mk));
   };
 
   /* ---------- Simetri ---------- */
@@ -145,150 +155,24 @@
     q.explain = 'Ayna çizgisinin bir yanındaki her kare, öbür yanda çizgiye aynı uzaklıkta yansır. Çizgiye yakın kareler yine çizgiye yakın kalır.';
     const mk = (m) => ({ html: S.svg(100, 100, G.draw(m, pal, 9, 9, 82), { cls: 'opt-svg' }), key: 'y' + G.key(m) });
     const ds = DIH.map((d) => { const m = given.map((row) => row.slice()); for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const s = d(r, c, N); m[r][c] = inGiven(s[0], s[1]) ? given[s[0]][s[1]] : 0; } return m; });
-    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const m = full.map((row) => row.slice()); m[r][c] = 1 - m[r][c]; ds.push(m); }
-    return Q.finish(rng, q, mk(full), rng.shuffle(ds).map(mk));
-  };
-
-  /* ---------- Yalancı mı, Doğrucu mu? ---------- */
-  const PEOPLE = [['👦', 'Ali'], ['👧', 'Ayşe'], ['🧒', 'Can'], ['👧', 'Elif'], ['👦', 'Mert'], ['👧', 'Zeynep'], ['👦', 'Efe'], ['👧', 'Defne']];
-  /* t: durum (herkesin doğru söyleyip söylemediği); i: konuşan kişi */
-  function holds(s, i, t) {
-    const n = t.length, liars = t.filter((v) => !v).length;
-    switch (s.t) {
-      case 'T': return t[s.x];
-      case 'F': return !t[s.x];
-      case 'bothLie': return !t[i] && !t[s.x];
-      case 'bothTrue': return t[i] && t[s.x];
-      case 'atLeast': return liars >= 1;
-      case 'one': return liars === 1;
-      case 'all': return liars === n;
-      default: throw new Error('bilinmeyen ifade');
-    }
-  }
-  function consistent(stmts) {
-    const n = stmts.length, out = [];
-    for (let mask = 0; mask < (1 << n); mask++) {
-      const t = Array.from({ length: n }, (_, i) => !!(mask & (1 << i)));
-      if (stmts.every((s, i) => holds(s, i, t) === t[i])) out.push(t);
-    }
-    return out;
-  }
-  const says = (s, names) => ({
-    T: () => names[s.x] + ' doğru söylüyor.',
-    F: () => names[s.x] + ' yalan söylüyor.',
-    bothLie: () => 'Ben ve ' + names[s.x] + ' yalan söylüyoruz.',
-    bothTrue: () => 'Ben ve ' + names[s.x] + ' doğru söylüyoruz.',
-    atLeast: () => 'Aramızda en az bir yalancı var.',
-    one: () => 'Aramızda tam bir yalancı var.',
-    all: () => 'Hepimiz yalan söylüyoruz.',
-  }[s.t]());
-
-  B.GEN.liar = function (rng, level) {
-    const n = level <= 2 ? 3 : 4, kinds = [null, ['T', 'F', 'all', 'atLeast'], ['T', 'F', 'bothLie', 'bothTrue'], ['T', 'F', 'bothLie', 'bothTrue', 'atLeast', 'one'], ['T', 'F', 'bothLie', 'bothTrue', 'atLeast', 'one', 'all']][level];
-    let stmts, sol;
-    for (let t = 0; ; t++) {
-      if (t > 3000) throw new Error('tek çözümlü ifadeler bulunamadı');
-      stmts = Array.from({ length: n }, (_, i) => {
-        const type = rng.pick(kinds);
-        let x;
-        do { x = rng.int(0, n - 1); } while (x === i);
-        return { t: type, x: x };
-      });
-      if (!stmts.some((s) => s.t !== 'T' && s.t !== 'F')) continue;      // yalnızca "X doğru/yalan" cümleleriyle çözüm hep çift çıkar: bir çapa gerekir
-      const all = consistent(stmts);
-      if (all.length === 1) { sol = all[0]; break; }
-    }
-    const people = rng.sample(PEOPLE, n), names = people.map((p) => p[1]);
-    const li = stmts.map((s, i) => '<li><b>' + people[i][0] + ' ' + names[i] + ':</b> “' + says(s, names) + '”</li>').join('');
-    const intro = 'Doğru söyleyen çocuk her zaman doğru söyler, yalan söyleyen çocuk her zaman yalan söyler. ' + n + ' çocuk konuşuyor:';
-    const nT = sol.filter(Boolean).length, nL = n - nT;
-    const opt = (i) => ({ html: '<span class="opt-pair"><span class="opt-emoji">' + people[i][0] + '</span><span class="opt-cap">' + names[i] + '</span></span>', key: 'p' + names[i] });
-    const q = { stem: '<div class="story"><p>' + intro + '</p><ul>' + li + '</ul></div>', promptBelow: true };
-    let mode;
-    if (nT === 1) mode = 'who-true'; else if (nL === 1) mode = 'who-liar'; else mode = 'count';
-    q.meta = { stmts: stmts, sol: sol, mode: mode };
-    q.explain = 'Her çocuğun doğru ya da yalan söylediğini denedik; hiçbir çelişki çıkmayan tek durum bu: ' + names.map((nm, i) => nm + (sol[i] ? ' doğru' : ' yalan') + ' söylüyor').join(', ') + '.';
-    q.speech = intro + ' ' + stmts.map((s, i) => names[i] + ': ' + says(s, names)).join(' ');
-    if (mode === 'count') {
-      q.prompt = 'Kaç çocuk yalan söylüyor?';
-      q.speech += ' ' + q.prompt;
-      return Q.finishNum(rng, q, nL, { min: 0, max: n });
-    }
-    const who = mode === 'who-true' ? sol.findIndex(Boolean) : sol.findIndex((v) => !v);
-    q.prompt = mode === 'who-true' ? 'Hangi çocuk doğru söylüyor?' : 'Hangi çocuk yalan söylüyor?';
-    q.speech += ' ' + q.prompt;
-    return Q.finish(rng, q, opt(who), rng.shuffle(Array.from({ length: n }, (_, i) => i).filter((i) => i !== who)).map(opt), n);
-  };
-
-  /* ---------- Sihirli Kare ---------- */
-  /* Her 3×3 sihirli kare: orta sayı c, iki ayar a ve b ile. Katsayılar [c, a, b]. */
-  const MAGIC = [[[1, 1, 0], [1, -1, -1], [1, 0, 1]], [[1, -1, 1], [1, 0, 0], [1, 1, -1]], [[1, 0, -1], [1, 1, 1], [1, -1, 0]]];
-  const magicVal = (c, a, b, r, k) => MAGIC[r][k][0] * c + MAGIC[r][k][1] * a + MAGIC[r][k][2] * b;
-  const LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
-  const LINE_NAME = ['1. satır', '2. satır', '3. satır', '1. sütun', '2. sütun', '3. sütun', 'sol üstten sağ alta köşegen', 'sağ üstten sol alta köşegen'];
-
-  /* Görünen kareleri sağlayan, tüm hücreleri pozitif tamsayı olan bütün sihirli karelerde hedef hücrenin alabileceği değerler */
-  function possibleValues(vis, target) {
-    const out = new Set();
-    for (let a = -30; a <= 30; a++) for (let b = -30; b <= 30; b++) {
-      // c, görünen ilk hücreden bulunur
-      const f = Object.keys(vis)[0], fr = Math.floor(f / 3), fk = f % 3, c = vis[f] - (magicVal(0, a, b, fr, fk));
-      let ok = true;
-      for (let i = 0; i < 9 && ok; i++) { const v = magicVal(c, a, b, Math.floor(i / 3), i % 3); if (v < 1 || (vis[i] != null && vis[i] !== v)) ok = false; }
-      if (ok) out.add(magicVal(c, a, b, Math.floor(target / 3), target % 3));
-    }
-    return out;
-  }
-
-  B.GEN.magic = function (rng, level) {
-    const hidden = [0, 1, 1, 2, 3][level];
-    let grid, hid, tgt, sum, steps;
-    for (let t = 0; ; t++) {
-      if (t > 600) throw new Error('sihirli kare üretilemedi');
-      const c = level === 1 ? rng.int(5, 7) : rng.int(7, 22), a = rng.int(1, level === 1 ? 4 : 7) * rng.pick([1, -1]), b = rng.int(1, level === 1 ? 4 : 7) * rng.pick([1, -1]);
-      grid = Array.from({ length: 9 }, (_, i) => magicVal(c, a, b, Math.floor(i / 3), i % 3));
-      if (new Set(grid).size !== 9 || grid.some((v) => v < 1 || v > 60)) continue;
-      if (level === 1 && !(Math.max.apply(null, grid) <= 11)) continue;
-      hid = rng.sample([0, 1, 2, 3, 4, 5, 6, 7, 8], hidden);
-      tgt = hid[0];
-      const vis = {};
-      grid.forEach((v, i) => { if (hid.indexOf(i) < 0) vis[i] = v; });
-      sum = 3 * c;
-      const known = Object.assign({}, vis), txt = [];
-      let progress = true, sumKnown = level <= 2 || LINES.some((ln) => ln.every((i) => known[i] != null));
-      if (!sumKnown) continue;
-      while (progress && known[tgt] == null) {
-        progress = false;
-        for (let li = 0; li < LINES.length; li++) {
-          const unk = LINES[li].filter((i) => known[i] == null);
-          if (unk.length !== 1) continue;
-          const have = LINES[li].filter((i) => i !== unk[0]).map((i) => known[i]), v = sum - have.reduce((x, y) => x + y, 0);
-          known[unk[0]] = v;
-          txt.push(LINE_NAME[li] + ': ' + sum + ' − (' + have.join(' + ') + ') = ' + v);
-          progress = true;
-          break;
-        }
-      }
-      if (known[tgt] == null || known[tgt] !== grid[tgt]) continue;
-      const pv = possibleValues(vis, tgt);
-      if (pv.size !== 1 || !pv.has(grid[tgt])) continue;
-      steps = txt;
-      break;
-    }
-    const cs = 64, W = 400, ox = (W - 3 * cs) / 2, labels = level <= 2 ? ['?'] : ['A', 'B', 'C'];
-    let inner = (level <= 2 ? S.text(W / 2, 14, 'Her satırın, sütunun ve köşegenin toplamı ' + sum, 15, SOFT) : S.text(W / 2, 14, 'Her satırın, sütunun ve köşegenin toplamı aynı', 15, SOFT));
-    for (let i = 0; i < 9; i++) {
-      const x = ox + (i % 3) * cs, y = 30 + Math.floor(i / 3) * cs, h = hid.indexOf(i);
-      if (h === 0) inner += S.qtile(x + 3, y + 3, cs - 6).replace('>?</text>', '>' + labels[0] + '</text>');
-      else if (h > 0) inner += S.tile(x + 3, y + 3, cs - 6, { fill: '#fff4cc', stroke: '#f0a000' }) + S.text(x + cs / 2, y + cs / 2, labels[h], 30, { fill: ORANGE });
-      else inner += S.tile(x + 3, y + 3, cs - 6) + S.text(x + cs / 2, y + cs / 2, grid[i], 32);
-    }
-    const want = level <= 2 ? '?' : 'A';
-    const q = { stem: S.svg(W, 30 + 3 * cs + 10, inner, { maxW: 400 }) };
-    q.prompt = want + ' yerine hangi sayı gelmeli?';
-    q.meta = { grid: grid, hid: hid, tgt: tgt, sum: sum, answer: grid[tgt], showSum: level <= 2 };
-    q.explain = 'Üç sayının toplamı ' + sum + ' olmalı. ' + steps.join('. ') + '.';
-    return Q.finishNum(rng, q, grid[tgt], { min: 1, prefer: [sum - grid[tgt], grid[tgt] + 1, grid[tgt] - 1, grid[tgt] + 2] });
+    const flips = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const m = full.map((row) => row.slice()); m[r][c] = 1 - m[r][c]; flips.push(m); }
+    const flip = (m) => { const x = m.map((row) => row.slice()), p = rng.pick(free); x[p[0]][p[1]] = 1 - x[p[0]][p[1]]; return x; };
+    const free = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) free.push([r, c]);
+    // Yalnız doğru şık simetrik olursa çocuk verilen yarıya bakmadan "simetrik olanı" seçer. Bu yüzden iki çeldirici de
+    // simetriktir ama verilen yarının bir karesi farklıdır: hangisinin verilen yarıyla aynı olduğuna bakmak gerekir.
+    const complete = (g) => { const m = g.map((row) => row.slice()); for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const p = mirror(r, c); m[r][c] = g[p[0]][p[1]]; } return m; };
+    const givenCells = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (inGiven(r, c)) givenCells.push([r, c]);
+    const flipG = (g, cells) => { const x = g.map((row) => row.slice()); cells.forEach((p) => { x[p[0]][p[1]] = 1 - x[p[0]][p[1]]; }); return x; };
+    const gc = rng.shuffle(givenCells);
+    const symWrong = [complete(flipG(given, [gc[0]])), complete(flipG(given, [gc[0], gc[1]])), complete(flipG(given, [gc[2]])), complete(flipG(given, [gc[3], gc[4]]))];
+    const symKeys = new Set(symWrong.map((m) => 'y' + G.key(m)));
+    // sahte merkez: simetrik yanlışın kendisinden türeyen (simetrik olmayan) çeldiriciler
+    const fake = [flip(symWrong[0]), flip(symWrong[2])];
+    const spread = Q.spread(rng, full, flip, G.key, { pool: ds });
+    return Q.finish(rng, q, mk(full), rng.shuffle(symWrong).concat(fake, spread, rng.shuffle(ds), rng.shuffle(flips)).map(mk), 4, { need: { ok: (d) => symKeys.has(d.key), count: 2 } });
   };
 
   /* ---------- Mini Sudoku ---------- */
@@ -370,7 +254,7 @@
     const cn = cand(ask[0], ask[1]);
     const rowC = puzzle[ask[0]].filter(Boolean).map((v) => nameOf(cols[v - 1])), colC = puzzle.map((r) => r[ask[1]]).filter(Boolean).map((v) => nameOf(cols[v - 1]));
     q.explain = cn.length === 1
-      ? 'Satırda ' + (rowC.join(', ') || 'hiçbir renk') + ' var; sütunda ' + (colC.join(', ') || 'hiçbir renk') + ' var' + (box ? '; kutudaki renkler de eleniyor' : '') + '. Geriye ' + nameOf(cols[cn[0] - 1]) + ' kalır.'
+      ? (rowC.length ? 'Satırda ' + rowC.join(', ') + ' var' : 'Satırda hiç renk yok') + '; ' + (colC.length ? 'sütunda ' + colC.join(', ') + ' var' : 'sütunda hiç renk yok') + (box ? '; kutudaki renkler de eleniyor' : '') + '. Geriye ' + nameOf(cols[cn[0] - 1]) + ' kalır.'
       : 'Boş kareleri tek tek eleyerek ilerleyince soru işaretinin yeri ' + nameOf(cols[sol[ask[0]][ask[1]] - 1]) + ' çıkar.';
     q.meta = { n: n, box: box, puzzle: puzzle, ask: ask, cols: cols, answer: sol[ask[0]][ask[1]] };
     const right = cols[sol[ask[0]][ask[1]] - 1];

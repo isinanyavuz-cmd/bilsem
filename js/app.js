@@ -5,7 +5,9 @@
   const app = document.getElementById('app');
   const rng = new B.RNG((Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0);
   const LETTERS = ['A', 'B', 'C', 'D'];
-  const EXAMS = [{ n: 20, min: 25, name: 'Kısa deneme' }, { n: 40, min: 50, name: 'Orta deneme' }, { n: 60, min: 75, name: 'Uzun deneme' }];
+  const EXAM_Q_SEC = 60;   // denemede her sorunun kendi süresi (saniye)
+  const EXAM_LOW = 10;     // son kaç saniyede geri sayım görünür
+  const EXAMS = [{ n: 20, name: 'Kısa deneme' }, { n: 40, name: 'Orta deneme' }, { n: 60, name: 'Uzun deneme' }];   // en fazla n × 60 sn = n dakika
   const PRAISE = ['Harika!', 'Süpersin!', 'Aferin!', 'Tam isabet!', 'Çok iyi!', 'Bravo!'];
   const CHEER = ['Olsun, birlikte bakalım.', 'Az kaldı!', 'Bir dahakine olacak.'];
   const DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
@@ -21,8 +23,8 @@
 
   /* ---------- simgeler ---------- */
   function star(on) {
-    return '<svg viewBox="0 0 24 24" class="' + (on ? 'on' : 'off') + '" aria-hidden="true"><path d="M12 2.4l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.3l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="' +
-      (on ? 'var(--sun)' : 'var(--surface-2)') + '" stroke="' + (on ? 'var(--sun-dark)' : 'var(--line-strong)') + '" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+    if (on) return '<svg viewBox="0 0 24 24" class="on" aria-hidden="true"><image href="assets/kil/yildiz.webp" width="24" height="24"/></svg>';
+    return '<svg viewBox="0 0 24 24" class="off" aria-hidden="true"><path d="M12 2.4l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.3l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.7" stroke-linejoin="round"/></svg>';
   }
   function heart(on) {
     return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5C5.5 15.6 3 12.4 3 8.9 3 6.2 5 4.3 7.5 4.3c1.8 0 3.4 1 4.5 2.7 1.1-1.7 2.7-2.7 4.5-2.7C19 4.3 21 6.2 21 8.9c0 3.5-2.5 6.7-9 11.6z" fill="' +
@@ -36,34 +38,24 @@
     sound: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.2 6.5a7.6 7.6 0 0 1 0 11"/></svg>',
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></svg>',
     del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg>',
-    span: '<svg class="hero-ico" viewBox="0 0 56 56" aria-hidden="true">' + [['4', 3, '#fff'], ['7', 20.5, '#fff'], ['2', 38, '#ffc93c']].map((d) =>
-      '<rect x="' + d[1] + '" y="14" width="15" height="24" rx="5" fill="' + d[2] + '" stroke="#1d2b4a" stroke-width="3"/><text x="' + (d[1] + 7.5) + '" y="26" dy="0.35em" text-anchor="middle" font-size="14" font-weight="800" fill="#1d2b4a">' + d[0] + '</text>').join('') +
-      '<path d="M14 47h28m-6 -5l6 5l-6 5M42 47H14m6 -5l-6 5l6 5" fill="none" stroke="#1d2b4a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    exam: '<svg class="hero-ico" viewBox="0 0 56 56" aria-hidden="true"><rect x="8" y="5" width="32" height="42" rx="6" fill="#fff" stroke="#1d2b4a" stroke-width="3.4"/>' +
-      '<path d="M15 16h18M15 24h18M15 32h10" stroke="#b4c5e2" stroke-width="3.4" stroke-linecap="round"/>' +
-      '<circle cx="39" cy="39" r="12" fill="#ffc93c" stroke="#1d2b4a" stroke-width="3.4"/><path d="M39 32v7l4.5 3" fill="none" stroke="#1d2b4a" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    span: '<img class="hero-ico" src="assets/kil/sayilar.webp" alt="">',
+    exam: '<img class="hero-ico" src="assets/kil/kronometre.webp" alt="">',
+    rocket: '<img class="kil-roket" src="assets/kil/roket.webp" alt="">',
+    avatar: '<img class="avatar-img kil-avatar" src="assets/kil/avatar.webp" alt="">',
   };
+  /* maskot: sevinc | selam | dusun */
+  const ENES = { sevinc: 'assets/kil/enes-sevinc.webp', selam: 'assets/kil/enes-selam.webp', dusun: 'assets/kil/enes-dusun.webp' };   // tam yollar: tek dosya aracı bunları gömer
+  const ALAN = { gorsel: 'assets/kil/alan-gorsel.webp', uzamsal: 'assets/kil/alan-uzamsal.webp', sayisal: 'assets/kil/alan-sayisal.webp', dikkat: 'assets/kil/alan-dikkat.webp', sozel: 'assets/kil/alan-sozel.webp' };
+  const KUPA = '<img class="kupa" src="assets/kil/kupa.webp" alt="">';
+  const enes = (poz) => '<img class="enes enes-' + poz + '" src="' + ENES[poz] + '" alt="">';
 
-  function robot(mood, cls) {
-    const eyes = mood === 'happy'
-      ? '<path d="M15.2 27.5q3.6-5.4 7.2 0M27.6 27.5q3.6-5.4 7.2 0" fill="none" stroke="#7cf7ff" stroke-width="3" stroke-linecap="round"/>'
-      : mood === 'sad'
-        ? '<circle cx="19" cy="25" r="3" fill="#7cf7ff"/><circle cx="31" cy="25" r="3" fill="#7cf7ff"/><path d="M21 31.2q4-2.4 8 0" fill="none" stroke="#7cf7ff" stroke-width="2.2" stroke-linecap="round"/>'
-        : '<circle cx="19" cy="26" r="3.5" fill="#7cf7ff"/><circle cx="31" cy="26" r="3.5" fill="#7cf7ff"/>';
-    return '<svg class="robot' + (cls ? ' ' + cls : '') + '" viewBox="0 0 56 56" aria-hidden="true">' +
-      /* eski robot, büyüteçsiz; ortalamak için kaydırıldı */
-      '<g transform="translate(3 5)"><path d="M25 5.5v8" stroke="#1d2b4a" stroke-width="3.4" stroke-linecap="round"/><circle cx="25" cy="5.5" r="4" fill="#ffc93c" stroke="#1d2b4a" stroke-width="2.6"/>' +
-      '<rect x="6" y="12" width="38" height="32" rx="12" fill="#3d8ef7" stroke="#1d2b4a" stroke-width="3.4"/>' +
-      '<rect x="11.5" y="18" width="27" height="16" rx="8" fill="#1d2b4a"/>' + eyes + '</g></svg>';
-  }
-
-  /* avatar: hazır karakterler ya da yüklenen fotoğraf; seçilmemişse robot */
+  /* Avatar seçilmemişse kil karakteri gösterilir. */
   const AVATARS = ['🦊', '🐼', '🐯', '🦁', '🐸', '🐶', '🐱', '🐵', '🦄', '🚀', '⭐', '🌈', '⚽', '🎨', '📚', '🌟'];
-  function avatarHtml(cls) {
+  function avatarHtml() {
     const a = Store.data.profile && Store.data.profile.avatar;
-    if (a && a.indexOf('data:') === 0) return '<img class="avatar-img ' + (cls || '') + '" src="' + a + '" alt="">';
-    if (a) return '<span class="avatar-emoji ' + (cls || '') + '" aria-hidden="true">' + esc(a) + '</span>';
-    return robot('idle', cls);
+    if (a && a.indexOf('data:') === 0) return '<img class="avatar-img" src="' + a + '" alt="">';
+    if (a) return '<span class="avatar-emoji" aria-hidden="true">' + esc(a) + '</span>';
+    return I.avatar;
   }
   function resizeImage(file, px) {
     return new Promise((resolve, reject) => {
@@ -104,16 +96,7 @@
     net: () => [[1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2]].map((p) => '<rect x="' + (p[0] * 24 + 4) + '" y="' + (p[1] * 24 + 14) + '" width="24" height="24" fill="#cfe3ff" stroke="#1d2b4a" stroke-width="3" stroke-linejoin="round"/>').join(''),
     sym: () => '<rect x="10" y="14" width="30" height="30" fill="#3d8ef7"/><rect x="40" y="44" width="30" height="30" fill="#3d8ef7"/><rect x="60" y="14" width="30" height="30" fill="#cfe0fa" stroke="#3d8ef7" stroke-width="3" stroke-dasharray="6 4"/><path d="M50 4V96" stroke="#f08c00" stroke-width="4" stroke-dasharray="8 6" stroke-linecap="round"/>',
     fold: () => '<rect x="12" y="22" width="76" height="56" rx="6" fill="#ffe9a8" stroke="#1d2b4a" stroke-width="3.4"/><path d="M50 22V78" stroke="#f08c00" stroke-width="3.4" stroke-dasharray="6 5"/><circle cx="28" cy="40" r="7" fill="#fff" stroke="#1d2b4a" stroke-width="3"/><circle cx="72" cy="40" r="7" fill="#fff" stroke="#1d2b4a" stroke-width="3"/>',
-    magic: () => [[2, 7, 6], [9, 5, 1], [4, 3, 8]].map((row, r) => row.map((v, c) => S.tile(8 + c * 29, 8 + r * 29, 27) + S.text(21.5 + c * 29, 21.5 + r * 29, r === 1 && c === 1 ? '?' : v, 17, r === 1 && c === 1 ? { fill: '#e08600' } : {})).join('')).join(''),
-    liar: () => S.emoji(27, 38, '😇', 30) + S.emoji(73, 38, '😈', 30) + S.text(50, 78, '?', 28, { fill: '#e08600' }),
     sudoku: () => [['red', 'blue'], ['blue', 'red']].map((row, r) => row.map((col, c) => S.tile(14 + c * 38, 14 + r * 38, 36) + (r === 1 && c === 1 ? S.text(14 + c * 38 + 18, 14 + r * 38 + 18, '?', 24, { fill: '#e08600' }) : '<circle cx="' + (32 + c * 38) + '" cy="' + (32 + r * 38) + '" r="11" fill="' + S.COLORS[col].fill + '" stroke="#1d2b4a" stroke-width="3"/>')).join('')).join(''),
-    maze: () => [[24, 30, 62, 30], [24, 30, 62, 70], [24, 70, 62, 30], [24, 70, 62, 70]].map((l) => '<path d="M' + l[0] + ' ' + l[1] + 'L' + l[2] + ' ' + l[3] + '" stroke="#8aa0c4" stroke-width="4" stroke-linecap="round"/>').join('') +
-      [[24, 30], [24, 70], [62, 30], [62, 70]].map((c) => '<rect x="' + (c[0] - 11) + '" y="' + (c[1] - 11) + '" width="22" height="22" rx="6" fill="#fff" stroke="#1d2b4a" stroke-width="3"/>').join('') + S.emoji(88, 50, '🧀', 20),
-    back: () => S.text(22, 50, '?', 30, { fill: '#e08600' }) + '<path d="M42 50h16m-7 -7l7 7l-7 7" fill="none" stroke="#566889" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 50 50)"/>' + S.text(78, 50, '12', 28),
-    cook: () => S.emoji(30, 40, '🍲', 34) + S.emoji(72, 40, '🍳', 34) + '<path d="M16 72h28M58 72h28" stroke="#f2545b" stroke-width="7" stroke-linecap="round"/>',
-    sticks: () => '<path d="M16 20h68v60H16z" fill="none" stroke="#1d2b4a" stroke-width="3" stroke-dasharray="4 5"/><rect x="14" y="14" width="46" height="12" rx="6" fill="#3d8ef7" stroke="#1d2b4a" stroke-width="3"/><rect x="60" y="14" width="26" height="12" rx="6" fill="#ffd233" stroke="#1d2b4a" stroke-width="3"/><rect x="14" y="74" width="26" height="12" rx="6" fill="#ffd233" stroke="#1d2b4a" stroke-width="3"/><rect x="40" y="74" width="46" height="12" rx="6" fill="#3d8ef7" stroke="#1d2b4a" stroke-width="3"/>',
-    dots: () => [0, 1, 2].map((r) => [0, 1, 2].map((c) => '<circle cx="' + (22 + c * 28) + '" cy="' + (22 + r * 28) + '" r="5.5" fill="#1d2b4a"/>').join('')).join('') + '<path d="M50 22L78 50L50 78L22 50Z" fill="none" stroke="#f08c00" stroke-width="4" stroke-linejoin="round"/>',
-    flip: () => S.Grid.draw([[1, 0, 0], [1, 1, 0], [1, 0, 0]], ['blue', 'yellow'], 8, 28, 40) + '<path d="M54 30a20 20 0 0 1 0 38" fill="none" stroke="#f08c00" stroke-width="5" stroke-linecap="round"/><path d="M60 72l-12 -3l8 -9z" fill="#f08c00"/>' + S.Grid.draw([[0, 0, 1], [0, 1, 1], [0, 0, 1]], ['blue', 'yellow'], 54, 28, 40),
     cipher: () => ['K', 'U', 'Ş'].map((ch, i) => S.tile(8 + i * 28, 14, 26) + S.text(21 + i * 28, 27, ch, 17)).join('') + '<path d="M50 48v10m-5 -5l5 5l5 -5" fill="none" stroke="#566889" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>' + ['L', 'Ü', 'T'].map((ch, i) => S.tile(8 + i * 28, 62, 26, { fill: '#e8ddff' }) + S.text(21 + i * 28, 75, ch, 17)).join(''),
     equiv: () => S.figAt(F('circle', 'red'), 4, 20, 26) + S.figAt(F('circle', 'red'), 4, 52, 26) + S.text(46, 50, '=', 28, { fill: '#566889' }) + S.figAt(F('square', 'blue'), 58, 34, 34),
     stack: () => [['#3d8ef7', 'M12 72L88 28'], ['#ffd233', 'M10 40L90 58'], ['#f2545b', 'M24 16L76 86']].map((l) =>
@@ -124,15 +107,12 @@
     same: () => { const m = [[1, 0, 2], [0, 1, 0], [2, 0, 0]], p = ['purple', 'yellow']; return S.Grid.draw(m, p, 5, 29, 42) + S.Grid.draw(m, p, 53, 29, 42); },
     count: () => S.figAt(F('star', 'yellow'), 2, 4, 46) + S.figAt(F('star', 'yellow'), 50, 18, 46) + S.figAt(F('star', 'yellow'), 14, 50, 46),
     memory: () => S.tile(6, 28, 42) + S.emoji(27, 49, '🐱', 26) + S.qtile(52, 28, 42),
-    order: () => [['#3d8ef7', 14, 34], ['#ffc93c', 40, 52], ['#f2545b', 66, 70]].map((b) =>
-      '<rect x="' + b[1] + '" y="' + (88 - b[2]) + '" width="20" height="' + b[2] + '" rx="6" fill="' + b[0] + '" stroke="#1d2b4a" stroke-width="3.4"/>').join(''),
     path: () => greenTile(8, 14, 90) + greenTile(52, 14, 90) + greenTile(52, 54, 180),
     machine: () => '<rect x="26" y="22" width="48" height="56" rx="12" fill="#a565f2" stroke="#1d2b4a" stroke-width="3.4"/>' + S.text(50, 50, '+2', 24, { fill: '#fff' }) +
       S.text(11, 50, '3', 24) + S.text(89, 50, '5', 24),
     shadow: () => S.figAt(F('star', 'yellow'), 2, 14, 54) + S.figAt(F('star', 'ink'), 44, 32, 54),
     balance: () => '<path d="M50 30V78M34 82h32" stroke="#1d2b4a" stroke-width="5" stroke-linecap="round"/><path d="M18 24L82 38" stroke="#1d2b4a" stroke-width="5" stroke-linecap="round"/>' +
       '<circle cx="50" cy="31" r="5" fill="#ffc93c" stroke="#1d2b4a" stroke-width="2.6"/>' + S.figAt(F('circle', 'red'), 4, 26, 30) + S.figAt(F('square', 'blue'), 68, 42, 28),
-    who: () => S.emoji(27, 40, '🐱', 30) + S.emoji(73, 40, '🐶', 30) + S.text(50, 76, '?', 30, { fill: '#e08600' }),
   };
   const icon = (id) => S.svg(100, 100, ICONS[id](), { cls: 'cat-svg' });
 
@@ -195,7 +175,6 @@
     ses = Object.assign({ idx: 0, startedAt: Date.now(), result: null }, s);
     sheet = null;
     view = 'quiz';
-    if (ses.mode === 'exam') clock = setInterval(tick, 1000);
     enter();
   }
   function startPractice(id, level) {
@@ -208,22 +187,19 @@
     begin({ mode: 'daily', fixed: level || 0, items: makeItems(plan) });
   }
   function startExam(i, level) {
-    const ex = EXAMS[i], specs = [];
-    let pool = [];
-    for (let k = 0; k < ex.n; k++) {
-      if (!pool.length) pool = rng.shuffle(B.CATS.map((c) => c.id));
-      const f = k / ex.n;
-      specs.push({ type: pool.pop(), level: level || (f < 0.25 ? 1 : f < 0.5 ? 2 : f < 0.8 ? 3 : 4) });   // seçilmediyse kolaydan zora
-    }
-    begin({ mode: 'exam', exam: i, fixed: level || 0, left: ex.min * 60, items: makeItems(specs) });
+    const ex = EXAMS[i], types = B.Exam.examCats(rng, ex.n);
+    const specs = types.map((t, k) => ({ type: t, level: level || B.Exam.examLevel(k, ex.n) }));   // seçilmediyse kolaydan zora (En Zor yok)
+    begin({ mode: 'exam', exam: i, fixed: level || 0, deadline: 0, left: EXAM_Q_SEC, items: makeItems(specs) });
   }
   function stopTimers() { clearInterval(clock); clearTimeout(memoT); clock = null; memoT = null; }
 
   function enter() {
     clearTimeout(memoT);
+    clearInterval(clock); clock = null;   // önceki sorunun süresi; yenisi soru görününce başlar
+    if (ses.mode === 'exam') ses.left = EXAM_Q_SEC;
     const it = cur();
     if (it.q.memo && !it.memoSeen) memoT = setTimeout(memoDone, it.q.memo.seconds * 1000);
-    else it.t0 = performance.now();
+    else { it.t0 = performance.now(); qClock(); }
     render();
     window.scrollTo(0, 0);
   }
@@ -233,21 +209,34 @@
     if (!it || it.memoSeen || view !== 'quiz') return;
     it.memoSeen = true;
     it.t0 = performance.now();
+    qClock();
     render();
   }
   function leave() {
     const it = cur();
     if (it && ses.mode === 'exam' && it.t0) { it.ms += performance.now() - it.t0; it.t0 = 0; }
   }
-  function tick() {
+  /* denemede soru süresi: soru görününce (hafıza sorularında resim kapanınca) başlar, bitince sıradaki soruya geçilir */
+  function qClock() {
+    clearInterval(clock); clock = null;
     if (!ses || ses.mode !== 'exam') return;
-    ses.left--;
-    const el = document.getElementById('clock');
-    if (el) {
-      el.querySelector('b').textContent = fmtTime(Math.max(0, ses.left));
-      el.classList.toggle('low', ses.left <= 60);
+    ses.deadline = Date.now() + EXAM_Q_SEC * 1000;
+    ses.left = EXAM_Q_SEC;
+    clock = setInterval(tick, 250);
+  }
+  function tick() {
+    if (!ses || ses.mode !== 'exam' || view !== 'quiz') return;
+    const left = Math.max(0, Math.ceil((ses.deadline - Date.now()) / 1000));
+    if (left !== ses.left) {
+      ses.left = left;
+      const el = document.getElementById('clock');
+      if (el) {
+        el.querySelector('b').textContent = left;
+        el.classList.toggle('hid', left > EXAM_LOW);
+        el.classList.toggle('low', left <= EXAM_LOW);
+      }
     }
-    if (ses.left <= 0) finish();
+    if (left <= 0) next();
   }
 
   function pick(i) {
@@ -273,19 +262,10 @@
   function next() {
     const it = cur();
     if (!it || view !== 'quiz') return;
-    if (ses.mode !== 'exam' && it.chosen == null) return;
-    if (ses.idx >= ses.items.length - 1) {
-      if (ses.mode === 'exam') { sheet = { kind: 'finish' }; render(); } else finish();
-      return;
-    }
+    if (ses.mode === 'exam' ? it.q.memo && !it.memoSeen : it.chosen == null) return;
+    if (ses.idx >= ses.items.length - 1) { finish(); return; }
     leave();
     ses.idx++;
-    enter();
-  }
-  function prev() {
-    if (!ses || ses.idx === 0) return;
-    leave();
-    ses.idx--;
     enter();
   }
   function finish() {
@@ -312,6 +292,23 @@
     beep(stars >= 2 ? SND.win : SND.done);
   }
 
+  /* Denemeden X ile çıkış: deneme tamamlanmış sayılmaz (sonuç ve deneme kaydı yok), ama o ana kadar
+     cevaplanan sorular konu istatistiğine yazılır; böylece veli panelindeki doğruluk oranları eksik kalmaz. */
+  function abandonExam() {
+    if (!ses || ses.mode !== 'exam' || view !== 'quiz' || ses.result) return 0;
+    leave();
+    let n = 0;
+    ses.items.forEach((it) => {
+      if (it.chosen == null) return;
+      Store.recordAnswer(it.q.type, it.q.level, it.chosen === it.q.answer, it.ms);
+      n++;
+    });
+    if (n) Store.save();
+    ses.result = { abandoned: true, answered: n };
+    return n;
+  }
+  const examAnswered = () => (ses && ses.mode === 'exam' ? ses.items.filter((it) => it.chosen != null).length : 0);
+
   /* ---------- ana sayfa ---------- */
   const STAR_MAX = B.LEVELS.length * 3;
   const starSum = (st) => st.stars.reduce((a, b) => a + b, 0);
@@ -325,33 +322,29 @@
   function spanRecords() {
     const best = Store.data.span.best;
     const list = Span.LEVELS.map((l) => ({ name: l.name, v: Math.max(best[l.id].both, best[l.id].fwd, best[l.id].bwd) })).filter((x) => x.v);
-    return list.length ? 'Rekor: ' + list.map((x) => x.name + ' ' + x.v + ' basamak').join(' · ') : 'Henüz rekor yok.';
+    return list.length ? 'Rekor: ' + list.map((x) => x.name + ' ' + x.v + ' basamak').join(' · ') : 'Sayıları düzden ve tersten hatırla';
   }
   function homeView() {
     const done = Store.dailyDone();
     const pname = user && user.name ? esc(user.name) : 'Enes';
     return '<div class="page home">' +
       '<header class="top"><div class="brand">' +
-      '<button type="button" class="avatar-card" data-act="account" aria-label="Hesap bilgileri">' + avatarHtml('') + '</button>' +
+      '<button type="button" class="avatar-card" data-act="account" aria-label="Hesap bilgileri">' + avatarHtml() + '</button>' +
       '<div class="title-wrap"><div class="title-line"><span class="brand-name">' + pname + ' <b>BİLSEM\'e</b> Hazırlanıyor</span>' +
       '<span class="chips chips-inline"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
       '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span></span></div>' +
-      '<span class="brand-sub">2. sınıf · genel yetenek alıştırmaları</span></div></div>' +
+      '<span class="brand-sub">3. sınıf · genel yetenek alıştırmaları</span></div></div>' +
       '<button type="button" class="btn btn-ghost btn-sm parent-corner" data-act="parent">Veli paneli</button></header>' +
       '<section class="hero">' +
-      '<button type="button" class="hero-card hero-daily" data-act="daily">' + robot(done ? 'happy' : 'idle') +
+      '<button type="button" class="hero-card hero-daily" data-act="daily">' +
       '<span class="hc"><span class="hc-title">Günün Görevi</span><span class="hc-text">' +
-      (done ? 'Bugünkü görev tamam. İstersen yeniden oyna.' : 'Her konudan karışık 10 soru. Yaklaşık 10 dakika sürer.') +
-      '</span><span class="hero-go">' + (done ? 'Tekrar oyna' : 'Başla') + '</span></span></button>' +
+      (done ? 'Bugünkü görev tamam.' : '10 soru · 10 dakika') +
+      '</span><span class="hero-go">' + (done ? 'Tekrar oyna' : 'Başla') + I.back + '</span></span></button>' +
       '<button type="button" class="hero-card hero-exam" data-act="exam-pick">' + I.exam +
-      '<span class="hc"><span class="hc-title">Deneme Sınavı</span><span class="hc-text">Süreli ve karışık sorular. Cevaplar sınav bitince gösterilir.</span>' +
-      '<span class="hero-go">Sınav seç</span></span></button></section>' +
-      '<section class="area" style="--area: var(--a-hafiza)"><h2>Sayı Hafızası</h2>' +
-      '<button type="button" class="span-card" data-act="span-pick">' + I.span +
-      '<span class="hc"><span class="hc-title">Sayıyı aklında tut</span><span class="hc-text">Sayıya bak; kapanınca süre bitmeden klavyeyle düzden ve tersten yaz. ' +
-      Span.MIN + ' basamakla başlar, ' + Span.MAX + ' basamağa kadar uzar.</span><span class="span-recs">' + spanRecords() + '</span></span>' +
-      '<span class="hero-go">Başla</span></button></section>' +
-      B.AREAS.map((a) => '<section class="area" style="--area: var(--a-' + a.id + ')"><h2>' + a.name + '</h2><div class="cat-grid">' +
+      '<span class="hc"><span class="hc-title">Deneme Sınavı</span><span class="hc-text">Süreli ve karışık sorular</span></span>' + I.back + '</button>' +
+      '<button type="button" class="hero-card hero-memory" data-act="span-pick">' + I.span +
+      '<span class="hc"><span class="hc-title">Sayı Hafızası</span><span class="hc-text">' + spanRecords() + '</span></span>' + I.back + '</button></section>' +
+      B.AREAS.map((a) => '<section class="area" style="--area: var(--a-' + a.id + ')"><h2><img class="alan-ico" src="' + ALAN[a.id] + '" alt="">' + a.name + '</h2><div class="cat-grid">' +
         B.CATS.filter((c) => c.area === a.id).map(catCard).join('') + '</div></section>').join('') +
       '<p class="foot">Her gün kısa bir çalışma, arada bir uzun çalışmadan daha çok işe yarar.' +
       (app.dataset.surum ? '<span class="surum">Sürüm ' + app.dataset.surum + '</span>' : '') + '</p></div>';
@@ -374,11 +367,11 @@
   function quizTop() {
     const n = ses.items.length, exam = ses.mode === 'exam';
     const right = exam
-      ? '<span class="chip chip-time' + (ses.left <= 60 ? ' low' : '') + '" id="clock">' + I.clock + '<b>' + fmtTime(Math.max(0, ses.left)) + '</b></span>'
+      ? '<span class="chip chip-time ' + (ses.left <= EXAM_LOW ? 'low' : 'hid') + '" id="clock">' + I.clock + '<b>' + ses.left + '</b></span>'
       : '<span class="chip">' + star(true) + '<b>' + ses.items.filter((it) => it.chosen != null && it.chosen === it.q.answer).length + '</b></span>';
     return '<header class="quiz-top"><button type="button" class="icon-btn" data-act="quit" aria-label="Çık">' + I.x + '</button>' +
-      '<div class="prog"><div class="prog-bar" style="width:' + pct(ses.idx + (ses.mode !== 'exam' && cur().chosen != null ? 1 : 0), n) + '%"></div>' +
-      '<span class="prog-txt">' + (ses.idx + 1) + ' / ' + n + '</span></div>' + right + '</header>';
+      '<div class="prog" aria-hidden="true"><div class="prog-bar" style="width:' + pct(ses.idx + 1, n) + '%"></div></div>' +
+      '<span class="prog-txt">' + (ses.idx + 1) + ' / ' + n + '</span>' + right + '</header>';
   }
   function quizView() {
     const it = cur(), q = it.q, cat = B.catById(q.type), exam = ses.mode === 'exam';
@@ -387,27 +380,24 @@
       return '<div class="page quiz memo"' + area + '>' + quizTop() + '<h1>Resimlere iyi bak!</h1>' +
         '<div class="paper stem">' + q.memo.html + '</div>' +
         '<div class="memo-bar"><i style="animation-duration:' + q.memo.seconds + 's"></i></div>' +
-        '<button type="button" class="btn btn-ghost" data-act="memo-done">Hazırım</button></div>';
+        (exam ? '' : '<button type="button" class="btn btn-ghost" data-act="memo-done">Hazırım</button>') + '</div>';
     }
     const answered = it.chosen != null && !exam, last = ses.idx === ses.items.length - 1;
-    const tag = '<span class="q-tag">' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</span>';
+    const tag = exam ? '' : '<span class="q-tag">' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</span>';   // gerçek sınavda tür ve kademe yazmaz
     const prompt = '<div class="q-prompt"><h1>' + q.prompt + '</h1>' +
       (trVoice ? '<button type="button" class="icon-btn" data-act="speak" aria-label="Soruyu sesli oku">' + I.sound + '</button>' : '') + '</div>';
     const stem = q.stem ? '<div class="paper stem">' + q.stem + '</div>' : '';
-    // öncüllü sorularda (Kim Hangisi, Sıralama) soru cümlesi öncüllerin altında durur
-    let html = '<div class="page quiz"' + area + '>' + quizTop() +
-      (q.promptBelow ? tag + stem + prompt : '<div class="q-head">' + tag + prompt + '</div>' + stem) +
+    let html = '<div class="page quiz' + (q.type === 'cubes' ? ' quiz-cubes' : '') + '"' + area + '>' + quizTop() +
+      '<div class="q-head">' + tag + prompt + '</div>' + stem +
       optsHtml(q, it, exam ? 'exam' : answered ? 'done' : 'live');
     if (answered) {
       const ok = it.chosen === q.answer;
-      html += '<div class="fb ' + (ok ? 'fb-ok' : 'fb-no') + '" role="status">' + robot(ok ? 'happy' : 'sad', 'badge') +
+      html += '<div class="fb ' + (ok ? 'fb-ok' : 'fb-no') + '" role="status">' + enes(ok ? 'sevinc' : 'selam') +
         '<div class="fb-msg"><b>' + it.msg + '</b>' + (ok ? '' : 'Doğru cevap ' + LETTERS[q.answer] + ' şıkkı. ') + q.explain + '</div>' +
         '<button type="button" class="btn btn-sun" data-act="next">' + (last ? 'Bitir' : 'Devam') + '</button></div>';
     }
     if (exam) {
-      html += '<div class="exam-nav"><button type="button" class="btn btn-ghost" data-act="prev"' + (ses.idx === 0 ? ' disabled' : '') + '>Önceki</button>' +
-        '<button type="button" class="btn btn-ghost" data-act="finish-ask">Sınavı bitir</button>' +
-        (last ? '' : '<button type="button" class="btn btn-sun" data-act="next">Sonraki</button>') + '</div>';
+      html += '<div class="exam-nav"><button type="button" class="btn btn-sun" data-act="next">' + (last ? 'Bitir' : 'Sonraki') + '</button></div>';
     }
     return html + '</div>';
   }
@@ -511,7 +501,7 @@
 
     if (span.phase === 'over') {
       const rec = Store.data.span.best[g.level][g.mode];
-      return '<div class="page result" style="--area: var(--a-hafiza)">' + robot(g.best ? 'happy' : 'idle', 'badge') +
+      return '<div class="page result" style="--area: var(--a-hafiza)"><div class="result-art">' + enes(g.best ? 'sevinc' : 'dusun') + (g.won ? KUPA : '') + '</div>' +
         '<h1>' + (g.won ? Span.MAX + ' basamağı da bildin!' : g.best ? 'Güzel hafıza!' : 'Bu sefer olmadı') + '</h1>' +
         '<div class="score">' + g.best + '<small> basamak</small></div>' +
         '<p class="result-sub">' + lvl.name + ' · ' + mode.name + ' · ' + g.hits + ' doğru, ' + (g.trials - g.hits) + ' yanlış · ' + (span.record ? 'Yeni rekor!' : rec ? 'Rekorun ' + rec + ' basamak' : 'Henüz rekor yok') + '</p>' +
@@ -544,7 +534,7 @@
     const nextInfo = g.over ? (g.won ? 'En uzun sayıyı da bildin.' : 'Canların bitti.')
       : span.ok ? 'Sıradaki sayı ' + g.len + ' basamaklı.' : 'Aynı uzunlukta yeni bir sayı gelecek. Kalan can: ' + g.lives + '.';
     return open + '<div class="paper span-result">' + rows + '</div>' +
-      '<div class="fb ' + (span.ok ? 'fb-ok' : 'fb-no') + '" role="status">' + robot(span.ok ? 'happy' : 'sad', 'badge') +
+      '<div class="fb ' + (span.ok ? 'fb-ok' : 'fb-no') + '" role="status">' + enes(span.ok ? 'sevinc' : 'selam') +
       '<div class="fb-msg"><b>' + (span.ok ? rng.pick(PRAISE) : 'Olmadı, bir daha deneyelim.') + '</b>' + nextInfo + '</div>' +
       '<button type="button" class="btn btn-sun" data-act="span-next">' + (g.over ? 'Bitir' : 'Devam') + '</button></div></div>';
   }
@@ -569,11 +559,11 @@
     } else {
       sub = EXAMS[ses.exam].name + ' · ' + (ses.fixed ? B.LEVEL_NAMES[ses.fixed] : 'karışık kademe') + ' · ' + r.blank + ' boş · süre ' + fmtTime(r.sec);
     }
-    let html = '<div class="page result">' + robot(p >= 0.5 ? 'happy' : 'idle', 'badge') + '<h1>' + title + '</h1>';
+    let html = '<div class="page result"><div class="result-art">' + enes(p >= 0.7 ? 'sevinc' : p >= 0.5 ? 'selam' : 'dusun') + (p >= 0.9 ? KUPA : '') + '</div><h1>' + title + '</h1>';
     if (!exam) html += '<div class="big-stars">' + [0, 1, 2].map((i) => star(i < r.stars)).join('') + '</div>';
     html += '<div class="score">' + r.ok + '<small> / ' + r.total + ' doğru</small></div><p class="result-sub">' + sub + '</p>';
     if (ses.mode !== 'practice') html += '<div class="card"><h2>Konulara göre</h2>' + areaBars(ses.items) + '</div>';
-    html += '<div class="card"><h2>Sorulara tekrar bak</h2><div class="qchips">' + ses.items.map((it, i) => {
+    html += '<div class="card"><h2>Sorulara tekrar bak</h2><p class="qchip-key"><span class="qchip ok">✓</span>doğru <span class="qchip no">✗</span>yanlış <span class="qchip blank">–</span>boş</p><div class="qchips">' + ses.items.map((it, i) => {
       const cls = it.chosen == null ? 'blank' : it.chosen === it.q.answer ? 'ok' : 'no';
       return '<button type="button" class="qchip ' + cls + '" data-act="review" data-i="' + i + '" aria-label="Soru ' + (i + 1) + '">' + (i + 1) + '</button>';
     }).join('') + '</div></div>';
@@ -669,7 +659,7 @@
           B.LEVEL_NAMES[lv] + (lv === rec ? '<small>Sana uygun seviye</small>' : '') + '</span>' + starsRow(st.stars[lv - 1]) + '</button>').join('') +
         '</div><p class="note">' + Store.data.settings.len + ' soruluk alıştırma. Soruların çoğunu doğru yaparsan yıldız kazanırsın.</p>';
     } else if (sheet.kind === 'daily') {
-      body = '<div class="sheet-head"><span class="cat-ico">' + robot('happy') + '</span><div><h2>Günün Görevi</h2><p>Her konudan karışık 10 soru. Hangi kademede olsun?</p></div>' + closeBtn + '</div><div class="levels">' +
+      body = '<div class="sheet-head"><span class="cat-ico">' + I.rocket + '</span><div><h2>Günün Görevi</h2><p>Her konudan karışık 10 soru. Hangi kademede olsun?</p></div>' + closeBtn + '</div><div class="levels">' +
         '<button type="button" class="level rec" data-act="daily-go" data-level="0"><span>Bana uygun<small>Her konuda kendi kademen</small></span></button>' +
         B.LEVELS.map((lv) => '<button type="button" class="level" data-act="daily-go" data-level="' + lv + '"><span>' + B.LEVEL_NAMES[lv] + '</span></button>').join('') + '</div>';
     } else if (sheet.kind === 'exam') {
@@ -677,9 +667,9 @@
       body = '<div class="sheet-head"><div><h2>Deneme Sınavı</h2><p>Bütün konulardan sorular. Önce kademeyi, sonra uzunluğu seç.</p></div>' + closeBtn + '</div>' +
         '<div class="set-row"><span>Kademe</span><span class="seg">' + [0].concat(B.LEVELS).map((l) =>
           '<button type="button" class="' + (l === lv ? 'on' : '') + '" data-act="exam-level" data-level="' + l + '" aria-pressed="' + (l === lv) + '">' + (l ? B.LEVEL_NAMES[l] : 'Karışık') + '</button>').join('') + '</span></div>' +
-        '<p class="tip">' + (lv ? 'Bütün sorular <b>' + B.LEVEL_NAMES[lv] + '</b> kademesinden gelir.' : '<b>Karışık:</b> sorular kolaydan en zora doğru sıralanır.') + '</p><div class="levels">' +
-        EXAMS.map((e, i) => '<button type="button" class="level" data-act="exam" data-i="' + i + '"><span>' + e.name + '<small>' + e.n + ' soru · ' + e.min + ' dakika</small></span></button>').join('') +
-        '</div><p class="note">Sınav sırasında doğru cevap gösterilmez. İstediğin soruya geri dönüp cevabını değiştirebilirsin.</p>';
+        '<p class="tip">' + (lv ? 'Bütün sorular <b>' + B.LEVEL_NAMES[lv] + '</b> kademesinden gelir.' : '<b>Karışık:</b> sorular kolaydan zora doğru sıralanır.') + '</p><div class="levels">' +
+        EXAMS.map((e, i) => '<button type="button" class="level" data-act="exam" data-i="' + i + '"><span>' + e.name + '<small>' + e.n + ' soru · en fazla ' + e.n + ' dakika</small></span></button>').join('') +
+        '</div><p class="note">Her sorunun 60 saniyesi var. Süre bitince sıradaki soruya geçilir; geri dönülmez. Doğru cevaplar sınav bitince gösterilir.</p>';
     } else if (sheet.kind === 'span') {
       const set = Store.data.settings, st = set.spanStart, lv = Span.levelOf(set.spanLevel), rec = Store.data.span.best[lv.id], sec = fmtSec(Span.seconds(st, lv.id)), timed = set.spanTypeTimed !== false;
       body = '<div class="sheet-head"><span class="cat-ico">' + I.span + '</span><div><h2>Sayı Hafızası</h2><p>Sayı bir süre görünür ve kapanır. Sonra süre bitmeden klavyeyle yazarsın.</p></div>' + closeBtn + '</div>' +
@@ -701,21 +691,17 @@
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="submit" class="btn btn-sun">Giriş</button></div></form>';
     } else if (sheet.kind === 'quit') {
       body = '<div class="sheet-head"><div><h2>Çıkmak istiyor musun?</h2><p>' +
-        (view === 'span' ? 'Oyundan çıkarsan bu oyun biter. Ulaştığın rekor kaydedildi.' : ses.mode === 'exam' ? 'Sınavdan çıkarsan cevapların kaydedilmez.' : 'Şimdiye kadar çözdüğün sorular kaydedildi. Yıldız kazanmak için alıştırmayı bitirmelisin.') +
+        (view === 'span' ? 'Oyundan çıkarsan bu oyun biter. Ulaştığın rekor kaydedildi.' : ses.mode === 'exam' ? 'Çıkarsan bu deneme yarım kalır ve sonucu verilmez. ' + (examAnswered() ? 'Şimdiye kadar cevapladığın ' + examAnswered() + ' soru konu istatistiklerine yazılır.' : 'Henüz cevapladığın soru yok.') : 'Şimdiye kadar çözdüğün sorular kaydedildi. Yıldız kazanmak için alıştırmayı bitirmelisin.') +
         '</p></div></div><div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="home">Çık</button><button type="button" class="btn btn-sun" data-act="close">Devam et</button></div>';
-    } else if (sheet.kind === 'finish') {
-      const blank = ses.items.filter((it) => it.chosen == null).length;
-      body = '<div class="sheet-head"><div><h2>Sınavı bitirelim mi?</h2><p>' + (blank ? blank + ' soru boş kaldı. Geri dönüp cevaplayabilirsin.' : 'Bütün soruları cevapladın.') +
-        '</p></div></div><div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Geri dön</button><button type="button" class="btn btn-sun" data-act="finish">Bitir</button></div>';
     } else if (sheet.kind === 'account') {
       const a = Store.data.profile && Store.data.profile.avatar;
       const prov = { password: 'E-posta ve şifre', 'google.com': 'Google', 'apple.com': 'Apple' }[user && user.provider] || 'E-posta ve şifre';
-      body = '<div class="sheet-head"><div class="acc-big">' + avatarHtml('acc-art') + '</div><div><h2>' + esc(user ? user.name : 'Hesap') + '</h2><p>Karakterini seç ya da kendi fotoğrafını yükle.</p></div>' + closeBtn + '</div>' +
+      body = '<div class="sheet-head"><div class="acc-big">' + avatarHtml() + '</div><div><h2>' + esc(user ? user.name : 'Hesap') + '</h2><p>Karakterini seç ya da kendi fotoğrafını yükle.</p></div>' + closeBtn + '</div>' +
         '<div class="acc-info"><div><small>Kullanıcı adı</small><b>' + esc(user ? user.name : '—') + '</b></div>' +
         '<div><small>E-posta</small><b>' + esc(user && user.email ? user.email : '—') + '</b></div>' +
         '<div><small>Giriş yöntemi</small><b>' + prov + '</b></div></div>' +
         '<div class="avatar-grid">' +
-        '<button type="button" class="avatar-opt' + (!a ? ' on' : '') + '" data-act="avatar-set" data-v="" aria-label="Robot" aria-pressed="' + (!a) + '">' + robot('idle', '') + '</button>' +
+        '<button type="button" class="avatar-opt' + (!a ? ' on' : '') + '" data-act="avatar-set" data-v="" aria-label="Kil karakteri" aria-pressed="' + (!a) + '">' + I.avatar + '</button>' +
         AVATARS.map((e) => '<button type="button" class="avatar-opt' + (a === e ? ' on' : '') + '" data-act="avatar-set" data-v="' + e + '" aria-label="' + e + '" aria-pressed="' + (a === e) + '">' + e + '</button>').join('') +
         '</div>' +
         '<div class="sheet-actions"><label class="btn btn-ghost avatar-file">Fotoğraf seç<input type="file" accept="image/*" data-file="avatar" hidden></label></div>' +
@@ -726,16 +712,22 @@
     } else if (sheet.kind === 'review') {
       wide = true;
       const i = sheet.i, it = ses.items[i], q = it.q, cat = B.catById(q.type);
-      const state = it.chosen == null ? 'Boş bırakıldı.' : it.chosen === q.answer ? 'Doğru cevapladın.' : 'Yanlış cevapladın.';
-      body = '<div class="sheet-head"><div><h2>Soru ' + (i + 1) + '</h2><p>' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</p></div>' + closeBtn + '</div>' +
-        (q.promptBelow ? '' : '<p class="rv-prompt">' + q.prompt + '</p>') +
+      /* deneme bittikten sonra gözden geçirme: cevaplar burada açılır (deneme sürerken hiçbir yerde gösterilmez).
+         Boş bırakılan soru yanlış sanılmasın diye ayrı etiketlenir; doğru şık yeşil, öbürleri soluk. */
+      const st = it.chosen == null ? 'blank' : it.chosen === q.answer ? 'ok' : 'no';
+      const badge = { blank: 'Boş bıraktın', ok: 'Doğru', no: 'Yanlış' }[st];
+      const lead = st === 'blank' ? 'Bu soruyu boş bıraktın. Doğru cevap yeşil olan ' + LETTERS[q.answer] + ' şıkkı.'
+        : st === 'ok' ? 'Doğru cevapladın.' : 'Sen ' + LETTERS[it.chosen] + ' şıkkını seçtin. Doğru cevap ' + LETTERS[q.answer] + ' şıkkı.';
+      const n = ses.items.length;
+      body = '<div class="sheet-head"><div><h2>Soru ' + (i + 1) + ' <span class="rv-state rv-' + st + '">' + badge + '</span></h2><p>' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</p></div>' + closeBtn + '</div>' +
+        '<p class="rv-prompt">' + q.prompt + '</p>' +
         (q.memo ? '<div class="paper stem">' + q.memo.html + '</div>' : '') +
         (q.stem ? '<div class="paper stem">' + q.stem + '</div>' : '') +
-        (q.promptBelow ? '<p class="rv-prompt">' + q.prompt + '</p>' : '') +
         optsHtml(q, it, 'done') +
-        '<p class="tip"><b>' + state + '</b> Doğru cevap ' + LETTERS[q.answer] + ' şıkkı. ' + q.explain + '</p>' +
+        '<p class="tip' + (st === 'blank' ? ' tip-blank' : '') + '"><b>' + lead + '</b> ' + q.explain + '</p>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="review" data-i="' + (i - 1) + '"' + (i === 0 ? ' disabled' : '') + '>Önceki soru</button>' +
-        '<button type="button" class="btn btn-ghost" data-act="review" data-i="' + (i + 1) + '"' + (i === ses.items.length - 1 ? ' disabled' : '') + '>Sonraki soru</button></div>';
+        '<span class="rv-pos">' + (i + 1) + ' / ' + n + '</span>' +
+        '<button type="button" class="btn btn-ghost" data-act="review" data-i="' + (i + 1) + '"' + (i === n - 1 ? ' disabled' : '') + '>Sonraki soru</button></div>';
     }
     return '<div class="scrim"><div class="sheet' + (wide ? ' sheet-wide' : '') + '" role="dialog" aria-modal="true">' + body + '</div></div>';
   }
@@ -748,8 +740,8 @@
   function loginView() {
     const busy = authBusy || !window.BilsemAuth;
     return '<div class="page login">' +
-      '<header class="top"><div class="brand">' + robot('idle', 'logo badge') +
-      '<div><span class="brand-name">Enes <b>BİLSEM\'e</b> Hazırlanıyor</span><span class="brand-sub">Devam etmek için giriş yap</span></div></div></header>' +
+      '<header class="login-hero">' + enes('selam') +
+      '<div><span class="brand-name">Enes BİLSEM\'e Hazırlanıyor</span><span class="brand-sub">Devam etmek için giriş yap</span></div></header>' +
       '<section class="card login-card">' +
       '<div class="seg login-tabs" role="group">' +
       '<button type="button" class="' + (authMode === 'in' ? 'on' : '') + '" data-act="auth-mode" data-mode="in" aria-pressed="' + (authMode === 'in') + '">Giriş yap</button>' +
@@ -774,13 +766,15 @@
   function render() {
     if (user === undefined) { app.innerHTML = S.defs() + loadingView(); return; }
     if (user === null) { app.innerHTML = S.defs() + loginView(); return; }
+    /* deneme sırasında süssüz sınav görünümü (css: html.exam-on); sonuç ekranı normal temada */
+    document.documentElement.classList.toggle('exam-on', view === 'quiz' && !!ses && ses.mode === 'exam');
     const html = view === 'quiz' ? quizView() : view === 'result' ? resultView() : view === 'parent' ? parentView() : view === 'span' ? spanView() : homeView();
     app.innerHTML = S.defs() + html + sheetView();
   }
 
   /* ---------- olaylar ---------- */
   const actions = {
-    home() { stopTimers(); ses = null; span = null; sheet = null; view = 'home'; render(); window.scrollTo(0, 0); },
+    home() { abandonExam(); stopTimers(); ses = null; span = null; sheet = null; view = 'home'; render(); window.scrollTo(0, 0); },
     'span-pick'() { sheet = { kind: 'span' }; render(); },
     'span-go'(el) { spanStart(el.dataset.mode); },
     'span-len'(el) {
@@ -809,12 +803,13 @@
     exam(el) { startExam(Number(el.dataset.i), sheet.level || 0); },
     pick(el) { pick(Number(el.dataset.i)); },
     next: next,
-    prev: prev,
-    'memo-done': memoDone,
+    'memo-done'() { if (ses && ses.mode !== 'exam') memoDone(); },
     quit() { sheet = { kind: 'quit' }; render(); },
-    'finish-ask'() { sheet = { kind: 'finish' }; render(); },
-    finish() { finish(); },
-    review(el) { sheet = { kind: 'review', i: Number(el.dataset.i) }; render(); },
+    review(el) {
+      const i = Number(el.dataset.i);
+      if (view !== 'result' || !ses || !ses.result || !(i >= 0 && i < ses.items.length)) return;   // cevaplar yalnızca bitmiş oturumda
+      sheet = { kind: 'review', i: i }; render();
+    },
     again() {
       sheet = ses.mode === 'practice' ? { kind: 'cat', id: ses.cat } : ses.mode === 'daily' ? { kind: 'daily' } : { kind: 'exam', level: ses.fixed || 0 };
       render();
@@ -900,7 +895,7 @@
 
   app.addEventListener('click', (e) => {
     if (e.target.classList && e.target.classList.contains('scrim')) {
-      if (sheet && sheet.kind !== 'finish') { sheet = null; render(); }
+      if (sheet) { sheet = null; render(); }
       return;
     }
     const el = e.target.closest ? e.target.closest('[data-act]') : null;

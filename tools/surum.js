@@ -17,7 +17,7 @@ const sha = (text) => crypto.createHash('sha1').update(text).digest('hex');
 function stamp(html, read) {
   const hashes = [];
   let out = html.replace(/((?:href|src)=")((?:css|js)\/[^"?]+)(?:\?v=[0-9a-f]*)?(")/g, (_, pre, file, post) => {
-    const h = sha(read(file)).slice(0, 8);
+    const h = sha(read(file).replace(/\r\n/g, '\n')).slice(0, 8);
     hashes.push(h);
     return pre + file + '?v=' + h + post;
   });

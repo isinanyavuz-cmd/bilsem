@@ -58,6 +58,7 @@ test('küp sayma: her sütunun tepesi görünür; cevap toplam ya da 27 eksi top
       if (x) assert.ok(h[x - 1][y] >= h[x][y], 'arkadaki sütun daha alçak olamaz');
       if (y) assert.ok(h[x][y - 1] >= h[x][y], 'arkadaki sütun daha alçak olamaz');
     }
+    assert.strictEqual((q.stem.match(/<image href="assets\/kil\/kup-/g) || []).length, sum, 'çizilen küp sayısı');
     assert.strictEqual(value(q), q.prompt.indexOf('tamamlamak') > 0 ? 27 - sum : sum);
   });
 });
@@ -80,7 +81,7 @@ test('sayı örüntüsü: boşluk dizideki sayıdır, sayılar 0-200 arasındad�
   });
 });
 
-test('meyveli işlem: bütün satırlar meyve değerleriyle tutuyor', () => {
+test('meyve işlemleri: bütün satırlar meyve değerleriyle tutuyor', () => {
   forEach('fruit', (q) => {
     const m = q.meta;
     const side = (toks) => {
@@ -130,20 +131,6 @@ test('ok yolu: oklar ve robot komutları hedefe götürür, yanlış şıklar g�
   });
 });
 
-test('sıralama: ipuçları sırayı tek biçimde belirler ve cevap doğru', () => {
-  forEach('order', (q) => {
-    const m = q.meta, n = m.order.length;
-    // ipuçlarından çıkan "daha üstte" ilişkisinin geçişli kapanışı tam sıralama vermeli
-    const above = Array.from({ length: n }, () => Array(n).fill(false));
-    m.pairs.forEach((p) => { assert.ok(p[0] < p[1]); above[p[0]][p[1]] = true; });
-    for (let k = 0; k < n; k++) for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (above[i][k] && above[k][j]) above[i][j] = true;
-    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) assert.ok(above[i][j], 'sıra belirsiz');
-    if (m.ask === 'count') { assert.strictEqual(value(q), m.answer); assert.ok(m.answer >= 0 && m.answer < n); }
-    else assert.strictEqual(q.options[q.answer].key, 't' + m.answer);
-    if (m.ask === 'between') assert.strictEqual(q.options.length, n - 2);
-  });
-});
-
 test('şifre çözme: cevap tablodan yeniden hesaplanınca aynı çıkar', () => {
   forEach('code', (q) => {
     const m = q.meta, num = (sq) => Number(sq.map((k) => m.digits[k]).join(''));
@@ -162,7 +149,7 @@ test('şifre çözme: cevap tablodan yeniden hesaplanınca aynı çıkar', () =>
 test('görsel hafıza: sorulan resim gerçekten gösterilmiş ya da gösterilmemiş', () => {
   forEach('memory', (q) => {
     const m = q.meta, ans = q.options[q.answer].key.slice(1), rest = q.options.filter((_, i) => i !== q.answer).map((o) => o.key.slice(1));
-    assert.strictEqual(q.memo.seconds, m.shown.length);
+    assert.strictEqual(q.memo.seconds, 6);
     if (m.kind === 'where') assert.strictEqual(m.shown[m.hole], ans);
     else {
       assert.ok(m.shown.indexOf(ans) < 0, 'yeni ya da olmayan resim gösterilenlerde bulunmamalı');
@@ -217,22 +204,6 @@ test('terazi: zincir eksiksiz; dengeli terazilerde cevap doğru', () => {
     assert.strictEqual(new Set(m.pairs.map((p) => Math.min(p[0], p[1]))).size, m.n - 1, 'her komşu çift bir kez karşılaştırılır');
     for (const p of m.pairs) assert.strictEqual(Math.abs(p[0] - p[1]), 1);
     if (m.ask === 'count') assert.strictEqual(value(q), m.answer);
-  });
-});
-
-test('kim hangisi: ipuçlarının tek çözümü var, gereksiz ipucu yok, cevap hazır verilmemiş', () => {
-  forEach('who', (q, lv) => {
-    const m = q.meta, sols = B.ExtraUtil.solutions(m.n, m.clues);
-    assert.strictEqual(sols.length, 1);
-    assert.deepStrictEqual(sols[0], Array.from({ length: m.n }, (_, i) => i));
-    assert.ok(!m.clues.some((c) => c.t === 'is' && c.kid === m.ask), 'cevap ipucunda hazır verilmemeli');
-    assert.strictEqual(q.options.length, m.n);
-    if (lv > 2) {
-      for (const c of m.clues) assert.ok(B.ExtraUtil.solutions(m.n, m.clues.filter((x) => x !== c)).length > 1, 'gereksiz ipucu');
-      assert.ok(m.clues.length >= 3 && m.clues.length <= 5);
-    }
-    if (lv === 4) assert.ok(!m.clues.some((c) => c.t === 'is'));
-    if (lv === 1) assert.strictEqual(m.n, 3);
   });
 });
 
@@ -302,23 +273,14 @@ test('dört kademe var ve adları Kolay, Orta, Zor, En Zor', () => {
   assert.deepStrictEqual(B.LEVEL_NAMES.slice(1), ['Kolay', 'Orta', 'Zor', 'En Zor']);
 });
 
-test('kademe yükseldikçe sorular büyür: küp sayısı, hafıza resmi, sıralamadaki kişi sayısı', () => {
+test('kademe yükseldikçe sorular büyür: küp sayısı, hafıza resmi', () => {
   const avg = (fn) => LEVELS.map((lv) => { let t = 0; for (let seed = 1; seed <= 200; seed++) t += fn(gen.apply(null, [fn.id, lv, seed])); return t / 200; });
   const cubes = (q) => q.meta.heights.flat().reduce((a, b) => a + b, 0); cubes.id = 'cubes';
   const pics = (q) => q.meta.shown.length; pics.id = 'memory';
-  const kids = (q) => q.meta.order.length; kids.id = 'order';
-  for (const fn of [cubes, pics, kids]) {
+  for (const fn of [cubes, pics]) {
     const a = avg(fn);
     for (let i = 1; i < a.length; i++) assert.ok(a[i] >= a[i - 1], fn.id + ': ' + a.join(' < '));
     assert.ok(a[3] > a[0], fn.id);
-  }
-});
-
-test('öncüllü sorularda soru cümlesi öncüllerin altında gösterilir', () => {
-  for (const lv of LEVELS) for (let seed = 1; seed <= 50; seed++) {
-    assert.strictEqual(gen('who', lv, seed).promptBelow, true);
-    assert.strictEqual(gen('order', lv, seed).promptBelow, true);
-    assert.ok(!gen('pattern', lv, seed).promptBelow);
   }
 });
 

@@ -10,6 +10,45 @@
   const FILLS3 = ['solid', 'empty', 'stripe'];
   const LABEL = { shape: 'şekil', color: 'renk', size: 'boyut', count: 'şekil sayısı', fill: 'iç dolgusu', rot: 'yön' };
 
+  /* Çeldirici dağılımı. Tüm çeldiriciler doğru cevabın tek değişiklikli hâli olursa doğru cevap
+     "diğer üçüne en çok benzeyen" şık olur ve soruya bakmadan seçilebilir. Bu yüzden yapı rastgele seçilir:
+     yıldız (hepsi doğruya yakın), sahte merkez (D1 doğrudan, D2 ve D3 D1'den türer) ya da zincir.
+     modify(durum) -> yeni durum | null; keyOf(durum) -> şık anahtarı; o.pool: hazır (yanlış anlama) çeldiriciler;
+     o.ok(durum): çeldirici gerçekten yanlış mı. Dönen liste yapıdaki çeldiricilerle başlar, sonra yedekler gelir. */
+  Q.spread = function (rng, base, modify, keyOf, o) {
+    o = o || {};
+    const ok = o.ok || (() => true), bk = keyOf(base), seen = new Set([bk]);
+    const take = (x) => { const k = keyOf(x); if (seen.has(k) || !ok(x)) return false; seen.add(k); return true; };
+    const step = (from) => {
+      for (let t = 0; t < 40; t++) { const x = modify(from); if (x && take(x)) return x; }
+      return null;
+    };
+    const pool = rng.shuffle(o.pool || []).filter((x) => keyOf(x) !== bk && ok(x));
+    const r = rng.next(), star = o.star == null ? 0.3 : o.star;
+    const out = [];
+    const add = (x) => { if (x) out.push(x); return x; };
+    if (r < star) {
+      pool.slice(0, 3).forEach((x) => { if (take(x)) out.push(x); });
+      while (out.length < 3) { if (!add(step(base))) break; }
+    } else {
+      // sahte merkez ya da zincir: D1 doğruya yakın, yanlış anlama çeldiricileri uzak uçlarda yer alır
+      const d1 = add(step(base));
+      if (d1) {
+        const d2 = add(step(d1));
+        let d3 = null;
+        if (d2) {
+          const useMis = pool.length && rng.chance(0.5);
+          if (useMis) { const x = pool.shift(); if (take(x)) d3 = add(x); }
+          if (!d3) d3 = add(r < star + (1 - star) / 2 ? step(d1) : rng.chance(0.5) ? step(d2) : step(base));
+        }
+      }
+      while (out.length < 3) { if (!add(step(base))) break; }
+    }
+    pool.forEach((x) => { if (take(x)) out.push(x); });
+    for (let i = 0; i < 6; i++) add(step(base));
+    return out;
+  };
+
   const mk = (shape, color, extra) => Object.assign({ shape: shape, color: color, fill: 'solid', size: 1, rot: 0, count: 1 }, extra || {});
   const clone = (f, ch) => Object.assign({}, f, ch);
   const opt = (f) => ({ html: S.figSvg(f), key: S.key(f) });
@@ -37,6 +76,16 @@
       }
     }
     return rng.shuffle(singles).concat(doubles);
+  }
+
+  /* variants gibi, ama çeldiricilerin doğruya göre dizilişi Q.spread ile karışık (yıldız / sahte merkez / zincir). */
+  function figSpread(rng, f, pools, pool) {
+    const keys = Object.keys(pools);
+    const mod = (g) => {
+      const k = rng.pick(keys), vs = pools[k].filter((v) => v !== g[k]);
+      return vs.length ? clone(g, { [k]: rng.pick(vs) }) : null;
+    };
+    return Q.spread(rng, f, mod, S.key, { pool: pool }).concat(variants(rng, f, pools));
   }
 
   /* Yan yana kutular; draw(i, x, y, s) kutunun içini çizer. */
@@ -74,7 +123,10 @@
       return m;
     };
     const hole = rng.int(2, len - 1);
-    const wrong = rng.shuffle([frame(hole, 1), frame(hole, -1), frame(hole, 2), frame(hole, 0, 1), frame(hole, 0, -1), frame(hole, 0, 0, 1), frame(hole, 1, 1), frame(hole, -1, 0, 1)]);
+    const offs = [[1, 0, 0], [-1, 0, 0], [2, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [1, 1, 0], [-1, 0, 1]];
+    const fr = (o) => frame(hole, o[0], o[1], o[2]);
+    const wrongOffs = Q.spread(rng, [0, 0, 0], (o) => { const x = o.slice(); x[rng.int(0, 2)] += rng.pick([1, -1, 2]); return x; }, (o) => G.key(fr(o)), { pool: offs });
+    const wrong = wrongOffs.map(fr);
     let why = cap(colName(pal[0])) + ' kare her adımda ' + stepText(steps[0]) + ' ilerliyor.';
     if (two) why += ' ' + cap(colName(pal[1])) + ' kare ' + stepText(steps[1]) + ' ilerliyor.';
     const names = centre.map((v) => (v ? colName(pal[v - 1]) : 'boş'));
@@ -106,14 +158,14 @@
       const p = tpl.length, len = p === 3 ? 7 : 8;
       for (let i = 0; i < len; i++) seq.push(F[tpl[i % p]]);
       hole = rng.int(2, len - 1);
-      wrong = rng.shuffle([F.A, F.B, F.C]).concat(variants(rng, seq[hole], { shape: sh, color: co }));
+      wrong = figSpread(rng, seq[hole], { shape: sh, color: co }, [F.A, F.B, F.C]);
       why = 'Şekiller şu sırayla tekrar ediyor: ' + tpl.split('').map((k) => S.name(F[k])).join(', ') + '. Boş yere ' + S.name(seq[hole]) + ' gelmeli.';
     } else if (kind === 'count') {
       const f = mk(rng.pick(BASE), rng.pick(COL)), cyc = rng.pick([[1, 2, 3], [3, 2, 1], [1, 2, 3, 4]]);
       const len = cyc.length === 3 ? 7 : 8;
       for (let i = 0; i < len; i++) seq.push(clone(f, { count: cyc[i % cyc.length] }));
       hole = rng.chance(0.5) ? len - 1 : rng.int(3, len - 2);
-      wrong = variants(rng, seq[hole], { count: [1, 2, 3, 4] });
+      wrong = figSpread(rng, seq[hole], { count: [1, 2, 3, 4] });
       why = 'Şekil sayısı ' + cyc.join(', ') + ' diye tekrar ediyor. Boş yere ' + S.name(seq[hole]) + ' gelmeli.';
     } else if (kind === 'two' || kind === 'two1') {
       // two1: şekil ikide bir, renk üçte bir değişir ve boşluk sondadır; two: herhangi iki özellik, boşluk her yerde
@@ -131,7 +183,7 @@
       });
       for (let i = 0; i < 7; i++) seq.push(clone(base, { [attrs[0]]: vals[attrs[0]][i % periods[0]], [attrs[1]]: vals[attrs[1]][i % periods[1]] }));
       hole = easy ? 6 : rng.int(2, 6);
-      wrong = variants(rng, seq[hole], pools);
+      wrong = figSpread(rng, seq[hole], pools);
       why = parts.join(' ') + ' İkisi birlikte tekrar ediyor. Boş yere ' + S.name(seq[hole]) + ' gelmeli.';
     } else {
       // dönen şekil: rot 90°; rotcol 90° + renk; three 90° + renk + boyut; rot45 45°; rot45x 45°/135° + renk + boyut
@@ -148,7 +200,7 @@
       const c = seq[hole], pools = { rot: fine ? [45, 90, 135, 315, 270, 225].map((d) => (c.rot + d) % 360) : [0, 90, 180, 270] };
       if (cols.length > 1) pools.color = cols;
       if (sizes.length > 1) pools.size = sizes;
-      wrong = variants(rng, c, pools);
+      wrong = figSpread(rng, c, pools);
       const dir = step < 180 ? 'sağa' : 'sola', amt = step % 90 === 0 ? 'çeyrek tur' : (step === 45 || step === 315) ? 'çeyrek turun yarısı kadar' : 'bir buçuk çeyrek tur';
       why = 'Şekil her adımda ' + dir + ' doğru ' + amt + ' dönüyor.' +
         (cols.length > 1 ? ' Renkler sırayla: ' + cols.map(colName).join(', ') + '.' : '') +
@@ -205,13 +257,13 @@
     const hr = rng.int(0, 2), hc = xor ? rng.int(0, 2) : 2, hole = hr * 3 + hc;
     const ans = rows[hr][hc], others = rows[hr].filter((_, c) => c !== hc);
     const comb = (fn) => ans.map((row, r) => row.map((_, c) => (fn(others[0][r][c], others[1][r][c]) ? 1 : 0)));
-    const wrong = [comb((a, b) => a || b), comb((a, b) => a !== b), comb((a, b) => a && b)].filter((g) => g.some((row) => row.some(Boolean)));
-    for (let i = 0; i < 6; i++) wrong.push(G.nudge(rng, ans, 1, ['move', 'add', 'remove']));
-    wrong.push(others[0], others[1]);
+    const lit = (g) => g.some((row) => row.some(Boolean));
+    const wrong = Q.spread(rng, ans, (g) => G.nudge(rng, g, 1, ['move', 'add', 'remove']), G.key,
+      { ok: lit, pool: [comb((a, b) => a || b), comb((a, b) => a !== b), comb((a, b) => a && b), others[0], others[1]] });
     return {
       rows: rows, hole: hole,
       stem: tableSvg(hole, (i, x, y, s) => G.draw(rows[Math.floor(i / 3)][i % 3], pal, x + 11, y + 11, s - 22)),
-      correct: gridOpt(ans, pal), wrong: rng.shuffle(wrong.slice(0, 9)).concat(wrong.slice(9)).map((g) => gridOpt(g, pal)),
+      correct: gridOpt(ans, pal), wrong: wrong.map((g) => gridOpt(g, pal)),
       why: xor
         ? 'Her satırda ilk iki şekil üst üste konuyor. İki şekilde de boyalı olan kareler siliniyor, yalnız birinde boyalı olanlar kalıyor.'
         : 'Her satırda ilk iki şekil üst üste konunca üçüncü şekil oluşuyor.',
@@ -270,7 +322,7 @@
     }
     q.stem = tableSvg(hole, (i, x, y, s) => S.figAt(cells[i], x, y, s));
     q.explain = why + ' Boş kutuya ' + S.name(cells[hole]) + ' gelmeli.';
-    return Q.finish(rng, q, opt(cells[hole]), variants(rng, cells[hole], pools).map(opt));
+    return Q.finish(rng, q, opt(cells[hole]), figSpread(rng, cells[hole], pools).map(opt));
   };
 
   /* ---------- Şekil Benzetmesi (A -> B, C -> ?) ---------- */
@@ -306,7 +358,9 @@
     return {
       stem: analogySvg([(x, y, s) => S.objDraw(A, { rot: 0, mirror: false }, x + 10, y + 10, s - 20), (x, y, s) => S.objDraw(A, t, x + 10, y + 10, s - 20),
         (x, y, s) => S.objDraw(C, { rot: 0, mirror: false }, x + 10, y + 10, s - 20)]),
-      correct: o(t), wrong: rng.shuffle(near).concat(rest).map(o),
+      correct: o(t),
+      wrong: Q.spread(rng, t, (x) => (rng.chance(0.5) ? { rot: (x.rot + rng.pick([90, 180, 270])) % 360, mirror: x.mirror } : { rot: x.rot, mirror: !x.mirror }),
+        (x) => o(x).key, { pool: near }).concat(rest).map(o),
       why: 'Kural: ' + TF_TEXT[(t.mirror ? 'm' : 'r') + t.rot] + ' Aynı kural üçüncü şekle uygulanıyor.',
     };
   }
@@ -386,7 +440,12 @@
     // en güçlü çeldiriciler: kuralın bir adımı eksik uygulanmış hâller, sonra adımlardan biri yanlış uygulanmış hâller
     let wrong = T.map((_, i) => apAll(C, i));
     T.forEach((t, i) => { wrong = wrong.concat(t.alt(apAll(C, i))); });
-    wrong = rng.shuffle(wrong.slice(0, T.length)).concat(rng.shuffle(wrong.slice(T.length)), [C, Bf, clone(ans, { color: cols[5] }), clone(ans, { shape: two[0] })]);
+    const modFig = (g) => { const alts = rng.pick(T).alt(g); return alts.length ? rng.pick(alts) : null; };
+    wrong = Q.spread(rng, ans, modFig, S.key, { pool: wrong.slice(0, T.length).concat([C, Bf]), star: 0.15 })
+      .concat(wrong.slice(T.length), [clone(ans, { color: cols[5] }), clone(ans, { shape: two[0] })]);
+    // Yanlışların da "komşusu" olsun: yoksa doğru şık, ondan türeyen çeldiricilerin ortasında kalır ve soruya bakmadan seçilir.
+    const foils = rng.shuffle(wrong.slice(0, 4)).slice(0, 2).map((w, i) => (i ? clone(w, { shape: two[0] }) : clone(w, { color: cols[5] })));
+    wrong = wrong.slice(0, 3).concat(foils, wrong.slice(3));
     q.stem = analogySvg([figDraw(A), figDraw(Bf), figDraw(C)]);
     q.explain = 'Kural: ' + T.map((t) => t.txt).join(', ') + '. Aynı kural üçüncü şekle uygulanınca ' + S.name(ans) + ' elde edilir.';
     return Q.finish(rng, q, opt(ans), wrong.map(opt));
@@ -395,7 +454,7 @@
   /* ---------- Farklı Olan ---------- */
   B.GEN.odd = function (rng, level) {
     const q = { prompt: 'Hangisi diğerlerinden farklı?', stem: '' };
-    const kind = rng.pick([null, ['size', 'fill', 'count', 'rot'], ['mirror', 'mirror', 'relation', 'noise2'], ['mirror4', 'curved', 'parity', 'relcolor'], ['near', 'near', 'mirror5']][level]);
+    const kind = rng.pick([null, ['size', 'fill', 'count', 'rot'], ['mirror', 'mirror', 'relation', 'noise2'], ['mirror4', 'curved', 'relcolor'], ['near', 'near', 'mirror5']][level]);
     const tf = (rot, mirror) => ({ rot: rot, mirror: !!mirror });
 
     if (kind === 'mirror' || kind === 'mirror4' || kind === 'mirror5') {
@@ -439,12 +498,6 @@
       odd = mk(inv ? straight[0] : round[0], colors[0]);
       rest = [1, 2, 3].map((i) => mk((inv ? round : straight)[i - 1], colors[i]));
       q.explain = inv ? 'Diğer üçünün kenarları eğri. Farklı olan düz kenarlı ve köşeli.' : 'Diğer üçünün kenarları düz ve köşeli. Farklı olanın kenarı eğri.';
-    } else if (kind === 'parity') {
-      const shapes = rng.sample(BASE, 4), even = rng.chance(0.5);
-      const common = rng.pick(even ? [[2, 4, 2], [4, 2, 4]] : [[1, 3, 1], [3, 1, 3]]);
-      odd = mk(shapes[0], colors[0], { count: rng.pick(even ? [1, 3] : [2, 4]) });
-      rest = [1, 2, 3].map((i) => mk(shapes[i], colors[i], { count: common[i - 1] }));
-      q.explain = even ? 'Diğer kutularda çift sayıda şekil var. Farklı olanda tek sayıda şekil var.' : 'Diğer kutularda tek sayıda şekil var. Farklı olanda çift sayıda şekil var.';
     } else {
       // tek özellik farkı. size/fill/count/rot: şekil ya da renkten yalnız biri değişir; noise2: ikisi de dördünde farklıdır
       const single = kind !== 'noise2', target = single ? kind : rng.pick(['size', 'fill', 'count']);

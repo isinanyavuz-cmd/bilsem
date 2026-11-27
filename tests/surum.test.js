@@ -22,3 +22,8 @@ test('dosya içeriği değişince adresi ve sürüm kodu da değişir', () => {
   const changed = urls(a.html).filter((u, i) => u !== urls(b.html)[i]);
   assert.deepStrictEqual(changed.map((u) => u.split('?')[0]), ['js/app.js'], 'yalnız değişen dosyanın adresi değişir');
 });
+
+test('Windows ve Linux satır sonları aynı sürüm damgasını verir', () => {
+  const source = '<script src="js/app.js"></script>';
+  assert.strictEqual(stamp(source, () => 'a\r\nb\r\n').html, stamp(source, () => 'a\nb\n').html);
+});
