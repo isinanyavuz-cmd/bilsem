@@ -63,7 +63,7 @@ Tek dosya sürümü (`tools/tek-dosya.js`) giriş modülünü içermez; hesap gi
 | Tekrar oyna | Her çalışmanın sonunda "Tekrar oyna" önce kademeyi sorar. Günün Görevi ve Deneme Sınavı tek bir kademeyle ya da karışık oynanabilir. |
 | Deneme Sınavı | 20, 40 ya da 60 soru (en fazla 20, 40 ya da 60 dakika). Gerçek tablet sınavı gibi her sorunun kendi 60 saniyesi vardır: süre bitince sıradaki soruya otomatik geçilir ve soru boş sayılır; önceki sorulara dönülemez. Son 10 saniyede geri sayım görünür. Görsel hafıza sorularında resimler her kademede 6 saniye görünür (denemede "Hazırım" düğmesi yoktur) ve 60 saniye resim kapandıktan sonra başlar. Kademe seçilmezse sıra: ilk %20 Kolay, sonraki %40 Orta, son %40 Zor (En Zor yalnızca elle seçilirse). Asıl konular yaklaşık iki kat sık gelir. Cevaplar sınav bitince gösterilir. |
 | Sayı Hafızası | Sayı bir süre görünür ve kapanır; süre bitmeden klavyeyle düzden ve tersten yazılır. 3 basamaktan 7 basamağa kadar uzar, üç yanlışta oyun biter. Süre (hem görünme hem her yazım için): Kolay basamak sayısının iki katı, Orta basamak sayısı, Zor basamak sayısının üçte ikisi kadar saniye. Yazma süresi isteğe bağlıdır (veli panelinden): "Süresiz" seçilirse sayı yine süreyle görünür ama yazarken süre yoktur. |
-| Veli paneli | Şifreyle açılır (321321). Konu konu doğru oranı, ortalama süre, son 7 gün, öneriler, ayarlar. |
+| Veli paneli | Veli şifresiyle açılır. Konu konu doğru oranı, ortalama süre, son 7 gün, öneriler, ayarlar. Şifre ilk açılışta belirlenir, hesapta saklanır ve panelden değiştirilebilir. Unutulursa hesaptan çıkıp yeniden giriş yapılır; girişten sonraki 10 dakika içinde yeni şifre belirlenebilir. |
 
 Resmî sınavın soru sayısı ve süresi her yıl MEB kılavuzunda duyurulur; deneme
 uzunluğu bu yüzden seçilebilir bırakıldı.
@@ -139,7 +139,8 @@ cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu ve terazi gibi türl
 | `js/core.js` | Tohumlu rastgele sayı üreteci, kategori listesi, şık yardımcıları |
 | `js/shapes.js` | Şekil, kareli şekil ve küp çizimleri (SVG metni; DOM gerekmez) |
 | `js/gen-*.js` | Soru üreticileri: `Bilsem.GEN[tür](rng, kademe)`; kademe 1–4 |
-| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Yönü, Küp Görünümü, Küp Açılımı, Katlama |
+| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Yönü, Küp Görünümü, Küp Açılımı |
+| `js/gen-sinif3b.js` | Katlama, Simetri, Mini Sudoku |
 | `js/gen-bilsem.js` | BİLSEM'in resmî tiplerinden: Harf Şifresi, Eşitlik |
 | `js/span.js` | Sayı Hafızası: sayı üretimi ve oyun kuralları |
 | `js/store.js` | Yıldızlar, gün serisi, konu istatistikleri, rekorlar (`localStorage`) |

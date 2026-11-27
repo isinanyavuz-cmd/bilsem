@@ -12,7 +12,7 @@
 
   const spanBlank = () => ({ plays: 0, best: { 1: { both: 0, fwd: 0, bwd: 0 }, 2: { both: 0, fwd: 0, bwd: 0 }, 3: { both: 0, fwd: 0, bwd: 0 } } });
   function blank() {
-    return { v: 3, settings: { sound: true, len: 10, spanStart: 3, spanLevel: 1, spanTypeTimed: true }, cats: {}, days: {}, exams: [], span: spanBlank(), profile: { avatar: null } };
+    return { v: 3, settings: { sound: true, len: 10, spanStart: 3, spanLevel: 1, spanTypeTimed: true, pin: null }, cats: {}, days: {}, exams: [], span: spanBlank(), profile: { avatar: null } };
   }
 
   /* Sayı hafızası kaydını bugünkü biçime getirir: rekorlar düzeye göre tutulur ve en çok MAX basamaktır.
@@ -76,6 +76,19 @@
     return n;
   }
 
+  /* Veli şifresi açık metin olarak saklanmaz, kısa bir özeti saklanır. Bu yalnızca şifrenin kayıtta
+     okunup geçilmesini zorlaştırır; gerçek bir güvenlik önlemi değildir (FNV-1a, iki tur). */
+  function pinHash(pin) {
+    let h1 = 0x811c9dc5, h2 = 0x01000193;
+    const s = 'bilsem-veli:' + String(pin);
+    for (let i = 0; i < s.length; i++) {
+      h1 = Math.imul(h1 ^ s.charCodeAt(i), 0x01000193) >>> 0;
+      h2 = Math.imul(h2 ^ s.charCodeAt(s.length - 1 - i), 0x01000193) >>> 0;
+    }
+    return 'p1:' + h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0');
+  }
+  const PIN_RE = /^[0-9]{4,12}$/;
+
   const Store = {
     data: blank(),
     /* Ham metindeki kaydı (bugünkü ya da eski biçim) okur. Geçerliyse true döner ve veriyi yükler. */
@@ -132,6 +145,17 @@
     detach() {
       this.data = blank();
       [KEY].concat(OLD_KEYS, [OWNER_KEY]).forEach(lsDel);
+    },
+    /* Veli şifresi: 4–12 rakam. Hesabın kaydında (ayarlarda) durur; her cihazda aynıdır ve ilerleme sıfırlanınca silinmez. */
+    hasPin() { return typeof this.data.settings.pin === 'string' && this.data.settings.pin.length > 0; },
+    validPin(pin) { return PIN_RE.test(String(pin || '')); },
+    checkPin(pin) { return this.hasPin() && pinHash(String(pin || '').trim()) === this.data.settings.pin; },
+    setPin(pin) {
+      pin = String(pin || '').trim();
+      if (!PIN_RE.test(pin)) return false;
+      this.data.settings.pin = pinHash(pin);
+      this.save();
+      return true;
     },
     reset() {
       const s = this.data.settings;
