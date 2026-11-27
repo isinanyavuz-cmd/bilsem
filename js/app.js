@@ -282,7 +282,7 @@
     const sec = Math.round((Date.now() - ses.startedAt) / 1000);
     if (ses.mode === 'practice') Store.setStars(ses.cat, ses.level, stars);
     if (ses.mode === 'daily') Store.finishDaily(stars);
-    if (ses.mode === 'exam') Store.addExam({ date: U.dayKey(), n: total, ok: ok, blank: blank, sec: sec });
+    if (ses.mode === 'exam') Store.addExam({ date: U.dayKey(), at: Date.now(), n: total, ok: ok, blank: blank, sec: sec });
     Store.save();
     ses.result = { ok: ok, total: total, blank: blank, stars: stars, sec: sec };
     sheet = null;
@@ -639,6 +639,7 @@
       '<div class="set-row"><span>Ses efektleri</span>' + seg('sound', [[true, 'Açık'], [false, 'Kapalı']], set.sound) + '</div>' +
       '<div class="set-row"><span>Sayı Hafızası\'nda yazarken süre</span>' + seg('spanTypeTimed', [[true, 'Süreli'], [false, 'Süresiz']], set.spanTypeTimed !== false) + '</div>' +
       '<div class="set-row"><span>Alıştırmadaki soru sayısı</span>' + seg('len', [[5, '5'], [10, '10'], [15, '15']], set.len) + '</div>' +
+      '<div class="set-row"><span>Veli şifresi</span><button type="button" class="btn btn-ghost btn-sm" data-act="pin-change">Değiştir</button></div>' +
       '<div class="set-row"><span>Bütün ilerlemeyi sil</span><button type="button" class="btn btn-ghost btn-sm" data-act="reset-ask">Sıfırla</button></div>' +
       '</div>' +
       '<div class="card"><h2>Sınav hakkında</h2>' +
@@ -688,7 +689,22 @@
         '<form class="pin-form" data-form="pin" autocomplete="off">' +
         '<input id="pin" class="pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" aria-label="Veli şifresi"' + (sheet.wrong ? ' aria-invalid="true"' : '') + '>' +
         (sheet.wrong ? '<p class="pin-err" role="alert">Şifre yanlış. Tekrar dene.</p>' : '') +
-        '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="submit" class="btn btn-sun">Giriş</button></div></form>';
+        '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="submit" class="btn btn-sun">Giriş</button></div>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-act="pin-forgot">Şifremi unuttum</button></form>';
+    } else if (sheet.kind === 'pinset') {
+      const first = !Store.hasPin();
+      body = '<div class="sheet-head"><div><h2>' + (first ? 'Veli şifresi belirle' : 'Yeni veli şifresi') + '</h2><p>' +
+        (first ? 'Veli paneli bir şifreyle korunur. Çocuğunun bilmediği 4–12 rakamlı bir şifre seç.' : '4–12 rakamlı yeni şifreyi iki kez yaz.') + '</p></div>' + closeBtn + '</div>' +
+        '<form class="pin-form" data-form="pinset" autocomplete="off">' +
+        '<label class="field"><span>Şifre</span><input id="pin" name="a" class="pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="new-password"></label>' +
+        '<label class="field"><span>Şifre (tekrar)</span><input name="b" class="pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="new-password"></label>' +
+        (sheet.err ? '<p class="pin-err" role="alert">' + esc(sheet.err) + '</p>' : '') +
+        '<p class="note">Şifre hesabında saklanır; her cihazda aynıdır. Unutursan hesaptan çıkıp yeniden giriş yaparak yenisini belirleyebilirsin.</p>' +
+        '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="submit" class="btn btn-sun">Kaydet</button></div></form>';
+    } else if (sheet.kind === 'pinforgot') {
+      body = '<div class="sheet-head"><div><h2>Veli şifresini mi unuttun?</h2><p>Yeni şifre belirlemek için önce hesabının şifresiyle (ya da Google veya Apple ile) yeniden giriş yapman gerekir.</p></div>' + closeBtn + '</div>' +
+        '<p class="tip">Çıkış yap, sonra yeniden giriş yap. Girişten sonraki ' + PIN_RESET_MIN + ' dakika içinde Veli paneli düğmesine basınca yeni şifre belirleyebilirsin. İlerleme hesabında saklı olduğu için kaybolmaz.</p>' +
+        '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="button" class="btn btn-sun" data-act="logout">Çıkış yap</button></div>';
     } else if (sheet.kind === 'quit') {
       body = '<div class="sheet-head"><div><h2>Çıkmak istiyor musun?</h2><p>' +
         (view === 'span' ? 'Oyundan çıkarsan bu oyun biter. Ulaştığın rekor kaydedildi.' : ses.mode === 'exam' ? 'Çıkarsan bu deneme yarım kalır ve sonucu verilmez. ' + (examAnswered() ? 'Şimdiye kadar cevapladığın ' + examAnswered() + ' soru konu istatistiklerine yazılır.' : 'Henüz cevapladığın soru yok.') : 'Şimdiye kadar çözdüğün sorular kaydedildi. Yıldız kazanmak için alıştırmayı bitirmelisin.') +
@@ -706,6 +722,10 @@
         '</div>' +
         '<div class="sheet-actions"><label class="btn btn-ghost avatar-file">Fotoğraf seç<input type="file" accept="image/*" data-file="avatar" hidden></label></div>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-bad" data-act="logout">Çıkış yap</button><button type="button" class="btn btn-sun" data-act="close">Tamam</button></div>';
+    } else if (sheet.kind === 'unsynced') {
+      body = '<div class="sheet-head"><div><h2>İnternet bağlantısı yok</h2><p>Son çalışmalar henüz hesabına gönderilemedi. Şimdi çıkış yaparsan bu cihazdaki son ilerleme kaybolur.</p></div></div>' +
+        '<p class="tip">İnternete bağlanınca ilerleme kendiliğinden gönderilir. Sonra çıkış yapabilirsin.</p>' +
+        '<div class="sheet-actions"><button type="button" class="btn btn-bad" data-act="logout-force">Yine de çık</button><button type="button" class="btn btn-sun" data-act="close">Vazgeç</button></div>';
     } else if (sheet.kind === 'reset') {
       body = '<div class="sheet-head"><div><h2>İlerleme silinsin mi?</h2><p>Bütün yıldızlar, gün serisi ve istatistikler silinir. Bu işlem geri alınamaz.</p></div></div>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="button" class="btn btn-bad" data-act="reset">Sil</button></div>';
@@ -790,7 +810,15 @@
     'span-next': spanNext,
     'span-again'() { sheet = { kind: 'span' }; render(); },
     parent() {
-      sheet = { kind: 'pin', wrong: false }; render();
+      // şifre yoksa ya da hesaba az önce yeniden giriş yapıldıysa yeni şifre belirlenir
+      sheet = !Store.hasPin() || pinResetOpen() ? { kind: 'pinset' } : { kind: 'pin', wrong: false };
+      render();
+      const inp = app.querySelector('#pin'); if (inp) inp.focus();
+    },
+    'pin-forgot'() { sheet = pinResetOpen() ? { kind: 'pinset' } : { kind: 'pinforgot' }; render(); },
+    'pin-change'() {
+      if (view !== 'parent') return;
+      sheet = { kind: 'pinset' }; render();
       const inp = app.querySelector('#pin'); if (inp) inp.focus();
     },
     cat(el) { sheet = { kind: 'cat', id: el.dataset.id }; render(); },
@@ -834,9 +862,14 @@
     'auth-forgot': forgotAuth,
     'auth-google'() { socialAuth('google'); },
     'auth-apple'() { socialAuth('apple'); },
-    async logout() {
+    'logout-force'() { actions.logout(null, true); },
+    async logout(el, force) {
       if (!window.BilsemAuth) return;
-      try { await BilsemAuth.out(); } catch (err) { /* çıkışta hata olursa yerel kayıt silinmez */ return; }
+      try { await BilsemAuth.out(force); } catch (err) {
+        // çıkışta hata olursa yerel kayıt silinmez; buluta gitmemiş ilerleme varsa sorulur
+        if (err && err.code === 'bilsem/unsynced') { sheet = { kind: 'unsynced' }; render(); }
+        return;
+      }
       Store.detach();
       ses = null; span = null; sheet = null; view = 'home';
       user = null; authErr = ''; authName = '';
@@ -846,6 +879,7 @@
 
   async function socialAuth(kind) {
     if (!window.BilsemAuth || authBusy) return;
+    markLoginTry();
     authBusy = true; authErr = ''; render();
     try { await BilsemAuth[kind](); } catch (err) { authErr = err.message || 'Giriş yapılamadı.'; }
     authBusy = false; render();
@@ -854,7 +888,7 @@
     if (!window.BilsemAuth || authBusy) return;
     const email = f.querySelector('[name=u]').value, pw = f.querySelector('[name=p]').value;
     const nameEl = f.querySelector('[name=n]'), shown = nameEl ? nameEl.value : '';
-    authName = email.trim(); authBusy = true; authErr = ''; authInfo = ''; render();
+    authName = email.trim(); markLoginTry(); authBusy = true; authErr = ''; authInfo = ''; render();
     try {
       if (authMode === 'in') await BilsemAuth.signIn(email, pw);
       else await BilsemAuth.signUp(email, pw, shown);
@@ -886,10 +920,15 @@
       render();
       return;
     }
-    Store.attach(d.user.uid, d.cloud);   // bu cihazdaki kaydı hesabın kaydıyla eşitler
+    Store.attach(d.user.uid, d.cloud, d.offline);   // bu cihazdaki kaydı hesabın kaydıyla birleştirir (internet yoksa yerel kayıtla devam)
+    takeLoginTry();
     user = d.user; authErr = ''; authName = '';
     view = 'home'; sheet = null;
     render(); window.scrollTo(0, 0);
+  });
+  /* başka bir cihazdan gelen ilerleme birleşti: soru ya da oyun sürmüyorsa ekranı yenile */
+  window.addEventListener('bilsem:synced', () => {
+    if (user && view !== 'quiz' && view !== 'span' && !(sheet && /^pin/.test(sheet.kind))) render();
   });
   setTimeout(() => { if (user === undefined) { loadFailed = true; render(); } }, 12000);
 
@@ -904,14 +943,40 @@
     if (fn) fn(el);
   });
 
-  /* Veli şifresi: yalnızca çocuğun ayarları kazara değiştirmesini önlemek için; gerçek bir güvenlik önlemi değildir. */
-  const PARENT_PIN = '321321';
+  /* Veli şifresi: çocuğun ayarları ve ilerlemeyi kazara değiştirmesini önlemek için; gerçek bir güvenlik önlemi değildir.
+     Şifre hesabın kaydında durur (Store.setPin). Unutulursa: hesaptan çıkıp yeniden giriş yapılır; girişten sonraki
+     PIN_RESET_MIN dakika içinde eski şifre sorulmadan yenisi belirlenebilir. Yeniden giriş hesap şifresini (ya da
+     Google/Apple onayını) istediği için bu yol yalnızca hesabın sahibine açıktır. Açık kalan bir oturumun
+     kendiliğinden geri yüklenmesi sayılmaz; giriş düğmesine basılmış olmalı. */
+  const PIN_RESET_MIN = 10;
+  const LOGIN_TRY_KEY = 'bilsem.loginTry';
+  let pinResetUntil = 0;
+  function markLoginTry() { try { sessionStorage.setItem(LOGIN_TRY_KEY, String(Date.now())); } catch (e) { /* önemli değil */ } }
+  function takeLoginTry() {
+    let t = 0;
+    try { t = Number(sessionStorage.getItem(LOGIN_TRY_KEY)) || 0; sessionStorage.removeItem(LOGIN_TRY_KEY); } catch (e) { t = 0; }
+    // Google/Apple yönlendirmesi sayfayı yeniden yükler; giriş denemesi en çok 10 dakika önce başlamış olmalı
+    if (t && Date.now() - t < 10 * 60000) pinResetUntil = Date.now() + PIN_RESET_MIN * 60000;
+  }
+  function pinResetOpen() { return Date.now() < pinResetUntil; }
+
   document.addEventListener('submit', (e) => {
     const f = e.target;
     if (f && f.dataset && f.dataset.form === 'auth') { e.preventDefault(); submitAuth(f); return; }
+    if (f && f.dataset && f.dataset.form === 'pinset') {
+      e.preventDefault();
+      if (Store.hasPin() && view !== 'parent' && !pinResetOpen()) { sheet = { kind: 'pin', wrong: false }; render(); return; }
+      const a = f.querySelector('[name=a]').value.trim(), b = f.querySelector('[name=b]').value.trim();
+      const err = !Store.validPin(a) ? 'Şifre 4 ile 12 arasında rakamdan oluşmalı.' : a !== b ? 'İki şifre aynı değil. Tekrar yaz.' : '';
+      if (err) { sheet = { kind: 'pinset', err: err }; render(); const inp = app.querySelector('#pin'); if (inp) inp.focus(); return; }
+      Store.setPin(a);
+      pinResetUntil = 0;
+      sheet = null; view = 'parent'; render(); window.scrollTo(0, 0);
+      return;
+    }
     if (!f || f.dataset.form !== 'pin') return;
     e.preventDefault();
-    if (f.querySelector('#pin').value.trim() === PARENT_PIN) { sheet = null; view = 'parent'; render(); window.scrollTo(0, 0); return; }
+    if (Store.checkPin(f.querySelector('#pin').value)) { sheet = null; view = 'parent'; render(); window.scrollTo(0, 0); return; }
     sheet = { kind: 'pin', wrong: true }; render();
     const inp = app.querySelector('#pin'); if (inp) inp.focus();
   });

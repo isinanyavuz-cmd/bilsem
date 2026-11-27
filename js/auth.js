@@ -4,8 +4,13 @@
  *
  * Dışarıya iki nesne açar:
  *   window.BilsemAuth  -> signIn, signUp, forgot, google, apple, out
- *   window.BilsemSync  -> push(data): ilerlemeyi bulutta kullanıcının kaydına gönderir (kısa gecikmeli)
- * Durum değişince "bilsem:auth" olayı yayınlanır (detail: { configured, user, cloud, error }).
+ *   window.BilsemSync  -> push(): ilerlemeyi bulutla eşitler (kısa gecikmeli); sync(): hemen eşitler
+ * Durum değişince "bilsem:auth" olayı yayınlanır (detail: { configured, user, cloud, offline, error }).
+ * Eşitlemede buluttan gelen ilerleme bu cihazdakiyle birleşir; değiştiyse "bilsem:synced" olayı yayınlanır.
+ *
+ * Eşitleme: önce bulut kaydı okunur, bu cihazdakiyle birleştirilir (Bilsem.Store.mergeCloud), sonra
+ * birleşen kayıt geri yazılır. Böylece iki cihaz birbirinin ilerlemesini silmez. İnternet yoksa uygulama
+ * bu cihazdaki kayıtla çalışmayı sürdürür; bağlantı gelince ya da sayfaya dönülünce yeniden eşitlenir.
  */
 
 import {
@@ -52,39 +57,53 @@ function emit(detail) {
 
 /* ---------- bulut kaydı ---------- */
 let uid = null;          // şu an giriş yapmış hesap
-let pending = null;      // henüz gönderilmemiş ilerleme metni
-let pendingUid = null;
+let dirty = false;       // bu cihazda buluta gitmemiş değişiklik var
 let timer = null;
-
-async function flush() {
-  clearTimeout(timer); timer = null;
-  if (!pending || !pendingUid) return;
-  const text = pending, who = pendingUid;
-  pending = null;
-  try {
-    await setDoc(doc(db, 'users', who), { data: text, updatedAt: serverTimestamp() });
-  } catch (e) {
-    // Gönderilemedi: bir sonraki değişiklikte ya da bağlantı geri gelince yeniden denenir.
-    if (!pending) { pending = text; pendingUid = who; }
-    window.addEventListener('online', flush, { once: true });
-  }
-}
+let chain = Promise.resolve();
 
 async function fetchCloud(who) {
   const snap = await getDoc(doc(db, 'users', who));
   return snap.exists() && typeof snap.data().data === 'string' ? snap.data().data : null;
 }
 
+/* Bir eşitleme turu: oku, birleştir, gerekirse yaz. Başarılıysa true. */
+async function syncOnce() {
+  const who = uid, Store = window.Bilsem && window.Bilsem.Store;
+  if (!db || !who || !Store) return false;
+  try {
+    const cloud = await fetchCloud(who);
+    if (uid !== who) return false;                       // bu arada çıkış yapıldı
+    const before = JSON.stringify(Store.data);
+    Store.mergeCloud(cloud);
+    const text = JSON.stringify(Store.data);
+    dirty = false;
+    if (text !== before) window.dispatchEvent(new CustomEvent('bilsem:synced'));
+    if (text !== cloud) await setDoc(doc(db, 'users', who), { data: text, updatedAt: serverTimestamp() });
+    return true;
+  } catch (e) {
+    // İnternet yok ya da bulut yanıt vermedi: kayıt bu cihazda duruyor, bağlantı gelince yeniden denenir.
+    dirty = true;
+    return false;
+  }
+}
+function sync() {
+  clearTimeout(timer); timer = null;
+  chain = chain.then(syncOnce, syncOnce);
+  return chain;
+}
+
 window.BilsemSync = {
-  push(data) {
+  push() {
     if (!db || !uid) return;
-    pending = JSON.stringify(data);
-    pendingUid = uid;
+    dirty = true;
     clearTimeout(timer);
-    timer = setTimeout(flush, 1200);
+    timer = setTimeout(sync, 1200);
   },
+  sync: sync,
+  pending() { return dirty; },
 };
-window.addEventListener('pagehide', () => { flush(); });
+window.addEventListener('online', () => { if (uid) sync(); });
+document.addEventListener('visibilitychange', () => { if (uid && document.visibilityState === 'visible') sync(); });
 
 /* ---------- giriş ---------- */
 function emailOf(raw) {
@@ -143,10 +162,18 @@ window.BilsemAuth = {
     p.addScope('email');
     return providerSignIn(p);
   },
-  async out() {
+  /* force olmadan, son değişiklik buluta gönderilemezse çıkış yapılmaz ve hata fırlatılır
+     (çıkışta bu cihazdaki kayıt silindiği için ilerleme kaybolmasın). */
+  async out(force) {
     need();
-    await flush();          // son değişiklik de buluta gitsin
+    const ok = await sync();          // son değişiklik de buluta gitsin
+    if (!ok && dirty && !force) {
+      const err = new Error('Son ilerleme henüz buluta gönderilemedi.');
+      err.code = 'bilsem/unsynced';
+      throw err;
+    }
     uid = null;
+    dirty = false;
     await signOut(auth);
   },
 };
@@ -161,22 +188,29 @@ if (auth) {
       emit({ configured: true, user: null });
       return;
     }
-    let cloud;
+    let cloud, offline = false;
     try {
       cloud = await fetchCloud(u.uid);
     } catch (e) {
-      // Bulut okunamadı: ilerleme üzerine yazılmasın diye giriş reddedilir.
       cloud = undefined;
     }
     if (cloud === undefined) {
-      emit({ configured: true, user: null, error: 'Kayıtlara ulaşılamadı. İnternet bağlantını kontrol edip tekrar giriş yap.' });
-      try { await signOut(auth); } catch (e) { /* zaten çıkılmış olabilir */ }
-      return;
+      // Bulut okunamadı. Bu cihazda aynı hesabın kaydı varsa onunla devam edilir (internetsiz çalışma);
+      // yoksa boş bir kayıt buluttaki ilerlemenin üzerine yazılmasın diye giriş reddedilir.
+      let owner = null;
+      try { owner = localStorage.getItem('bilsem.owner'); } catch (err) { owner = null; }
+      if (owner !== u.uid) {
+        emit({ configured: true, user: null, error: 'Kayıtlara ulaşılamadı. İnternet bağlantını kontrol edip tekrar giriş yap.' });
+        try { await signOut(auth); } catch (err) { /* zaten çıkılmış olabilir */ }
+        return;
+      }
+      offline = true;
+      dirty = true;
     }
     uid = u.uid;
     const label = u.displayName || u.email || 'Hesap';
     const provider = (u.providerData && u.providerData[0] && u.providerData[0].providerId) || 'password';
-    emit({ configured: true, user: { uid: u.uid, name: label, email: u.email || '', provider: provider }, cloud: cloud });
+    emit({ configured: true, user: { uid: u.uid, name: label, email: u.email || '', provider: provider }, cloud: offline ? null : cloud, offline: offline });
   });
 } else {
   emit({ configured: false, user: null });

@@ -138,3 +138,30 @@ test('kaldırılmış kategorilerin kayıtları yüklenirken atılır ve toplaml
   assert.deepStrictEqual(Object.keys(S.data.cats), ['cubes']);
   assert.strictEqual(S.totalStars(), 1);
 });
+
+test('veli şifresi: başta yoktur, belirlenir, açık metin saklanmaz, sıfırlamada ve yeniden yüklemede kalır', () => {
+  const S = B.Store;
+  S.data = U.blank();
+  assert.strictEqual(S.hasPin(), false);
+  assert.strictEqual(S.checkPin(''), false, 'şifre yokken hiçbir şey kabul edilmez');
+  ['', '123', 'abcd', '1234567890123', '12 34'].forEach((p) => {
+    assert.strictEqual(S.setPin(p), false, 'geçersiz şifre: ' + JSON.stringify(p));
+  });
+  assert.strictEqual(S.hasPin(), false);
+  assert.strictEqual(S.setPin('4826'), true);
+  assert.strictEqual(S.hasPin(), true);
+  assert.ok(!JSON.stringify(S.data).includes('4826'), 'şifre kayıtta açık durmaz');
+  assert.strictEqual(S.checkPin('4826'), true);
+  assert.strictEqual(S.checkPin(' 4826 '), true);
+  assert.strictEqual(S.checkPin('4827'), false);
+  assert.strictEqual(S.checkPin('321321'), false, 'eski sabit şifre artık geçmez');
+  S.reset();
+  assert.strictEqual(S.checkPin('4826'), true, 'ilerleme sıfırlanınca şifre kalır');
+  const raw = JSON.stringify(S.data);
+  S.data = U.blank();
+  assert.strictEqual(S.hydrate(raw), true);
+  assert.strictEqual(S.checkPin('4826'), true, 'buluttan gelen kayıtta şifre korunur');
+  assert.strictEqual(S.setPin('99887766'), true);
+  assert.strictEqual(S.checkPin('4826'), false);
+  assert.strictEqual(S.checkPin('99887766'), true);
+});

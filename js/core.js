@@ -45,7 +45,7 @@
     { id: 'mirror', core: true, area: 'uzamsal', name: 'Ayna Görüntüsü', desc: 'Yansımayı bul', tip: 'Aynada sağ ile sol yer değiştirir. Aynaya yakın olan parça yine aynaya yakın kalır.' },
     { id: 'cubes', core: true, area: 'uzamsal', name: 'Küp Sayma', desc: 'Gizli küpleri unutma', tip: 'Kat kat say. Üstteki küplerin altında da küp olduğunu unutma.' },
     { id: 'stack', area: 'uzamsal', name: 'Üst Üste Çizgiler', desc: 'Hangi çizgi üstte, hangisi altta?', tip: 'İki çizginin kesiştiği yere bak: kesintisiz devam eden üstte, arkadan geçen alttadır. Çizgileri ikişer ikişer karşılaştır.' },
-    { id: 'roll', core: true, area: 'uzamsal', name: 'Küp Yönü', desc: 'Küp yatınca hangi yüz üstte?', tip: 'Karşılıklı yüzleri not al. Küp yan yatınca üst yüz yana gider, karşısındaki yüz üste çıkar.' },
+    { id: 'roll', core: true, area: 'uzamsal', name: 'Küpün Yüzünü Bul', desc: 'Küp yatınca hangi yüz üstte?', tip: 'Karşılıklı yüzleri not al. Küp yan yatınca üst yüz yana gider, karşısındaki yüz üste çıkar.' },
     { id: 'view', core: true, area: 'uzamsal', name: 'Küp Görünümü', desc: 'Gözün gördüğünü bul', tip: 'Gözün baktığı yönde her sütunun en yüksek kulesine bak. Arkadaki alçak kuleler görünmez.' },
     { id: 'net', area: 'uzamsal', name: 'Küp Açılımı', desc: 'Katlayınca küp olur mu?', tip: 'Açılımı kafanda katla: hiçbir kare başka bir karenin üstüne binmemeli. Dörtlü sıranın iki yanına birer kare gelir.' },
     { id: 'fold', core: true, area: 'uzamsal', name: 'Katlama', desc: 'Açılınca delikler nerede?', tip: 'Katlama çizgisi bir ayna gibidir. Katlanmış kâğıttaki her delik, açılınca çizginin öbür yanında da çıkar.' },

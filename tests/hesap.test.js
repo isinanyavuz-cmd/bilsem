@@ -102,3 +102,124 @@ test('save: her değişiklik yerel kayda yazılır ve buluta gönderilir', () =>
     assert.equal(JSON.parse(ls.getItem('bilsem.v3')).cats.cubes.stars[0], 3);
   });
 });
+
+/* ---------- internetsiz çalışma ve iki cihazın birleşmesi ---------- */
+function rec(build) { const d = U.blank(); build(d); return d; }
+
+test('attach (internet yok): aynı hesabın bu cihazdaki kaydıyla devam eder, başka hesabınkiyle değil', () => {
+  withEnv((ls, pushes) => {
+    ls.setItem('bilsem.v3', progressWith(2));
+    ls.setItem('bilsem.owner', 'uid-a');
+    assert.equal(Store.attach('uid-a', null, true), 'local');
+    assert.equal(Store.data.cats.cubes.stars[0], 2);
+    assert.equal(pushes.length, 0, 'internet yokken gönderilmeye çalışılmaz');
+    assert.equal(Store.attach('uid-b', null, true), 'none');
+    assert.equal(ls.getItem('bilsem.owner'), 'uid-a', 'başka hesap cihazı devralmaz');
+  });
+});
+
+test('attach: aynı hesabın internetsiz yapılmış ilerlemesi buluttakiyle birleşir ve gönderilir', () => {
+  withEnv((ls, pushes) => {
+    const cloud = rec((d) => { d.cats.cubes = { stars: [3, 0, 0, 0], seen: 10, ok: 8, ms: 0, recent: [1], skill: 1.5 }; d.ts = 100; });
+    const local = rec((d) => {
+      d.cats.cubes = { stars: [1, 2, 0, 0], seen: 14, ok: 11, ms: 0, recent: [1, 1], skill: 2.1 };
+      d.cats.odd = { stars: [2, 0, 0, 0], seen: 5, ok: 4, ms: 0, recent: [1], skill: 1.2 };
+      d.ts = 200;
+    });
+    ls.setItem('bilsem.v3', JSON.stringify(local));
+    ls.setItem('bilsem.owner', 'uid-a');
+    assert.equal(Store.attach('uid-a', JSON.stringify(cloud)), 'merged');
+    assert.deepEqual(Store.data.cats.cubes.stars, [3, 2, 0, 0], 'yıldızların en büyüğü');
+    assert.equal(Store.data.cats.cubes.seen, 14, 'daha çok çözülen kayıt');
+    assert.equal(Store.data.cats.odd.seen, 5, 'yalnızca bu cihazdaki konu da gelir');
+    assert.equal(pushes.length, 1);
+  });
+});
+
+test('merge: iki cihaz birbirinin ilerlemesini silmez', () => {
+  const a = rec((d) => {
+    d.cats.cubes = { stars: [3, 1, 0, 0], seen: 20, ok: 15, ms: 0, recent: [1], skill: 2.3 };
+    d.days['2026-11-27'] = { n: 10, ok: 8, daily: true, stars: 2 };
+    d.exams = [{ date: '2026-11-26', at: 1, n: 20, ok: 15, blank: 1, sec: 600 }];
+    d.span.plays = 3; d.span.best[1].both = 5;
+    d.settings.sound = false; d.ts = 500;
+  });
+  const b = rec((d) => {
+    d.cats.cubes = { stars: [2, 2, 0, 0], seen: 12, ok: 9, ms: 0, recent: [0], skill: 1.8 };
+    d.cats.memory = { stars: [1, 0, 0, 0], seen: 4, ok: 3, ms: 0, recent: [1], skill: 1 };
+    d.days['2026-11-27'] = { n: 14, ok: 9, daily: false };
+    d.days['2026-11-28'] = { n: 5, ok: 5, daily: false };
+    d.exams = [{ date: '2026-11-26', at: 1, n: 20, ok: 15, blank: 1, sec: 600 }, { date: '2026-11-28', at: 9, n: 40, ok: 30, blank: 0, sec: 1500 }];
+    d.span.plays = 5; d.span.best[1].both = 4; d.span.best[2].fwd = 6;
+    d.settings.sound = true; d.ts = 400;
+  });
+  for (const [x, y] of [[a, b], [b, a]]) {
+    const m = U.merge(U.parse(x), U.parse(y));
+    assert.deepEqual(m.cats.cubes.stars, [3, 2, 0, 0]);
+    assert.equal(m.cats.cubes.seen, 20);
+    assert.equal(m.cats.memory.seen, 4);
+    assert.deepEqual(m.days['2026-11-27'], { n: 14, ok: 9, daily: true, stars: 2 });
+    assert.equal(m.days['2026-11-28'].n, 5);
+    assert.equal(m.exams.length, 2, 'aynı deneme iki kez sayılmaz');
+    assert.equal(m.span.plays, 5);
+    assert.equal(m.span.best[1].both, 5);
+    assert.equal(m.span.best[2].fwd, 6);
+    assert.equal(m.settings.sound, false, 'ayarlar son kaydeden cihazdan');
+    assert.equal(m.ts, 500);
+  }
+  const once = U.merge(U.parse(a), U.parse(b));
+  assert.deepEqual(U.merge(once, U.parse(b)), once, 'birleşen kayıt yeniden birleşince değişmez');
+});
+
+test('merge: ilerleme bir cihazda sıfırlandıysa eski ilerleme geri gelmez', () => {
+  withEnv(() => {
+    Store.data = U.parse(rec((d) => { d.cats.cubes = { stars: [3, 0, 0, 0], seen: 30, ok: 20, ms: 0, recent: [1], skill: 2 }; d.ts = 10; }));
+    const old = JSON.stringify(Store.data);
+    Store.reset();
+    assert.ok(Store.data.epoch > 0);
+    Store.mergeCloud(old);
+    assert.equal(Store.data.cats.cubes, undefined);
+  });
+});
+
+test('mergeCloud: buluttaki ilerleme bu cihazdakine eklenir, bulut boşsa kayıt değişmez', () => {
+  withEnv((ls) => {
+    Store.data = U.parse(progressWith(1));
+    const before = JSON.stringify(Store.data);
+    Store.mergeCloud(null);
+    assert.equal(JSON.stringify(Store.data), before);
+    Store.mergeCloud(progressWith(3));
+    assert.equal(Store.data.cats.cubes.stars[0], 3);
+    assert.equal(JSON.parse(ls.getItem('bilsem.v3')).cats.cubes.stars[0], 3, 'birleşen kayıt cihaza da yazılır');
+  });
+});
+
+test('merge: bir cihazda veli şifresi belirlenince, öbür cihazda sonradan soru çözülmesi şifreyi geri almaz', () => {
+  withEnv(() => {
+    const realNow = Date.now;
+    let now = 1000;
+    Date.now = () => now;
+    try {
+      // iki cihaz aynı kayıtla başlar
+      Store.data = U.parse(progressWith(1)); Store.save();
+      const start = JSON.stringify(Store.data);
+      // A: veli şifresini belirler
+      now = 2000; Store.data = U.parse(start); Store.setPin('4826');
+      const a = U.parse(JSON.stringify(Store.data));
+      // B (internetsiz): daha sonra soru çözer, ayarlara dokunmaz
+      now = 3000; Store.data = U.parse(start); Store.recordAnswer('cubes', 1, true, 500); Store.save();
+      const b = U.parse(JSON.stringify(Store.data));
+      for (const [x, y] of [[a, b], [b, a]]) {
+        const m = U.merge(x, y);
+        Store.data = m;
+        assert.equal(Store.checkPin('4826'), true, 'şifre korunur');
+        assert.equal(m.cats.cubes.seen, 4, 'B\'nin ilerlemesi de gelir');
+      }
+      // B sonra şifreyi değiştirirse o kazanır
+      now = 4000; Store.data = U.parse(JSON.stringify(b)); Store.setPin('1111');
+      const m2 = U.merge(a, U.parse(JSON.stringify(Store.data)));
+      Store.data = m2;
+      assert.equal(Store.checkPin('1111'), true);
+    } finally { Date.now = realNow; }
+  });
+});
