@@ -544,6 +544,18 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .note + .note { margin-top: 8px; }
 
 .rv-prompt { font: 800 20px/1.25 var(--font-display); }
+.rv-state { display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; margin-left: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; font: 800 18px/1.1 var(--font-display); }
+.rv-state::before { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-size: 15px; background: rgba(255, 255, 255, .9); }
+.rv-state.rv-ok { background: var(--good); color: #fff; box-shadow: 0 3px 0 var(--good-dark); }
+.rv-state.rv-ok::before { content: '✓'; color: var(--good-dark); }
+.rv-state.rv-no { background: var(--bad); color: #fff; box-shadow: 0 3px 0 var(--bad-dark); }
+.rv-state.rv-no::before { content: '✗'; color: var(--bad-dark); }
+.rv-state.rv-blank { background: var(--sun); color: var(--sun-ink); box-shadow: 0 3px 0 var(--sun-dark); }
+.rv-state.rv-blank::before { content: '–'; color: var(--sun-ink); }
+.tip.tip-blank { background: var(--sun); color: var(--sun-ink); box-shadow: inset 0 0 0 2px var(--sun-dark); }
+.rv-pos { align-self: center; font-weight: 700; color: var(--ink-soft); }
+.qchip-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 14px; color: var(--ink-soft); }
+.qchip-key .qchip { width: 26px; height: 26px; min-width: 0; font-size: 13px; pointer-events: none; }
 .sheet .q-svg { max-height: 240px; }
 .sheet .opt { min-height: 92px; }
 

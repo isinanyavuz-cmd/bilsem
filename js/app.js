@@ -563,7 +563,7 @@
     if (!exam) html += '<div class="big-stars">' + [0, 1, 2].map((i) => star(i < r.stars)).join('') + '</div>';
     html += '<div class="score">' + r.ok + '<small> / ' + r.total + ' doğru</small></div><p class="result-sub">' + sub + '</p>';
     if (ses.mode !== 'practice') html += '<div class="card"><h2>Konulara göre</h2>' + areaBars(ses.items) + '</div>';
-    html += '<div class="card"><h2>Sorulara tekrar bak</h2><div class="qchips">' + ses.items.map((it, i) => {
+    html += '<div class="card"><h2>Sorulara tekrar bak</h2><p class="qchip-key"><span class="qchip ok">✓</span>doğru <span class="qchip no">✗</span>yanlış <span class="qchip blank">–</span>boş</p><div class="qchips">' + ses.items.map((it, i) => {
       const cls = it.chosen == null ? 'blank' : it.chosen === it.q.answer ? 'ok' : 'no';
       return '<button type="button" class="qchip ' + cls + '" data-act="review" data-i="' + i + '" aria-label="Soru ' + (i + 1) + '">' + (i + 1) + '</button>';
     }).join('') + '</div></div>';
@@ -712,15 +712,22 @@
     } else if (sheet.kind === 'review') {
       wide = true;
       const i = sheet.i, it = ses.items[i], q = it.q, cat = B.catById(q.type);
-      const state = it.chosen == null ? 'Boş bırakıldı.' : it.chosen === q.answer ? 'Doğru cevapladın.' : 'Yanlış cevapladın.';
-      body = '<div class="sheet-head"><div><h2>Soru ' + (i + 1) + '</h2><p>' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</p></div>' + closeBtn + '</div>' +
+      /* deneme bittikten sonra gözden geçirme: cevaplar burada açılır (deneme sürerken hiçbir yerde gösterilmez).
+         Boş bırakılan soru yanlış sanılmasın diye ayrı etiketlenir; doğru şık yeşil, öbürleri soluk. */
+      const st = it.chosen == null ? 'blank' : it.chosen === q.answer ? 'ok' : 'no';
+      const badge = { blank: 'Boş bıraktın', ok: 'Doğru', no: 'Yanlış' }[st];
+      const lead = st === 'blank' ? 'Bu soruyu boş bıraktın. Doğru cevap yeşil olan ' + LETTERS[q.answer] + ' şıkkı.'
+        : st === 'ok' ? 'Doğru cevapladın.' : 'Sen ' + LETTERS[it.chosen] + ' şıkkını seçtin. Doğru cevap ' + LETTERS[q.answer] + ' şıkkı.';
+      const n = ses.items.length;
+      body = '<div class="sheet-head"><div><h2>Soru ' + (i + 1) + ' <span class="rv-state rv-' + st + '">' + badge + '</span></h2><p>' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</p></div>' + closeBtn + '</div>' +
         '<p class="rv-prompt">' + q.prompt + '</p>' +
         (q.memo ? '<div class="paper stem">' + q.memo.html + '</div>' : '') +
         (q.stem ? '<div class="paper stem">' + q.stem + '</div>' : '') +
         optsHtml(q, it, 'done') +
-        '<p class="tip"><b>' + state + '</b> Doğru cevap ' + LETTERS[q.answer] + ' şıkkı. ' + q.explain + '</p>' +
+        '<p class="tip' + (st === 'blank' ? ' tip-blank' : '') + '"><b>' + lead + '</b> ' + q.explain + '</p>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="review" data-i="' + (i - 1) + '"' + (i === 0 ? ' disabled' : '') + '>Önceki soru</button>' +
-        '<button type="button" class="btn btn-ghost" data-act="review" data-i="' + (i + 1) + '"' + (i === ses.items.length - 1 ? ' disabled' : '') + '>Sonraki soru</button></div>';
+        '<span class="rv-pos">' + (i + 1) + ' / ' + n + '</span>' +
+        '<button type="button" class="btn btn-ghost" data-act="review" data-i="' + (i + 1) + '"' + (i === n - 1 ? ' disabled' : '') + '>Sonraki soru</button></div>';
     }
     return '<div class="scrim"><div class="sheet' + (wide ? ' sheet-wide' : '') + '" role="dialog" aria-modal="true">' + body + '</div></div>';
   }
@@ -798,7 +805,11 @@
     next: next,
     'memo-done'() { if (ses && ses.mode !== 'exam') memoDone(); },
     quit() { sheet = { kind: 'quit' }; render(); },
-    review(el) { sheet = { kind: 'review', i: Number(el.dataset.i) }; render(); },
+    review(el) {
+      const i = Number(el.dataset.i);
+      if (view !== 'result' || !ses || !ses.result || !(i >= 0 && i < ses.items.length)) return;   // cevaplar yalnızca bitmiş oturumda
+      sheet = { kind: 'review', i: i }; render();
+    },
     again() {
       sheet = ses.mode === 'practice' ? { kind: 'cat', id: ses.cat } : ses.mode === 'daily' ? { kind: 'daily' } : { kind: 'exam', level: ses.fixed || 0 };
       render();
