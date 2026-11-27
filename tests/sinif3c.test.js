@@ -147,7 +147,7 @@ test('harf şifresi: örneğe uyan her kural aynı cevabı verir, cevap kuraldan
   }, 150);
 });
 
-test('hangisi eşit?: satırları sağlayan her değer üçlüsünde cevap aynıdır', () => {
+test('eşitlik: satırları sağlayan her değer üçlüsünde cevap aynıdır', () => {
   forEach('equiv', (q) => {
     const m = q.meta, nT = m.nT, found = new Set();
     const val = (c, v) => c.reduce((a, x, i) => a + x * v[i], 0);

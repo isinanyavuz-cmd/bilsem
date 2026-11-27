@@ -7,7 +7,7 @@ const gen = (id, lv, seed) => B.generate(id, lv, new B.RNG(seed));
 const forEach = (id, fn, runs, levels) => { for (const lv of levels || B.LEVELS) for (let seed = 1; seed <= (runs || 200); seed++) fn(gen(id, lv, seed), lv, seed); };
 const correctKey = (q) => q.options[q.answer].key;
 
-test('delikli kâğıt: kâğıt gerçekten katlanıp delikler yeniden açılınca aynı sonuç çıkar', () => {
+test('katlama: kâğıt gerçekten katlanıp delikler yeniden açılınca aynı sonuç çıkar', () => {
   forEach('fold', (q) => {
     const m = q.meta, N = m.N, h = N / 2;
     // her kâğıt karesinin katlanmış kâğıttaki yeri (üreticiden bağımsız: katmanları üst üste bindir)

@@ -73,8 +73,8 @@ uzunluğu bu yüzden seçilebilir bırakıldı.
 | Alan | Türler |
 |---|---|
 | Şekil Bulmacaları | Şekil Örüntüsü, Şekil Tablosu, Şekil Benzetmesi, Farklı Olan, Desen Tamamlama, Şeffaf Kâğıt, Simetri |
-| Kafanda Canlandır | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Yuvarlanan Küp, Küp Görünümü, Küp Açılımı, Delikli Kâğıt, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
-| Sayı Bulmacaları | Sayı Örüntüsü, Meyve Hesabı, Şifre Çözme, Sayı Makinesi, Sihirli Kare, Geriye Doğru, Ocak Planı, Hangisi Eşit? |
+| Yön ve Döndürme | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Yönü, Küp Görünümü, Küp Açılımı, Katlama, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
+| Sayı Bulmacaları | Sayı Örüntüsü, Meyveli İşlem, Şifre Çözme, Sayı Makinesi, Sihirli Kare, Geriye Doğru, Ocak Planı, Eşitlik |
 | Dikkat ve Hafıza | Aynısını Bul, Şekil Sayma, Görsel Hafıza, Gölge Bulma |
 | Mantık Yürütme | Sıralama, Ok Yolu, Terazi, Kim Hangisi?, Yalancı mı Doğrucu mu?, Mini Sudoku, Kapılardan Geçiş, Harf Şifresi |
 
@@ -96,10 +96,10 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Kim Hangisi? | 3 kişi, 2 ipucu | 3–4 kişi, "değil" ipuçları | 4 kişi, en az sayıda ipucu | "ne … ne …" ve "ya … ya da …" ipuçları |
 | Desen Tamamlama | 6×6 desende 2×2 boşluk; 2 renkli yinelenen kalıp | 3 renkli ya da 3×3 kalıp | çapraz çizgiler; ortadan aynalanmış desen | 6×6 çeyrek tur simetrisi; 8×8 desende 3×3 boşluk, aynalama ya da çeyrek tur |
 | Şeffaf Kâğıt | 3×3, iki kâğıt | 4×4, iki kâğıt | 3×3, kâğıdın biri çevrilir | 4×4, iki ya da üç kâğıt; çeyrek, yarım tur ya da ters yöne çevirme |
-| Yuvarlanan Küp | alt yüz ya da bir devirme sonrası üst yüz (karşılıklı yüzlerden) | bir devirme; üst, sağ ya da sol yüz | iki devirme | üç devirme |
+| Küp Yönü | alt yüz ya da bir devirme sonrası üst yüz (karşılıklı yüzlerden) | bir devirme; üst, sağ ya da sol yüz | iki devirme | üç devirme |
 | Küp Görünümü | 2×2 taban, soldan bakış | 3×2 taban; soldan ya da sağdan | 3×3 taban | 4×3 taban, 4 kata kadar |
 | Küp Açılımı | hangi açılım küp olur? (bariz yanlış çeldiriciler) | aynısı, inandırıcı çeldiricilerle | verilen renkli açılımda karşı yüzün rengi | 7 kareden hangisi çıkarılırsa açılım olur (Kangaroo tarzı) |
-| Delikli Kâğıt | 4×4 kâğıt, bir katlama, 1 delik | 6×6 kâğıt, bir katlama, 2 delik | iki katlama (dikey sonra yatay), 1–2 delik | 6×6, iki katlama, 2–3 delik |
+| Katlama | 4×4 kâğıt, bir katlama, 1 delik | 6×6 kâğıt, bir katlama, 2 delik | iki katlama (dikey sonra yatay), 1–2 delik | 6×6, iki katlama, 2–3 delik |
 | Simetri | 4×4, dikey ayna çizgisi, yarıyı tamamla | 6×6, dikey ya da yatay çizgi | 5×5, çapraz ayna çizgisi | kaç simetri ekseni var? (0–4; yalnızca dönme simetrisi olan şekiller de var) |
 | Sihirli Kare | 3×3, 1–11 arası sayılar, toplam verilir, 1 gizli | daha büyük sayılar, toplam verilir | toplam verilmez, 2 gizli sayı | toplam verilmez, 3 gizli sayı |
 | Yalancı mı Doğrucu mu? | 3 çocuk; "X doğru/yalan söylüyor", "hepimiz yalanız" | 3 çocuk; "ben ve X yalan söylüyoruz" gibi ikili ifadeler | 4 çocuk; "aramızda tam bir yalancı var" | 4 çocuk; tüm ifade türleri |
@@ -111,10 +111,10 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Geriye Doğru | tek işlem | iki işlem | üç işlem (yarısı, çarpma dâhil) | dört işlem ya da robotun kafaları (3 kesişte 1 kafa uzar) |
 | Kartı Çevir | sağ ya da üst kenardan çevrilince görünen yüz verilir; öbür eksenden çevirsek? | karşı kenar da olabilir (aynı görüntü) | 4×4 resim, 3 çevirme dizisi | 4×4 resim, 5 çevirme dizisi |
 | Harf Şifresi | örnek kelimeden kural çıkar: alfabede 1 ileri ya da geri kayma | 2–3 harf kayma | alfabeyi tersten yazma (A yerine Z) ya da kayma ve tersten yazma | kayma ya da ters alfabe, ayrıca kelime tersten yazılır |
-| Hangisi Eşit? | iki şekil, bir eşitlik | iki şekil, iki eşitlik | üç şekil, iki eşitlik | üç şekil, üç eşitlik; her şekil sayısı 9'a kadar değer alabilir |
+| Eşitlik | iki şekil, bir eşitlik | iki şekil, iki eşitlik | üç şekil, iki eşitlik | üç şekil, üç eşitlik; her şekil sayısı 9'a kadar değer alabilir |
 
-3. sınıf için eklenen beş türde (Desen Tamamlama, Şeffaf Kâğıt, Yuvarlanan Küp, Küp Görünümü, Küp Açılımı) En Zor kademe 3. sınıf düzeyindedir; Kolay kademe 2. sınıfa da uygundur. Sınıf seçimi yoktur: tüm türler tek havuzda, kademeler ilerlemeye göre otomatik önerilir.
-Yalancı mı Doğrucu mu?, Sihirli Kare ve Mini Sudoku'da bulmacanın tek çözümlü olduğu üretimde denetlenir. Cevaplar kuraldan hesaplanır: Yuvarlanan Küp'te küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
+3. sınıf için eklenen beş türde (Desen Tamamlama, Şeffaf Kâğıt, Küp Yönü, Küp Görünümü, Küp Açılımı) En Zor kademe 3. sınıf düzeyindedir; Kolay kademe 2. sınıfa da uygundur. Sınıf seçimi yoktur: tüm türler tek havuzda, kademeler ilerlemeye göre otomatik önerilir.
+Yalancı mı Doğrucu mu?, Sihirli Kare ve Mini Sudoku'da bulmacanın tek çözümlü olduğu üretimde denetlenir. Cevaplar kuraldan hesaplanır: Küp Yönü'nde küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
 
 Öncüllü sorularda (Kim Hangisi?, Sıralama) soru cümlesi öncüllerin altında gösterilir.
 
@@ -150,9 +150,9 @@ cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu, sıralama, terazi v
 | `js/core.js` | Tohumlu rastgele sayı üreteci, kategori listesi, şık yardımcıları |
 | `js/shapes.js` | Şekil, kareli şekil ve küp çizimleri (SVG metni; DOM gerekmez) |
 | `js/gen-*.js` | Soru üreticileri: `Bilsem.GEN[tür](rng, kademe)`; kademe 1–4 |
-| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Yuvarlanan Küp, Küp Görünümü, Küp Açılımı, Delikli Kâğıt, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
+| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Yönü, Küp Görünümü, Küp Açılımı, Katlama, Çubukla Kare, Noktalı Kâğıt, Kartı Çevir |
 | `js/gen-sinif3c.js` | Kangaroo tarzı türler: Kapılardan Geçiş, Ocak Planı, Çubukla Kare, Noktalı Kâğıt, Geriye Doğru, Kartı Çevir |
-| `js/gen-bilsem.js` | BİLSEM'in resmî tiplerinden: Harf Şifresi, Hangisi Eşit? |
+| `js/gen-bilsem.js` | BİLSEM'in resmî tiplerinden: Harf Şifresi, Eşitlik |
 | `js/span.js` | Sayı Hafızası: sayı üretimi ve oyun kuralları |
 | `js/store.js` | Yıldızlar, gün serisi, konu istatistikleri, rekorlar (`localStorage`) |
 | `js/app.js` | Arayüz |
