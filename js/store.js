@@ -12,7 +12,7 @@
 
   const spanBlank = () => ({ plays: 0, best: { 1: { both: 0, fwd: 0, bwd: 0 }, 2: { both: 0, fwd: 0, bwd: 0 }, 3: { both: 0, fwd: 0, bwd: 0 } } });
   function blank() {
-    return { v: 3, settings: { sound: true, len: 10, spanStart: 3, spanLevel: 1, spanTypeTimed: true, pin: null }, cats: {}, days: {}, exams: [], span: spanBlank(), profile: { avatar: null }, ts: 0, epoch: 0 };
+    return { v: 3, settings: { sound: true, len: 10, spanStart: 3, spanLevel: 1, spanTypeTimed: true, pin: null }, cats: {}, days: {}, exams: [], span: spanBlank(), profile: { avatar: null }, ts: 0, sts: 0, shash: '', epoch: 0 };
   }
 
   /* Sayı hafızası kaydını bugünkü biçime getirir: rekorlar düzeye göre tutulur ve en çok MAX basamaktır.
@@ -87,6 +87,11 @@
     }
     return 'p1:' + h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0');
   }
+  function textHash(s) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193) >>> 0;
+    return h.toString(16) + ':' + s.length;
+  }
   const PIN_RE = /^[0-9]{4,12}$/;
 
   /* Ham metni bugünkü biçimde bir kayda çevirir; geçersizse null. */
@@ -105,6 +110,8 @@
         Object.keys(out.cats || {}).forEach((k) => { if (Bilsem.catById(k)) cats[k] = out.cats[k]; });
         out.cats = cats;
         out.ts = Number(out.ts) || 0;
+        out.sts = Number(out.sts) || 0;
+        out.shash = typeof out.shash === 'string' ? out.shash : '';
         out.epoch = Number(out.epoch) || 0;
         return out;
       }
@@ -115,7 +122,7 @@
   /* İki cihazın kaydını birleştirir (saf; iki kayıt da parse edilmiş olmalı).
      İlerleme yalnızca artar: her konuda daha çok soru çözülmüş kayıt alınır, yıldızlar ve rekorlar en
      büyüğüdür, günler gün gün birleşir, deneme sonuçları birleşip yinelenenler atılır. Ayarlar ve profil
-     en son kaydedilen cihazdan gelir. İlerleme bir cihazda sıfırlandıysa (epoch) sıfırlamadan önceki kayıt
+     en son değiştiren cihazdan gelir (sts). İlerleme bir cihazda sıfırlandıysa (epoch) sıfırlamadan önceki kayıt
      birleştirilmez; sıfırlanan taraf kazanır.
      Not: iki cihaz aynı konuda ayrı ayrı çalıştıysa o konunun sayaçları toplanmaz, büyük olan alınır;
      böylece aynı çalışma iki kez sayılmaz, ama bir cihazdaki birkaç soru istatistiklere girmeyebilir. */
@@ -124,6 +131,14 @@
     const newer = (b.ts || 0) > (a.ts || 0) ? b : a;
     const out = JSON.parse(JSON.stringify(newer));
     const older = newer === a ? b : a;
+    // ayarlar ve profil (veli şifresi dâhil) yalnızca kendileri en son değişen cihazdan gelir (sts);
+    // öbür cihazda sonradan soru çözülmesi eski ayarları geri getirmez
+    const setSrc = (older.sts || 0) > (out.sts || 0) ? older : null;
+    if (setSrc) {
+      out.settings = JSON.parse(JSON.stringify(setSrc.settings));
+      out.profile = JSON.parse(JSON.stringify(setSrc.profile));
+      out.sts = setSrc.sts; out.shash = setSrc.shash;
+    }
     // konular
     Object.keys(older.cats).forEach((k) => {
       const o = older.cats[k], n = out.cats[k];
@@ -176,6 +191,8 @@
     /* Kaydı bu cihazda saklar ve (giriş yapılmışsa) hesabın bulut kaydına gönderir. */
     save() {
       this.data.ts = Date.now();
+      const h = textHash(JSON.stringify([this.data.settings, this.data.profile]));
+      if (h !== this.data.shash) { this.data.shash = h; this.data.sts = this.data.ts; }   // ayarlar değişti
       lsSet(KEY, JSON.stringify(this.data));
       if (root.BilsemSync) root.BilsemSync.push(this.data);
     },

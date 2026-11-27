@@ -62,7 +62,7 @@ Tek dosya sürümü (`tools/tek-dosya.js`) giriş modülünü içermez; hesap gi
   dönülünce ilerleme buluta gönderilir.
 - Kayıt buluta yazılmadan önce buluttakiyle birleştirilir; iki cihaz birbirinin ilerlemesini silmez. Yıldızlar ve
   rekorlar en büyüğü alınır, her konuda daha çok soru çözülmüş kayıt kullanılır, deneme sonuçları birleşir,
-  ayarlar son kaydeden cihazdan gelir. İlerleme bir cihazda sıfırlanırsa öbür cihazdaki eski ilerleme geri gelmez.
+  ayarlar (veli şifresi dâhil) onları en son değiştiren cihazdan gelir. İlerleme bir cihazda sıfırlanırsa öbür cihazdaki eski ilerleme geri gelmez.
 - Buluta gönderilmemiş ilerleme varken çıkış yapılmak istenirse uygulama uyarır (çıkışta cihazdaki kayıt silinir).
 
 ## Çalışma biçimleri

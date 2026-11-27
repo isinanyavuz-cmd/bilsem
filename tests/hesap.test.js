@@ -193,3 +193,33 @@ test('mergeCloud: buluttaki ilerleme bu cihazdakine eklenir, bulut boşsa kayıt
     assert.equal(JSON.parse(ls.getItem('bilsem.v3')).cats.cubes.stars[0], 3, 'birleşen kayıt cihaza da yazılır');
   });
 });
+
+test('merge: bir cihazda veli şifresi belirlenince, öbür cihazda sonradan soru çözülmesi şifreyi geri almaz', () => {
+  withEnv(() => {
+    const realNow = Date.now;
+    let now = 1000;
+    Date.now = () => now;
+    try {
+      // iki cihaz aynı kayıtla başlar
+      Store.data = U.parse(progressWith(1)); Store.save();
+      const start = JSON.stringify(Store.data);
+      // A: veli şifresini belirler
+      now = 2000; Store.data = U.parse(start); Store.setPin('4826');
+      const a = U.parse(JSON.stringify(Store.data));
+      // B (internetsiz): daha sonra soru çözer, ayarlara dokunmaz
+      now = 3000; Store.data = U.parse(start); Store.recordAnswer('cubes', 1, true, 500); Store.save();
+      const b = U.parse(JSON.stringify(Store.data));
+      for (const [x, y] of [[a, b], [b, a]]) {
+        const m = U.merge(x, y);
+        Store.data = m;
+        assert.equal(Store.checkPin('4826'), true, 'şifre korunur');
+        assert.equal(m.cats.cubes.seen, 4, 'B\'nin ilerlemesi de gelir');
+      }
+      // B sonra şifreyi değiştirirse o kazanır
+      now = 4000; Store.data = U.parse(JSON.stringify(b)); Store.setPin('1111');
+      const m2 = U.merge(a, U.parse(JSON.stringify(Store.data)));
+      Store.data = m2;
+      assert.equal(Store.checkPin('1111'), true);
+    } finally { Date.now = realNow; }
+  });
+});
