@@ -443,6 +443,9 @@
     const modFig = (g) => { const alts = rng.pick(T).alt(g); return alts.length ? rng.pick(alts) : null; };
     wrong = Q.spread(rng, ans, modFig, S.key, { pool: wrong.slice(0, T.length).concat([C, Bf]), star: 0.15 })
       .concat(wrong.slice(T.length), [clone(ans, { color: cols[5] }), clone(ans, { shape: two[0] })]);
+    // Yanlışların da "komşusu" olsun: yoksa doğru şık, ondan türeyen çeldiricilerin ortasında kalır ve soruya bakmadan seçilir.
+    const foils = rng.shuffle(wrong.slice(0, 4)).slice(0, 2).map((w, i) => (i ? clone(w, { shape: two[0] }) : clone(w, { color: cols[5] })));
+    wrong = wrong.slice(0, 3).concat(foils, wrong.slice(3));
     q.stem = analogySvg([figDraw(A), figDraw(Bf), figDraw(C)]);
     q.explain = 'Kural: ' + T.map((t) => t.txt).join(', ') + '. Aynı kural üçüncü şekle uygulanınca ' + S.name(ans) + ' elde edilir.';
     return Q.finish(rng, q, opt(ans), wrong.map(opt));

@@ -72,18 +72,63 @@
 
   const Q = Bilsem.Q = {};
 
-  /* Doğru şık + çeldiriciler -> karıştırılmış şıklar. Aynı anahtarlı çeldiriciler atılır. */
-  Q.finish = function (rng, q, correct, distractors, n) {
+  /* Şık anahtarını karşılaştırılabilir parçalara ayırır: konumlu liste ya da (";" varsa) küme. */
+  function keyParts(k, asSet) {
+    if (asSet) return { set: k.slice(1).split(';').filter(Boolean) };
+    if (k.includes('|')) return { pos: k.split('|') };
+    if (k.includes('+')) return { pos: k.split('+') };
+    if (k.includes('/')) return { pos: k.split('/') };
+    return { pos: Array.from(k) };
+  }
+  function partDist(a, b) {
+    let d = 0;
+    if (a.set) { a.set.forEach((t) => { if (!b.set.includes(t)) d++; }); b.set.forEach((t) => { if (!a.set.includes(t)) d++; }); return d; }
+    for (let i = 0; i < Math.max(a.pos.length, b.pos.length); i++) if (a.pos[i] !== b.pos[i]) d++;
+    return d;
+  }
+  /* Doğru şıkkın sırası: kaç şık ondan kesin olarak "daha merkezde" (diğerlerine toplamda daha yakın)
+     ve (küme anahtarlarında) kaç şık ondan daha çok öğe içeriyor. */
+  Q.ranks = function (keys, ai) {
+    const asSet = keys.some((k) => k.includes(';'));
+    const P = keys.map((k) => keyParts(k, asSet));
+    const sums = P.map((a, i) => P.reduce((s, b, j) => s + (i === j ? 0 : partDist(a, b)), 0));
+    const r = sums.filter((v) => v < sums[ai]).length;
+    const size = asSet ? P.filter((p) => p.set.length > P[ai].set.length).length : null;
+    // doğru şık öbür üçünün her öğesini içeriyor mu ("hepsini kapsayan şık")
+    const sup = asSet && P.every((p, j) => j === ai || p.set.every((t) => P[ai].set.includes(t)));
+    return { center: r, size: size, sup: sup, flat: new Set(sums).size === 1 };
+  };
+
+  /* Doğru şık + çeldiriciler -> karıştırılmış şıklar. Aynı anahtarlı çeldiriciler atılır.
+     Sızıntı önleme: çeldirici adayları üçten fazlaysa (ilk 8 aday), doğru şıkkın "merkezlik" sırası (ve küme
+     şıklarında öğe sayısı sırası) her soruda rastgele seçilen bir hedefe en yakın olacak üçlü seçilir. Böylece
+     "diğerlerine en çok benzeyen", "en farklı olan" ya da "en çok deliği olan" ya da "ötekilerin hepsini kapsayan"
+     şıkkı seçmek şanstan iyi sonuç vermez. Hedefi tutturan üçlüler arasında üreticinin öncelik sırası (listedeki yer) korunur.
+     o.need = { ok: (şık) => bool, count }: seçilen üçlüde bu koşulu sağlayan en az count çeldirici bulunur. */
+  Q.finish = function (rng, q, correct, distractors, n, o) {
     n = n || 4;
+    const need = o && o.need;
     const seen = new Set([correct.key]);
-    const picked = [];
+    const cand = [];
     for (const d of distractors) {
-      if (picked.length === n - 1) break;
+      if (cand.length === (n === 4 ? 8 : n - 1)) break;
       if (!d || seen.has(d.key)) continue;
       seen.add(d.key);
-      picked.push(d);
+      cand.push(d);
     }
-    if (picked.length < n - 1) throw new Error('yetersiz çeldirici');
+    if (cand.length < n - 1) throw new Error('yetersiz çeldirici');
+    let picked = need ? cand.filter((d) => need.ok(d)).slice(0, need.count).concat(cand.filter((d) => !need.ok(d))).slice(0, n - 1) : cand.slice(0, n - 1);
+    if (n === 4 && cand.length > 3) {
+      const tc = rng.int(0, 3), ts = rng.int(0, 3), supOk = rng.chance(0.2);
+      let best = Infinity;
+      for (let a = 0; a < cand.length; a++) for (let b = a + 1; b < cand.length; b++) for (let c = b + 1; c < cand.length; c++) {
+        if (need && [a, b, c].filter((i) => need.ok(cand[i])).length < need.count) continue;
+        const R = Q.ranks([correct.key, cand[a].key, cand[b].key, cand[c].key], 0);
+        if (R.flat && a + b + c > 3) continue;
+        const cost = (Math.abs(R.center - tc) + (R.size == null ? 0 : Math.abs(R.size - ts)) + (R.sup && !supOk ? 2 : 0)) * 100 + a + b + c;
+        if (cost < best) { best = cost; picked = [cand[a], cand[b], cand[c]]; }
+      }
+    }
     const opts = rng.shuffle([correct].concat(picked));
     q.options = opts;
     q.answer = opts.indexOf(correct);

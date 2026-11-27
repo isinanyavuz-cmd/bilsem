@@ -265,8 +265,9 @@
   }
 
   B.GEN.view = function (rng, level) {
-    const dims = [null, [2, 2], rng.pick([[3, 2], [2, 3]]), [3, 3], rng.pick([[4, 3], [3, 4]])][level], maxH = [0, 2, 3, 3, 4][level];
-    const side = level === 1 ? 'L' : rng.pick(['L', 'R']), tone = rng.pick(S.CUBE_TONES);
+    const dims = [null, [2, 2], rng.pick([[3, 2], [2, 3]]), [3, 3], rng.pick([[4, 3], [3, 4]])][level], maxH = [0, 3, 3, 3, 4][level];
+    // 1. kademede de iki yön ve üç kat: 2 kat ve hep soldan bakınca doğru cevap her soruda aynı çıkıyordu
+    const side = rng.pick(['L', 'R']), tone = rng.pick(S.CUBE_TONES);
     let h, vL, vR;
     for (let t = 0; ; t++) {
       if (t > 400) throw new Error('kule üretilemedi');
@@ -398,22 +399,16 @@
         const k = freeKey(cells);
         if (!seen.has(k)) { seen.add(k); cand.push(cells); }
       });
-      // doğru açılım, çeldiricilere en az benzeyen (en uzak) şık olmasın: uzaklık kare kümelerinin farkıdır
-      const toks = (cells) => new Set(freeKey(cells).split(';'));
-      const diff = (a, b) => { let d = 0; a.forEach((t) => { if (!b.has(t)) d++; }); b.forEach((t) => { if (!a.has(t)) d++; }); return d; };
-      let picked = cand.slice(0, 3);
-      for (let t = 0; t < 30; t++) {
-        const trio = t ? rng.sample(cand, 3) : picked, all = [good].concat(trio).map(toks);
-        const sums = all.map((a, i) => all.reduce((s, b, j) => s + (i === j ? 0 : diff(a, b)), 0)), mx = Math.max.apply(null, sums);
-        picked = trio;
-        if (!(sums[0] === mx && sums.filter((v) => v === mx).length === 1)) break;
-      }
+      // çeldirici üçlüsü Q.finish'te seçilir: doğru açılım ne hep "en farklı" ne de hep "en tipik" şık olur
       const q = { prompt: 'Hangi açılım katlanınca bir küp olur?', stem: '' };
       q.stem = S.svg(300, 70, S.emoji(150, 36, '🧊', 52), { maxW: 120 });
-      q.meta = { good: good, bad: picked };
+      q.meta = { good: good };
       q.explain = 'Küpün 6 yüzü var. Doğru açılımı katlayınca 6 kare tam 6 farklı yüz yapar. ' +
         (level === 1 ? 'Diğerlerinde kareler katlanınca üst üste biner (yan yana 4 karelik blok ya da çok uzun sıra küp yapmaz).' : 'Diğerlerinde en az iki kare katlanınca üst üste biner, bir yüz de boş kalır.');
-      return Q.finish(rng, q, netOpt(good), picked.map(netOpt));
+      Q.finish(rng, q, netOpt(good), cand.map(netOpt));
+      const byKey = new Map(cand.map((c) => [netOpt(c).key, c]));
+      q.meta.bad = q.options.filter((_, i) => i !== q.answer).map((o) => byKey.get(o.key));
+      return q;
     }
     if (level === 3) {
       const cells = rng.pick(H.valid), face = fold(cells), cols = rng.shuffle(PAL);

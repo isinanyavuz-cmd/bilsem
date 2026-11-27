@@ -81,9 +81,15 @@
       c[i] = [nr, nc];
       return uniq(c);
     };
+    // Doğru açılım tüm yansımaları içerdiğinden en çok deliği olan şık olurdu. Fazladan delikli çeldiriciler de var:
+    // bir yansıma fazladan uygulanmış ya da bir delik fazladan sayılmış hâller.
+    const extra = [uniq(correct.concat(correct.map((c) => [N - 1 - c[0], N - 1 - c[1]]))), uniq(correct.concat(correct.map((c) => [c[1], c[0]])))];
+    if (!two) extra.push(unfold(actual, true, true));
+    for (let t = 0; t < 4; t++) { const c = [rng.int(0, N - 1), rng.int(0, N - 1)]; extra.push(uniq(correct.concat([c]))); }
+    const more = rng.shuffle(extra.filter((c) => c.length > correct.length));
     const spread = Q.spread(rng, correct, shift, cellKey, { pool: ds });
     for (let t = 0; t < 8; t++) { const x = shift(correct); if (x) spread.push(x); }
-    return Q.finish(rng, q, mk(correct), spread.concat(rng.shuffle(ds)).map(mk));
+    return Q.finish(rng, q, mk(correct), spread.slice(0, 3).concat(more.slice(0, 3), spread.slice(3), rng.shuffle(ds), more.slice(3)).map(mk));
   };
 
   /* ---------- Simetri ---------- */
@@ -154,8 +160,19 @@
     const flip = (m) => { const x = m.map((row) => row.slice()), p = rng.pick(free); x[p[0]][p[1]] = 1 - x[p[0]][p[1]]; return x; };
     const free = [];
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) free.push([r, c]);
+    // Yalnız doğru şık simetrik olursa çocuk verilen yarıya bakmadan "simetrik olanı" seçer. Bu yüzden iki çeldirici de
+    // simetriktir ama verilen yarının bir karesi farklıdır: hangisinin verilen yarıyla aynı olduğuna bakmak gerekir.
+    const complete = (g) => { const m = g.map((row) => row.slice()); for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const p = mirror(r, c); m[r][c] = g[p[0]][p[1]]; } return m; };
+    const givenCells = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (inGiven(r, c)) givenCells.push([r, c]);
+    const flipG = (g, cells) => { const x = g.map((row) => row.slice()); cells.forEach((p) => { x[p[0]][p[1]] = 1 - x[p[0]][p[1]]; }); return x; };
+    const gc = rng.shuffle(givenCells);
+    const symWrong = [complete(flipG(given, [gc[0]])), complete(flipG(given, [gc[0], gc[1]])), complete(flipG(given, [gc[2]])), complete(flipG(given, [gc[3], gc[4]]))];
+    const symKeys = new Set(symWrong.map((m) => 'y' + G.key(m)));
+    // sahte merkez: simetrik yanlışın kendisinden türeyen (simetrik olmayan) çeldiriciler
+    const fake = [flip(symWrong[0]), flip(symWrong[2])];
     const spread = Q.spread(rng, full, flip, G.key, { pool: ds });
-    return Q.finish(rng, q, mk(full), spread.concat(rng.shuffle(ds), rng.shuffle(flips)).map(mk));
+    return Q.finish(rng, q, mk(full), rng.shuffle(symWrong).concat(fake, spread, rng.shuffle(ds), rng.shuffle(flips)).map(mk), 4, { need: { ok: (d) => symKeys.has(d.key), count: 2 } });
   };
 
   /* ---------- Mini Sudoku ---------- */

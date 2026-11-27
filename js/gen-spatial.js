@@ -104,7 +104,9 @@
         waterLine(mx + g - 10, W - 2, my) + S.qtile(mx + g, my + g, s), { maxW: 300 });
       q.explain = 'Aynada sağ ile sol, suda üst ile alt yer değiştirir. İkisi birlikte şekli baş aşağı çevirir.';
       const ans = G.tf(o.m, tf(180));
-      const wrong = nearMisses(rng, o, ans, 1).slice(0, 1).concat(rng.shuffle([G.flipH(o.m), G.flipV(o.m), o.m]).map((m) => gridOpt(o, m)));
+      // yakın yanlışlar yalnız doğru cevabın değil, öbür dönüşümlerin de yakını olur: doğru şık "merkezde" kalmaz
+      const wrong = nearMisses(rng, o, ans, 1).slice(0, 1).concat(rng.shuffle([G.flipH(o.m), G.flipV(o.m), o.m]).map((m) => gridOpt(o, m)),
+        nearMisses(rng, o, G.flipH(o.m), 1).slice(0, 1), nearMisses(rng, o, G.flipV(o.m), 1).slice(0, 1), nearMisses(rng, o, o.m, 1).slice(0, 1));
       return Q.finish(rng, q, gridOpt(o, ans), wrong);
     }
 
@@ -122,7 +124,8 @@
     const plain = [other, G.tf(o.m, tf(180)), o.m].map((m) => gridOpt(o, m));
     const wrong = level < 3
       ? rng.shuffle(plain).concat([tf(90), tf(270)].map((t) => objOpt(o, t)))
-      : nearMisses(rng, o, ans, 1).slice(0, 1).concat(rng.shuffle(plain));
+      : nearMisses(rng, o, ans, 1).slice(0, 1).concat(rng.shuffle(plain), nearMisses(rng, o, other, 1).slice(0, 1),
+        nearMisses(rng, o, G.tf(o.m, tf(180)), 1).slice(0, 1), nearMisses(rng, o, o.m, 1).slice(0, 1));
     return Q.finish(rng, q, gridOpt(o, ans), wrong);
   };
 
