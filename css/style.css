@@ -544,6 +544,13 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .note + .note { margin-top: 8px; }
 
 .rv-prompt { font: 800 20px/1.25 var(--font-display); }
+.rv-state { display: inline-block; vertical-align: middle; margin-left: 6px; padding: 3px 10px; border-radius: 999px; font: 800 14px/1.2 var(--font-display); }
+.rv-state.rv-ok { background: var(--good-soft); color: var(--good-ink); }
+.rv-state.rv-no { background: var(--bad-soft); color: var(--bad-ink); }
+.rv-state.rv-blank { background: var(--surface-2); color: var(--ink-soft); box-shadow: inset 0 0 0 2px var(--line-strong); }
+.rv-pos { align-self: center; font-weight: 700; color: var(--ink-soft); }
+.qchip-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 14px; color: var(--ink-soft); }
+.qchip-key .qchip { width: 26px; height: 26px; min-width: 0; font-size: 13px; pointer-events: none; }
 .sheet .q-svg { max-height: 240px; }
 .sheet .opt { min-height: 92px; }
 
