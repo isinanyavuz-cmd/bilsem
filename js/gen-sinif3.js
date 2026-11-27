@@ -1,4 +1,4 @@
-/* 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Yönü, Küp Görünümü, Küp Açılımı.
+/* 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küpün Yüzünü Bul, Küp Görünümü, Küp Açılımı.
    Cevaplar kuraldan hesaplanır: küp yönü ve açılım için küp gerçekten yuvarlanır/katlanır. */
 (function (root) {
   'use strict';
@@ -175,7 +175,7 @@
     return Q.finish(rng, q, blackOpt(result), spread.concat(rng.shuffle(first), rng.shuffle(toggles)).map(blackOpt));
   };
 
-  /* ---------- Küp Yönü ---------- */
+  /* ---------- Küpün Yüzünü Bul ---------- */
   const OPP = { T: 'B', B: 'T', E: 'W', W: 'E', S: 'N', N: 'S' };
   /* Yüzler: T üst, B alt, E sağ (koyu), S sol (açık), W ve N görünmeyen arka yüzler. */
   function roll(f, dir) {

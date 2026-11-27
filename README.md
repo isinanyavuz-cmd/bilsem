@@ -84,7 +84,7 @@ uzunluğu bu yüzden seçilebilir bırakıldı.
 | Alan | Türler |
 |---|---|
 | Şekil Bulmacaları | Şekil Örüntüsü, Şekil Tablosu, Şekil Benzetmesi, Farklı Olan, Desen Tamamlama, Şeffaf Kâğıt, Simetri |
-| Yön ve Döndürme | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küp Yönü, Küp Görünümü, Küp Açılımı, Katlama |
+| Yön ve Döndürme | Döndürme, Ayna Görüntüsü, Küp Sayma, Üst Üste Çizgiler, Küpün Yüzünü Bul, Küp Görünümü, Küp Açılımı, Katlama |
 | Sayı Bulmacaları | Sayı Örüntüsü, Meyveli İşlem, Şifre Çözme, Sayı Makinesi, Eşitlik |
 | Dikkat ve Hafıza | Aynısını Bul, Şekil Sayma, Görsel Hafıza, Gölge Bulma |
 | Mantık Yürütme | Ok Yolu, Terazi, Mini Sudoku, Harf Şifresi |
@@ -106,7 +106,7 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Ok Yolu | 5×5 alan, 5–6 ok | 5×5 alan, 6–8 ok, yol seçme | 6×6 alan, tekrar sayılı oklar | baktığı yöne göre komut alan robot |
 | Desen Tamamlama | 6×6 desende 2×2 boşluk; 2 renkli yinelenen kalıp | 3 renkli ya da 3×3 kalıp | çapraz çizgiler; ortadan aynalanmış desen | 6×6 çeyrek tur simetrisi; 8×8 desende 3×3 boşluk, aynalama ya da çeyrek tur |
 | Şeffaf Kâğıt | 3×3, iki kâğıt | 4×4, iki kâğıt | 3×3, kâğıdın biri çevrilir | 4×4, iki ya da üç kâğıt; çeyrek, yarım tur ya da ters yöne çevirme |
-| Küp Yönü | alt yüz ya da bir devirme sonrası üst yüz (karşılıklı yüzlerden) | bir devirme; üst, sağ ya da sol yüz | iki devirme | üç devirme |
+| Küpün Yüzünü Bul | alt yüz ya da bir devirme sonrası üst yüz (karşılıklı yüzlerden) | bir devirme; üst, sağ ya da sol yüz | iki devirme | üç devirme |
 | Küp Görünümü | 2×2 taban, soldan bakış | 3×2 taban; soldan ya da sağdan | 3×3 taban | 4×3 taban, 4 kata kadar |
 | Küp Açılımı | hangi açılım küp olur? (bariz yanlış çeldiriciler) | aynısı, inandırıcı çeldiricilerle | verilen renkli açılımda karşı yüzün rengi | 7 kareden hangisi çıkarılırsa açılım olur (Kangaroo tarzı) |
 | Katlama | 4×4 kâğıt, bir katlama, 1 delik | 6×6 kâğıt, bir katlama, 2 delik | iki katlama (dikey sonra yatay), 1–2 delik | 6×6, iki katlama, 2–3 delik |
@@ -115,8 +115,8 @@ Her soru türünün dört kademesi var: 1 Kolay, 2 Orta, 3 Zor, 4 En Zor. Örnek
 | Harf Şifresi | örnek kelimeden kural çıkar: alfabede 1 ileri ya da geri kayma | 2–3 harf kayma | alfabeyi tersten yazma (A yerine Z) ya da kayma ve tersten yazma | kayma ya da ters alfabe, ayrıca kelime tersten yazılır |
 | Eşitlik | iki şekil, bir eşitlik | iki şekil, iki eşitlik | üç şekil, iki eşitlik | üç şekil, üç eşitlik; her şekil sayısı 9'a kadar değer alabilir |
 
-3. sınıf için eklenen beş türde (Desen Tamamlama, Şeffaf Kâğıt, Küp Yönü, Küp Görünümü, Küp Açılımı) En Zor kademe 3. sınıf düzeyindedir; Kolay kademe 2. sınıfa da uygundur. Sınıf seçimi yoktur: tüm türler tek havuzda, kademeler ilerlemeye göre otomatik önerilir.
-Mini Sudoku'da bulmacanın tek çözümlü olduğu üretimde denetlenir. Cevaplar kuraldan hesaplanır: Küp Yönü'nde küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
+3. sınıf için eklenen beş türde (Desen Tamamlama, Şeffaf Kâğıt, Küpün Yüzünü Bul, Küp Görünümü, Küp Açılımı) En Zor kademe 3. sınıf düzeyindedir; Kolay kademe 2. sınıfa da uygundur. Sınıf seçimi yoktur: tüm türler tek havuzda, kademeler ilerlemeye göre otomatik önerilir.
+Mini Sudoku'da bulmacanın tek çözümlü olduğu üretimde denetlenir. Cevaplar kuraldan hesaplanır: Küpün Yüzünü Bul'da küp gerçekten yuvarlanır, Küp Açılımı'nda açılım gerçekten katlanır (altıgenlerden tam 11 küp açılımı çıkar).
 
 
 Sayı Hafızası'nın düzeyleri ayrıdır (Kolay, Orta, Zor) ve yalnızca süreyi belirler.
@@ -150,7 +150,7 @@ cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu ve terazi gibi türl
 | `js/core.js` | Tohumlu rastgele sayı üreteci, kategori listesi, şık yardımcıları |
 | `js/shapes.js` | Şekil, kareli şekil ve küp çizimleri (SVG metni; DOM gerekmez) |
 | `js/gen-*.js` | Soru üreticileri: `Bilsem.GEN[tür](rng, kademe)`; kademe 1–4 |
-| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Yönü, Küp Görünümü, Küp Açılımı |
+| `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küpün Yüzünü Bul, Küp Görünümü, Küp Açılımı |
 | `js/gen-sinif3b.js` | Katlama, Simetri, Mini Sudoku |
 | `js/gen-bilsem.js` | BİLSEM'in resmî tiplerinden: Harf Şifresi, Eşitlik |
 | `js/span.js` | Sayı Hafızası: sayı üretimi ve oyun kuralları |
