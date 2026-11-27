@@ -1,4 +1,4 @@
-/* BİLSEM'in resmî tiplerinden eksik kalanlar: Harf Şifresi (şifreleme) ve Figürsel Eşitlik.
+/* BİLSEM'in resmî tiplerinden eksik kalanlar: Harf Şifresi (şifreleme) ve Hangisi Eşit?.
    Cevaplar hesaplanır; kural ve eşitlik sistemlerinin tek cevap verdiği üretimde denetlenir. */
 (function (root) {
   'use strict';
@@ -65,7 +65,7 @@
     return Q.finish(rng, q, Q.text(answer), rng.shuffle(wrong).map(Q.text));
   };
 
-  /* ---------- Figürsel Eşitlik ---------- */
+  /* ---------- Hangisi Eşit? ---------- */
   const MULTI = (counts) => counts.reduce((a, c) => a + c, 0);
   const valueOf = (counts, v) => counts.reduce((a, c, i) => a + c * v[i], 0);
   /* sayı vektörlerini küçükten büyüğe tarar: ürün: tüm (c0..cn) boyları ≤ max toplam */

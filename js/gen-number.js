@@ -1,4 +1,4 @@
-/* Sayı bulmacaları: sayı örüntüsü, meyve işlemleri, şifre çözme */
+/* Sayı bulmacaları: sayı örüntüsü, meyve hesabı, şifre çözme */
 (function (root) {
   'use strict';
   const B = root.Bilsem, S = B.Shapes, Q = B.Q;
@@ -127,7 +127,7 @@
     return Q.finishNum(rng, q, seq[hole], { min: 0, prefer: rng.shuffle([seq[hole - 1] + d + 1, seq[hole] - 2, seq[hole] + 2, seq[hole] + 10]).slice(0, 2) });
   };
 
-  /* ---------- Meyve İşlemleri ---------- */
+  /* ---------- Meyve Hesabı ---------- */
   const FRUITS = ['🍎', '🍌', '🍇', '🍓', '🍊', '🍉', '🍒', '🍐'];
 
   function eqHtml(lines, fr) {

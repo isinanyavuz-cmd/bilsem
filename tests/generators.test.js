@@ -80,7 +80,7 @@ test('sayı örüntüsü: boşluk dizideki sayıdır, sayılar 0-200 arasındad�
   });
 });
 
-test('meyve işlemleri: bütün satırlar meyve değerleriyle tutuyor', () => {
+test('meyve hesabı: bütün satırlar meyve değerleriyle tutuyor', () => {
   forEach('fruit', (q) => {
     const m = q.meta;
     const side = (toks) => {
