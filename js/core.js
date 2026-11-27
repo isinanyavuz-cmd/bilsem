@@ -27,7 +27,7 @@
 
   Bilsem.AREAS = [
     { id: 'gorsel', name: 'Şekil Bulmacaları', formal: 'Görsel akıl yürütme' },
-    { id: 'uzamsal', name: 'Döndür ve Hayal Et', formal: 'Uzamsal düşünme' },
+    { id: 'uzamsal', name: 'Yön ve Döndürme', formal: 'Uzamsal düşünme' },
     { id: 'sayisal', name: 'Sayı Bulmacaları', formal: 'Sayısal akıl yürütme' },
     { id: 'dikkat', name: 'Dikkat ve Hafıza', formal: 'Dikkat ve görsel hafıza' },
     { id: 'sozel', name: 'Mantık Yürütme', formal: 'Mantıksal çıkarım' },
@@ -45,12 +45,12 @@
     { id: 'mirror', core: true, area: 'uzamsal', name: 'Ayna Görüntüsü', desc: 'Yansımayı bul', tip: 'Aynada sağ ile sol yer değiştirir. Aynaya yakın olan parça yine aynaya yakın kalır.' },
     { id: 'cubes', core: true, area: 'uzamsal', name: 'Küp Sayma', desc: 'Gizli küpleri unutma', tip: 'Kat kat say. Üstteki küplerin altında da küp olduğunu unutma.' },
     { id: 'stack', area: 'uzamsal', name: 'Üst Üste Çizgiler', desc: 'Hangi çizgi üstte, hangisi altta?', tip: 'İki çizginin kesiştiği yere bak: kesintisiz devam eden üstte, arkadan geçen alttadır. Çizgileri ikişer ikişer karşılaştır.' },
-    { id: 'roll', core: true, area: 'uzamsal', name: 'Küp Devirme', desc: 'Küp yatınca hangi yüz üstte?', tip: 'Karşılıklı yüzleri not al. Küp yan yatınca üst yüz yana gider, karşısındaki yüz üste çıkar.' },
+    { id: 'roll', core: true, area: 'uzamsal', name: 'Küp Yönü', desc: 'Küp yatınca hangi yüz üstte?', tip: 'Karşılıklı yüzleri not al. Küp yan yatınca üst yüz yana gider, karşısındaki yüz üste çıkar.' },
     { id: 'view', core: true, area: 'uzamsal', name: 'Küp Görünümü', desc: 'Gözün gördüğünü bul', tip: 'Gözün baktığı yönde her sütunun en yüksek kulesine bak. Arkadaki alçak kuleler görünmez.' },
     { id: 'net', area: 'uzamsal', name: 'Küp Açılımı', desc: 'Katlayınca küp olur mu?', tip: 'Açılımı kafanda katla: hiçbir kare başka bir karenin üstüne binmemeli. Dörtlü sıranın iki yanına birer kare gelir.' },
-    { id: 'fold', core: true, area: 'uzamsal', name: 'Katla ve Deş', desc: 'Açılınca delikler nerede?', tip: 'Katlama çizgisi bir ayna gibidir. Katlanmış kâğıttaki her delik, açılınca çizginin öbür yanında da çıkar.' },
+    { id: 'fold', core: true, area: 'uzamsal', name: 'Katlama', desc: 'Açılınca delikler nerede?', tip: 'Katlama çizgisi bir ayna gibidir. Katlanmış kâğıttaki her delik, açılınca çizginin öbür yanında da çıkar.' },
     { id: 'numseq', core: true, area: 'sayisal', name: 'Sayı Örüntüsü', desc: 'Sayıların kuralını bul', tip: 'Yan yana iki sayının farkına bak. Fark hep aynı mı, yoksa değişiyor mu?' },
-    { id: 'fruit', area: 'sayisal', name: 'Meyve İşlemleri', desc: 'Her meyve bir sayı', tip: 'Önce aynı meyveden oluşan satırı çöz. Bulduğun sayıyı diğer satırda yerine koy.' },
+    { id: 'fruit', area: 'sayisal', name: 'Meyveli İşlem', desc: 'Her meyve bir sayı', tip: 'Önce aynı meyveden oluşan satırı çöz. Bulduğun sayıyı diğer satırda yerine koy.' },
     { id: 'code', core: true, area: 'sayisal', name: 'Şifre Çözme', desc: 'Şekilleri sayıya çevir', tip: 'Tablodan her şeklin sayısını sırayla bul. Renge de şekle de dikkat et.' },
     { id: 'machine', area: 'sayisal', name: 'Sayı Makinesi', desc: 'Makinenin kuralını bul', tip: 'Giren sayı ile çıkan sayıyı karşılaştır. Makine ekliyor mu, çıkarıyor mu, yoksa katını mı alıyor?' },
     { id: 'same', area: 'dikkat', name: 'Aynısını Bul', desc: 'Tıpatıp aynısı hangisi?', tip: 'Parça parça karşılaştır: önce üst satır, sonra orta, sonra alt.' },
@@ -59,7 +59,7 @@
     { id: 'shadow', core: true, area: 'dikkat', name: 'Gölge Bulma', desc: 'Resmin gölgesi hangisi?', tip: 'Renkleri unut, yalnızca dış çizgiye bak. Parçaların yerini, yönünü ve boyunu tek tek kontrol et.' },
     { id: 'sudoku', area: 'sozel', name: 'Mini Sudoku', desc: 'Her renk bir kez', tip: 'Soru işaretinin satırına ve sütununa bak: orada olan renkler olamaz. Kutudaki renkleri de ele.' },
     { id: 'cipher', core: true, area: 'sozel', name: 'Harf Şifresi', desc: 'Şifre kuralını bul', tip: 'Örnekte her harfin yerine hangi harfin yazıldığına bak. Aynı kuralı alfabeyi sayarak yeni kelimeye uygula.' },
-    { id: 'equiv', core: true, area: 'sayisal', name: 'Figürsel Eşitlik', desc: 'Şekillerle denge kur', tip: 'Her şekle bir sayı değeri ver ve eşitlikleri tutturmaya çalış. Sonra son eşitliğin sol tarafının değerini bul.' },
+    { id: 'equiv', core: true, area: 'sayisal', name: 'Eşitlik', desc: 'Şekillerle denge kur', tip: 'Her şekle bir sayı değeri ver ve eşitlikleri tutturmaya çalış. Sonra son eşitliğin sol tarafının değerini bul.' },
     { id: 'path', area: 'sozel', name: 'Ok Yolu', desc: 'Okları takip et', tip: 'Parmağını başlangıç karesine koy ve her ok için bir kare ilerle.' },
     { id: 'balance', area: 'sozel', name: 'Terazi', desc: 'Hangisi daha ağır?', tip: 'Terazinin aşağı inen kefesi daha ağırdır. Şekilleri ağırdan hafife doğru sıraya diz.' },
   ];

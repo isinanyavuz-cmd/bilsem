@@ -157,7 +157,7 @@ for (const c of B.CATS) {
   });
 }
 
-test('katla ve deş: istem doğru çekimlenir', () => {
+test('katlama: istem doğru çekimlenir', () => {
   for (const lv of B.LEVELS) for (let seed = 1; seed <= 40; seed++) {
     const q = B.generate('fold', lv, new B.RNG(seed));
     assert.ok(!/çizgidenler/.test(q.prompt), q.prompt);

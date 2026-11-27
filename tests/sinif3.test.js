@@ -82,7 +82,7 @@ test('şeffaf kâğıt: cevap, çevrilmiş kâğıtların birleşimidir', () => 
   });
 });
 
-test('küp devirme: üç boyutlu döndürmeyle aynı cevap', () => {
+test('küp yönü: üç boyutlu döndürmeyle aynı cevap', () => {
   const NORMAL = { T: '0,0,1', B: '0,0,-1', E: '1,0,0', W: '-1,0,0', S: '0,1,0', N: '0,-1,0' };
   const spin = { E: (v) => [v[2], v[1], -v[0]], S: (v) => [v[0], v[2], -v[1]] };   // sağa: üst -> +x; sola: üst -> +y
   forEach('roll', (q, lv) => {

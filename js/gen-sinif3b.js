@@ -1,4 +1,4 @@
-/* 3. sınıf türleri, ikinci tur: Katla ve Deş, Simetri, Mini Sudoku.
+/* 3. sınıf türleri, ikinci tur: Katlama, Simetri, Mini Sudoku.
    Her sorunun cevabı kuraldan hesaplanır; bulmacalarda çözümün tek olduğu üretimde denetlenir. */
 (function (root) {
   'use strict';
@@ -15,7 +15,7 @@
   const cellKey = (cells) => cells.map((c) => c[0] + ',' + c[1]).sort().join(';');
   const uniq = (cells) => { const m = new Map(); cells.forEach((c) => m.set(c[0] + ',' + c[1], c)); return Array.from(m.values()); };
 
-  /* ---------- Katla ve Deş ---------- */
+  /* ---------- Katlama ---------- */
   const PAPER = '#ffe9a8';
   function paperDraw(rows, cols, cs, holes, x, y) {
     let s = '<g transform="translate(' + r1(x) + ' ' + r1(y) + ')"><rect width="' + r1(cols * cs) + '" height="' + r1(rows * cs) + '" rx="4" fill="' + PAPER + '"/>';

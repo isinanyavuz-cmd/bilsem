@@ -127,7 +127,7 @@
     return Q.finishNum(rng, q, seq[hole], { min: 0, prefer: rng.shuffle([seq[hole - 1] + d + 1, seq[hole] - 2, seq[hole] + 2, seq[hole] + 10]).slice(0, 2) });
   };
 
-  /* ---------- Meyve İşlemleri ---------- */
+  /* ---------- Meyveli İşlem ---------- */
   const FRUITS = ['🍎', '🍌', '🍇', '🍓', '🍊', '🍉', '🍒', '🍐'];
 
   function eqHtml(lines, fr) {

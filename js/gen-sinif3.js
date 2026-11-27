@@ -1,5 +1,5 @@
-/* 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Devirme, Küp Görünümü, Küp Açılımı.
-   Cevaplar kuraldan hesaplanır: küp devirme ve açılım için küp gerçekten yuvarlanır/katlanır. */
+/* 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küp Yönü, Küp Görünümü, Küp Açılımı.
+   Cevaplar kuraldan hesaplanır: küp yönü ve açılım için küp gerçekten yuvarlanır/katlanır. */
 (function (root) {
   'use strict';
   const B = root.Bilsem, S = B.Shapes, Q = B.Q, G = S.Grid;
@@ -175,7 +175,7 @@
     return Q.finish(rng, q, blackOpt(result), spread.concat(rng.shuffle(first), rng.shuffle(toggles)).map(blackOpt));
   };
 
-  /* ---------- Küp Devirme ---------- */
+  /* ---------- Küp Yönü ---------- */
   const OPP = { T: 'B', B: 'T', E: 'W', W: 'E', S: 'N', N: 'S' };
   /* Yüzler: T üst, B alt, E sağ (koyu), S sol (açık), W ve N görünmeyen arka yüzler. */
   function roll(f, dir) {
