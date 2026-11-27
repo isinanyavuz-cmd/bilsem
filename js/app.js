@@ -724,7 +724,7 @@
         (q.memo ? '<div class="paper stem">' + q.memo.html + '</div>' : '') +
         (q.stem ? '<div class="paper stem">' + q.stem + '</div>' : '') +
         optsHtml(q, it, 'done') +
-        '<p class="tip"><b>' + lead + '</b> ' + q.explain + '</p>' +
+        '<p class="tip' + (st === 'blank' ? ' tip-blank' : '') + '"><b>' + lead + '</b> ' + q.explain + '</p>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="review" data-i="' + (i - 1) + '"' + (i === 0 ? ' disabled' : '') + '>Önceki soru</button>' +
         '<span class="rv-pos">' + (i + 1) + ' / ' + n + '</span>' +
         '<button type="button" class="btn btn-ghost" data-act="review" data-i="' + (i + 1) + '"' + (i === n - 1 ? ' disabled' : '') + '>Sonraki soru</button></div>';
