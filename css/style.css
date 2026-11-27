@@ -691,3 +691,32 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
   .home .chip { gap: 3px; padding: 4px 6px; }
   .hero-go { padding-inline: 12px; font-size: 17px; }
 }
+
+/* ---------- deneme sınavı: süssüz, nötr, açık görünüm ----------
+   Yalnızca deneme sorusu görünürken (html.exam-on). Koyu temada da açık kalır; kil dokusu, renkli
+   çerçeve, gölge ve ödül öğeleri yok. Belirli bir sınav arayüzünü taklit etmez. */
+:root.exam-on:root.exam-on {
+  color-scheme: light;
+  --bg: #f4f5f7; --surface: #ffffff; --surface-2: #e9ecf0; --line: #cfd4db; --line-strong: #aab1bb;
+  --ink: #1d2433; --ink-soft: #566070;
+  --paper: #ffffff; --paper-ink: #1d2433; --paper-soft: #566070; --paper-line: #cfd4db; --paper-tint: #eef0f3;
+  --paper-sel: #e6eefb; --cobalt: #2f4f9e; --a-gorsel: #2f4f9e;
+  --shadow: none; --grain: none; --scrim: rgba(20, 30, 55, .45);
+}
+.exam-on body { background-image: none; }
+.exam-on .quiz { gap: 18px; }
+.exam-on .paper, .exam-on .opt { background-image: none; box-shadow: none; border-radius: 12px; }
+.exam-on .paper { border: 2px solid var(--line); }
+.exam-on .opt { border: 2px solid var(--line); transition: none; }
+.exam-on .opt:not([disabled]):active { transform: none; box-shadow: none; }
+.exam-on .opt.sel { border-color: var(--cobalt); box-shadow: none; background: var(--paper-sel); }
+.exam-on .opt.sel .opt-letter { background: var(--cobalt); }
+.exam-on .icon-btn { background: var(--surface); box-shadow: inset 0 0 0 2px var(--line); border-radius: 12px; }
+.exam-on .prog { background: var(--surface-2); box-shadow: none; height: 10px; }
+.exam-on .prog-bar { background: var(--cobalt); box-shadow: none; }
+.exam-on .chip { background: var(--surface); box-shadow: inset 0 0 0 2px var(--line); }
+.exam-on .chip-time.low { background: var(--surface); color: #b3261e; box-shadow: inset 0 0 0 2px #b3261e; }
+.exam-on .exam-nav .btn { background: var(--cobalt); color: #fff; box-shadow: none; border-radius: 12px; transition: none; }
+.exam-on .exam-nav .btn:active { transform: none; }
+.exam-on .memo-bar { background: var(--surface-2); box-shadow: none; }
+.exam-on .memo-bar i { background: var(--cobalt); }
