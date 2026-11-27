@@ -292,6 +292,23 @@
     beep(stars >= 2 ? SND.win : SND.done);
   }
 
+  /* Denemeden X ile çıkış: deneme tamamlanmış sayılmaz (sonuç ve deneme kaydı yok), ama o ana kadar
+     cevaplanan sorular konu istatistiğine yazılır; böylece veli panelindeki doğruluk oranları eksik kalmaz. */
+  function abandonExam() {
+    if (!ses || ses.mode !== 'exam' || view !== 'quiz' || ses.result) return 0;
+    leave();
+    let n = 0;
+    ses.items.forEach((it) => {
+      if (it.chosen == null) return;
+      Store.recordAnswer(it.q.type, it.q.level, it.chosen === it.q.answer, it.ms);
+      n++;
+    });
+    if (n) Store.save();
+    ses.result = { abandoned: true, answered: n };
+    return n;
+  }
+  const examAnswered = () => (ses && ses.mode === 'exam' ? ses.items.filter((it) => it.chosen != null).length : 0);
+
   /* ---------- ana sayfa ---------- */
   const STAR_MAX = B.LEVELS.length * 3;
   const starSum = (st) => st.stars.reduce((a, b) => a + b, 0);
@@ -316,7 +333,7 @@
       '<div class="title-wrap"><div class="title-line"><span class="brand-name">' + pname + ' <b>BİLSEM\'e</b> Hazırlanıyor</span>' +
       '<span class="chips chips-inline"><span class="chip">' + star(true) + '<b>' + Store.totalStars() + '</b><small>yıldız</small></span>' +
       '<span class="chip">' + I.flame + '<b>' + Store.streak() + '</b><small>gün üst üste</small></span></span></div>' +
-      '<span class="brand-sub">2. sınıf · genel yetenek alıştırmaları</span></div></div>' +
+      '<span class="brand-sub">3. sınıf · genel yetenek alıştırmaları</span></div></div>' +
       '<button type="button" class="btn btn-ghost btn-sm parent-corner" data-act="parent">Veli paneli</button></header>' +
       '<section class="hero">' +
       '<button type="button" class="hero-card hero-daily" data-act="daily">' +
@@ -674,7 +691,7 @@
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="submit" class="btn btn-sun">Giriş</button></div></form>';
     } else if (sheet.kind === 'quit') {
       body = '<div class="sheet-head"><div><h2>Çıkmak istiyor musun?</h2><p>' +
-        (view === 'span' ? 'Oyundan çıkarsan bu oyun biter. Ulaştığın rekor kaydedildi.' : ses.mode === 'exam' ? 'Sınavdan çıkarsan cevapların kaydedilmez.' : 'Şimdiye kadar çözdüğün sorular kaydedildi. Yıldız kazanmak için alıştırmayı bitirmelisin.') +
+        (view === 'span' ? 'Oyundan çıkarsan bu oyun biter. Ulaştığın rekor kaydedildi.' : ses.mode === 'exam' ? 'Çıkarsan bu deneme yarım kalır ve sonucu verilmez. ' + (examAnswered() ? 'Şimdiye kadar cevapladığın ' + examAnswered() + ' soru konu istatistiklerine yazılır.' : 'Henüz cevapladığın soru yok.') : 'Şimdiye kadar çözdüğün sorular kaydedildi. Yıldız kazanmak için alıştırmayı bitirmelisin.') +
         '</p></div></div><div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="home">Çık</button><button type="button" class="btn btn-sun" data-act="close">Devam et</button></div>';
     } else if (sheet.kind === 'account') {
       const a = Store.data.profile && Store.data.profile.avatar;
@@ -748,7 +765,7 @@
 
   /* ---------- olaylar ---------- */
   const actions = {
-    home() { stopTimers(); ses = null; span = null; sheet = null; view = 'home'; render(); window.scrollTo(0, 0); },
+    home() { abandonExam(); stopTimers(); ses = null; span = null; sheet = null; view = 'home'; render(); window.scrollTo(0, 0); },
     'span-pick'() { sheet = { kind: 'span' }; render(); },
     'span-go'(el) { spanStart(el.dataset.mode); },
     'span-len'(el) {
