@@ -383,7 +383,7 @@
         (exam ? '' : '<button type="button" class="btn btn-ghost" data-act="memo-done">Hazırım</button>') + '</div>';
     }
     const answered = it.chosen != null && !exam, last = ses.idx === ses.items.length - 1;
-    const tag = '<span class="q-tag">' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</span>';
+    const tag = exam ? '' : '<span class="q-tag">' + cat.name + ' · ' + B.LEVEL_NAMES[q.level] + '</span>';   // gerçek sınavda tür ve kademe yazmaz
     const prompt = '<div class="q-prompt"><h1>' + q.prompt + '</h1>' +
       (trVoice ? '<button type="button" class="icon-btn" data-act="speak" aria-label="Soruyu sesli oku">' + I.sound + '</button>' : '') + '</div>';
     const stem = q.stem ? '<div class="paper stem">' + q.stem + '</div>' : '';
@@ -759,6 +759,8 @@
   function render() {
     if (user === undefined) { app.innerHTML = S.defs() + loadingView(); return; }
     if (user === null) { app.innerHTML = S.defs() + loginView(); return; }
+    /* deneme sırasında süssüz sınav görünümü (css: html.exam-on); sonuç ekranı normal temada */
+    document.documentElement.classList.toggle('exam-on', view === 'quiz' && !!ses && ses.mode === 'exam');
     const html = view === 'quiz' ? quizView() : view === 'result' ? resultView() : view === 'parent' ? parentView() : view === 'span' ? spanView() : homeView();
     app.innerHTML = S.defs() + html + sheetView();
   }
