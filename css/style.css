@@ -688,7 +688,8 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 @media (max-width: 719px) {
   .home .top { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
   .home .brand, .home .title-wrap, .home .title-line { display: contents; }
-  .home .avatar-card { grid-area: 1 / 1; justify-self: start; align-self: start; }
+  /* başlık yazısı aynı hücrede avatarın üstüne biniyordu; avatara dokunulamıyor, hesap paneli açılmıyordu */
+  .home .avatar-card { grid-area: 1 / 1; justify-self: start; align-self: start; position: relative; z-index: 1; }
   .home .brand-name { grid-area: 1 / 1; align-self: center; padding-left: 62px; font-size: clamp(21px, 5.8vw, 30px); }
   .home .avatar-card :is(.avatar-img, .avatar-emoji) { width: 48px; height: 48px; font-size: 40px; }
   .home .parent-corner { grid-area: 1 / 2; padding: 6px 10px; font-size: 14px; }
