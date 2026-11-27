@@ -282,7 +282,7 @@
     const sec = Math.round((Date.now() - ses.startedAt) / 1000);
     if (ses.mode === 'practice') Store.setStars(ses.cat, ses.level, stars);
     if (ses.mode === 'daily') Store.finishDaily(stars);
-    if (ses.mode === 'exam') Store.addExam({ date: U.dayKey(), n: total, ok: ok, blank: blank, sec: sec });
+    if (ses.mode === 'exam') Store.addExam({ date: U.dayKey(), at: Date.now(), n: total, ok: ok, blank: blank, sec: sec });
     Store.save();
     ses.result = { ok: ok, total: total, blank: blank, stars: stars, sec: sec };
     sheet = null;
@@ -722,6 +722,10 @@
         '</div>' +
         '<div class="sheet-actions"><label class="btn btn-ghost avatar-file">Fotoğraf seç<input type="file" accept="image/*" data-file="avatar" hidden></label></div>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-bad" data-act="logout">Çıkış yap</button><button type="button" class="btn btn-sun" data-act="close">Tamam</button></div>';
+    } else if (sheet.kind === 'unsynced') {
+      body = '<div class="sheet-head"><div><h2>İnternet bağlantısı yok</h2><p>Son çalışmalar henüz hesabına gönderilemedi. Şimdi çıkış yaparsan bu cihazdaki son ilerleme kaybolur.</p></div></div>' +
+        '<p class="tip">İnternete bağlanınca ilerleme kendiliğinden gönderilir. Sonra çıkış yapabilirsin.</p>' +
+        '<div class="sheet-actions"><button type="button" class="btn btn-bad" data-act="logout-force">Yine de çık</button><button type="button" class="btn btn-sun" data-act="close">Vazgeç</button></div>';
     } else if (sheet.kind === 'reset') {
       body = '<div class="sheet-head"><div><h2>İlerleme silinsin mi?</h2><p>Bütün yıldızlar, gün serisi ve istatistikler silinir. Bu işlem geri alınamaz.</p></div></div>' +
         '<div class="sheet-actions"><button type="button" class="btn btn-ghost" data-act="close">Vazgeç</button><button type="button" class="btn btn-bad" data-act="reset">Sil</button></div>';
@@ -858,9 +862,14 @@
     'auth-forgot': forgotAuth,
     'auth-google'() { socialAuth('google'); },
     'auth-apple'() { socialAuth('apple'); },
-    async logout() {
+    'logout-force'() { actions.logout(null, true); },
+    async logout(el, force) {
       if (!window.BilsemAuth) return;
-      try { await BilsemAuth.out(); } catch (err) { /* çıkışta hata olursa yerel kayıt silinmez */ return; }
+      try { await BilsemAuth.out(force); } catch (err) {
+        // çıkışta hata olursa yerel kayıt silinmez; buluta gitmemiş ilerleme varsa sorulur
+        if (err && err.code === 'bilsem/unsynced') { sheet = { kind: 'unsynced' }; render(); }
+        return;
+      }
       Store.detach();
       ses = null; span = null; sheet = null; view = 'home';
       user = null; authErr = ''; authName = '';
@@ -911,11 +920,15 @@
       render();
       return;
     }
-    Store.attach(d.user.uid, d.cloud);   // bu cihazdaki kaydı hesabın kaydıyla eşitler
+    Store.attach(d.user.uid, d.cloud, d.offline);   // bu cihazdaki kaydı hesabın kaydıyla birleştirir (internet yoksa yerel kayıtla devam)
     takeLoginTry();
     user = d.user; authErr = ''; authName = '';
     view = 'home'; sheet = null;
     render(); window.scrollTo(0, 0);
+  });
+  /* başka bir cihazdan gelen ilerleme birleşti: soru ya da oyun sürmüyorsa ekranı yenile */
+  window.addEventListener('bilsem:synced', () => {
+    if (user && view !== 'quiz' && view !== 'span' && !(sheet && /^pin/.test(sheet.kind))) render();
   });
   setTimeout(() => { if (user === undefined) { loadFailed = true; render(); } }, 12000);
 

@@ -54,6 +54,17 @@ gönderilen bağlantıyla yapılır ("Şifremi unuttum"). Bağlantının Türkç
 Authentication → Templates bölümünden "Şifre sıfırlama" metnini düzenleyebilirsiniz.
 Tek dosya sürümü (`tools/tek-dosya.js`) giriş modülünü içermez; hesap girişi yalnızca yayındaki sürümde çalışır.
 
+### İnternetsiz çalışma ve birden çok cihaz
+
+- Uygulama bir kez açıldıktan sonra internet olmadan da açılır (`sw.js`, hizmet çalışanı). Sayfa her açılışta
+  önce yeni sürümü ağdan ister; ağ yoksa son kopyayı kullanır.
+- İnternet yokken giriş yapılmış hesap bu cihazdaki kayıtla çalışmayı sürdürür. Bağlantı gelince ya da sayfaya
+  dönülünce ilerleme buluta gönderilir.
+- Kayıt buluta yazılmadan önce buluttakiyle birleştirilir; iki cihaz birbirinin ilerlemesini silmez. Yıldızlar ve
+  rekorlar en büyüğü alınır, her konuda daha çok soru çözülmüş kayıt kullanılır, deneme sonuçları birleşir,
+  ayarlar son kaydeden cihazdan gelir. İlerleme bir cihazda sıfırlanırsa öbür cihazdaki eski ilerleme geri gelmez.
+- Buluta gönderilmemiş ilerleme varken çıkış yapılmak istenirse uygulama uyarır (çıkışta cihazdaki kayıt silinir).
+
 ## Çalışma biçimleri
 
 | Biçim | Ne yapar |

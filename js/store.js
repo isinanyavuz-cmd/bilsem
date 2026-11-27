@@ -12,7 +12,7 @@
 
   const spanBlank = () => ({ plays: 0, best: { 1: { both: 0, fwd: 0, bwd: 0 }, 2: { both: 0, fwd: 0, bwd: 0 }, 3: { both: 0, fwd: 0, bwd: 0 } } });
   function blank() {
-    return { v: 3, settings: { sound: true, len: 10, spanStart: 3, spanLevel: 1, spanTypeTimed: true, pin: null }, cats: {}, days: {}, exams: [], span: spanBlank(), profile: { avatar: null } };
+    return { v: 3, settings: { sound: true, len: 10, spanStart: 3, spanLevel: 1, spanTypeTimed: true, pin: null }, cats: {}, days: {}, exams: [], span: spanBlank(), profile: { avatar: null }, ts: 0, epoch: 0 };
   }
 
   /* Sayı hafızası kaydını bugünkü biçime getirir: rekorlar düzeye göre tutulur ve en çok MAX basamaktır.
@@ -89,27 +89,80 @@
   }
   const PIN_RE = /^[0-9]{4,12}$/;
 
+  /* Ham metni bugünkü biçimde bir kayda çevirir; geçersizse null. */
+  function parse(raw) {
+    try {
+      const d = migrate(typeof raw === 'string' ? JSON.parse(raw) : raw), b = blank();
+      if (d && d.v === 3) {
+        const Sp = Bilsem.Span;
+        const out = Object.assign(b, d, { settings: Object.assign(b.settings, d.settings), span: normalizeSpan(d.span, Sp.MAX) });
+        const set = out.settings;
+        set.spanStart = Math.max(Sp.MIN, Math.min(Sp.MAX, set.spanStart));
+        set.spanLevel = Sp.levelOf(set.spanLevel).id;
+        set.spanTypeTimed = set.spanTypeTimed !== false;
+        /* Kaldırılmış (ya da bilinmeyen) kategorilerin kayıtları toplamlara karışmasın diye atılır. */
+        const cats = {};
+        Object.keys(out.cats || {}).forEach((k) => { if (Bilsem.catById(k)) cats[k] = out.cats[k]; });
+        out.cats = cats;
+        out.ts = Number(out.ts) || 0;
+        out.epoch = Number(out.epoch) || 0;
+        return out;
+      }
+    } catch (e) { /* bozuk kayıt */ }
+    return null;
+  }
+
+  /* İki cihazın kaydını birleştirir (saf; iki kayıt da parse edilmiş olmalı).
+     İlerleme yalnızca artar: her konuda daha çok soru çözülmüş kayıt alınır, yıldızlar ve rekorlar en
+     büyüğüdür, günler gün gün birleşir, deneme sonuçları birleşip yinelenenler atılır. Ayarlar ve profil
+     en son kaydedilen cihazdan gelir. İlerleme bir cihazda sıfırlandıysa (epoch) sıfırlamadan önceki kayıt
+     birleştirilmez; sıfırlanan taraf kazanır.
+     Not: iki cihaz aynı konuda ayrı ayrı çalıştıysa o konunun sayaçları toplanmaz, büyük olan alınır;
+     böylece aynı çalışma iki kez sayılmaz, ama bir cihazdaki birkaç soru istatistiklere girmeyebilir. */
+  function merge(a, b) {
+    if (a.epoch !== b.epoch) return JSON.parse(JSON.stringify(a.epoch > b.epoch ? a : b));
+    const newer = (b.ts || 0) > (a.ts || 0) ? b : a;
+    const out = JSON.parse(JSON.stringify(newer));
+    const older = newer === a ? b : a;
+    // konular
+    Object.keys(older.cats).forEach((k) => {
+      const o = older.cats[k], n = out.cats[k];
+      if (!n) { out.cats[k] = JSON.parse(JSON.stringify(o)); return; }
+      const base = (o.seen || 0) > (n.seen || 0) ? JSON.parse(JSON.stringify(o)) : n;
+      base.stars = [0, 1, 2, 3].map((i) => Math.max((o.stars || [])[i] || 0, (n.stars || [])[i] || 0));
+      out.cats[k] = base;
+    });
+    // günler
+    Object.keys(older.days).forEach((k) => {
+      const o = older.days[k], n = out.days[k];
+      if (!n) { out.days[k] = Object.assign({}, o); return; }
+      const base = (o.n || 0) > (n.n || 0) ? Object.assign({}, o) : n;
+      base.daily = !!(o.daily || n.daily);
+      const st = Math.max(o.stars || 0, n.stars || 0);
+      if (st || 'stars' in o || 'stars' in n) base.stars = st;
+      out.days[k] = base;
+    });
+    // denemeler
+    const seen = {}, exams = [];
+    older.exams.concat(out.exams).forEach((e) => { const k = JSON.stringify(e); if (!seen[k]) { seen[k] = 1; exams.push(e); } });
+    exams.sort((x, y) => (x.at || 0) - (y.at || 0) || String(x.date).localeCompare(String(y.date)));
+    out.exams = exams.slice(-30);
+    // sayı hafızası
+    out.span.plays = Math.max(older.span.plays || 0, out.span.plays || 0);
+    Object.keys(out.span.best).forEach((l) => Object.keys(out.span.best[l]).forEach((m) => {
+      out.span.best[l][m] = Math.max(out.span.best[l][m] || 0, (older.span.best[l] || {})[m] || 0);
+    }));
+    out.ts = Math.max(a.ts || 0, b.ts || 0);
+    return out;
+  }
+
   const Store = {
     data: blank(),
     /* Ham metindeki kaydı (bugünkü ya da eski biçim) okur. Geçerliyse true döner ve veriyi yükler. */
     hydrate(raw) {
-      try {
-        const d = migrate(JSON.parse(raw)), b = blank();
-        if (d && d.v === 3) {
-          const Sp = Bilsem.Span;
-          this.data = Object.assign(b, d, { settings: Object.assign(b.settings, d.settings), span: normalizeSpan(d.span, Sp.MAX) });
-          const set = this.data.settings;
-          set.spanStart = Math.max(Sp.MIN, Math.min(Sp.MAX, set.spanStart));
-          set.spanLevel = Sp.levelOf(set.spanLevel).id;
-          set.spanTypeTimed = set.spanTypeTimed !== false;
-          /* Kaldırılmış (ya da bilinmeyen) kategorilerin kayıtları toplamlara karışmasın diye atılır. */
-          const cats = {};
-          Object.keys(this.data.cats || {}).forEach((k) => { if (Bilsem.catById(k)) cats[k] = this.data.cats[k]; });
-          this.data.cats = cats;
-          return true;
-        }
-      } catch (e) { /* bozuk kayıt */ }
-      return false;
+      const d = parse(raw);
+      if (d) this.data = d;
+      return !!d;
     },
     /* Bu cihazdaki yerel kaydı okur (bugünkü ya da eski anahtar). */
     localRaw() {
@@ -122,6 +175,7 @@
     },
     /* Kaydı bu cihazda saklar ve (giriş yapılmışsa) hesabın bulut kaydına gönderir. */
     save() {
+      this.data.ts = Date.now();
       lsSet(KEY, JSON.stringify(this.data));
       if (root.BilsemSync) root.BilsemSync.push(this.data);
     },
@@ -130,16 +184,37 @@
        - Bulutta kayıt varsa onu kullanır (yalnızca bu cihaza yazılır, buluta geri gönderilmez).
        - Bulutta yoksa ve bu cihaz henüz bir hesaba bağlanmamışsa, bu cihazdaki ilerlemeyi ilk hesaba aktarır.
        - Aksi hâlde yeni, boş bir kayıtla başlar. */
-    attach(uid, cloudRaw) {
-      const owner = lsGet(OWNER_KEY), local = this.localRaw();
+    attach(uid, cloudRaw, offline) {
+      const owner = lsGet(OWNER_KEY), localRaw = this.localRaw();
+      const mine = owner === uid ? parse(localRaw) : null;     // bu cihazda aynı hesabın kaydı
+      const cloud = cloudRaw ? parse(cloudRaw) : null;
       let source;
-      if (cloudRaw && this.hydrate(cloudRaw)) source = 'cloud';
-      else if (!owner && local && this.hydrate(local)) source = 'adopted';
+      if (offline) {
+        // Bulut okunamadı (internet yok): bu hesabın bu cihazdaki kaydıyla devam edilir; bağlantı gelince birleştirilir.
+        if (!mine) return 'none';
+        this.data = mine;
+        return 'local';
+      }
+      if (cloud && mine) {
+        this.data = merge(cloud, mine);
+        source = JSON.stringify(this.data) === JSON.stringify(cloud) ? 'cloud' : 'merged';
+      } else if (cloud) { this.data = cloud; source = 'cloud'; }
+      else if (mine) { this.data = mine; source = 'local'; }
+      else if (!owner && localRaw && this.hydrate(localRaw)) source = 'adopted';
       else { this.data = blank(); source = 'blank'; }
       lsSet(OWNER_KEY, uid);
       lsSet(KEY, JSON.stringify(this.data));
       if (source !== 'cloud' && root.BilsemSync) root.BilsemSync.push(this.data);
       return source;
+    },
+    /* Bulut kaydını bu cihazdakiyle birleştirir (eşitleme sırasında). Birleşen kaydı döndürür. */
+    mergeCloud(cloudRaw) {
+      const cloud = cloudRaw ? parse(cloudRaw) : null;
+      if (cloud) {
+        this.data = merge(this.data, cloud);
+        lsSet(KEY, JSON.stringify(this.data));
+      }
+      return this.data;
     },
     /* Çıkışta bu cihazdaki ilerlemeyi siler; ortak kullanılan bir cihazda bir sonraki çocuk onu görmesin. */
     detach() {
@@ -161,6 +236,7 @@
       const s = this.data.settings;
       this.data = blank();
       this.data.settings = s;
+      this.data.epoch = Date.now();   // öbür cihazlardaki eski ilerleme birleştirilirken geri gelmesin
       OLD_KEYS.forEach(lsDel);
       this.save();
     },
@@ -265,7 +341,7 @@
 
   Bilsem.Store = Store;
   Bilsem.Exam = { examLevel: examLevel, examCats: examCats };
-  Bilsem.StoreUtil = { dayKey: dayKey, addDays: addDays, starsFor: starsFor, nextSkill: nextSkill, streak: streak, migrate: migrate, blank: blank, normalizeSpan: normalizeSpan };
+  Bilsem.StoreUtil = { dayKey: dayKey, addDays: addDays, starsFor: starsFor, nextSkill: nextSkill, streak: streak, migrate: migrate, blank: blank, normalizeSpan: normalizeSpan, parse: parse, merge: merge };
 
   if (typeof module !== 'undefined') module.exports = Bilsem;
 })(typeof window !== 'undefined' ? window : globalThis);
