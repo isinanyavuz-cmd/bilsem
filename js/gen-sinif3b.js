@@ -3,33 +3,25 @@
 (function (root) {
   'use strict';
   const B = root.Bilsem, S = B.Shapes, Q = B.Q, G = S.Grid;
-  const INK = S.INK, r1 = S.r1, PAL = S.COLOR_IDS;
-  const fillOf = (id) => S.COLORS[id].fill;
+  const T = S.STIL, INK = S.INK, r1 = S.r1, PAL = S.COLOR_IDS;
   const nameOf = (id) => S.COLORS[id].name;
-  const SOFT = { fill: '#566889', weight: 700 };
-  const ORANGE = '#e08600';
-  const colorOpt = (id) => ({
-    html: S.svg(100, 100, '<rect x="22" y="8" width="56" height="56" rx="14" fill="' + fillOf(id) + '" stroke="' + INK + '" stroke-width="4"/>' + S.text(50, 83, nameOf(id), 19), { cls: 'opt-svg' }),
-    key: 'c' + id,
-  });
+  const colorOpt = S.swatchOpt;
   const cellKey = (cells) => cells.map((c) => c[0] + ',' + c[1]).sort().join(';');
   const uniq = (cells) => { const m = new Map(); cells.forEach((c) => m.set(c[0] + ',' + c[1], c)); return Array.from(m.values()); };
 
   /* ---------- Katlama ---------- */
-  const PAPER = '#ffe9a8';
+  /* Kâğıt: hardal renkli, ince kareli; delikler koyu kenarlı ve içi açık. */
   function paperDraw(rows, cols, cs, holes, x, y) {
-    let s = '<g transform="translate(' + r1(x) + ' ' + r1(y) + ')"><rect width="' + r1(cols * cs) + '" height="' + r1(rows * cs) + '" rx="4" fill="' + PAPER + '"/>';
+    const w = cols * cs, h = rows * cs;
+    let s = '<g transform="translate(' + r1(x) + ' ' + r1(y) + ')">' + S.board(0, 0, w, h, { paper: true, rx: 5 });
     let lines = '';
-    for (let i = 1; i < cols; i++) lines += 'M' + r1(i * cs) + ' 0V' + r1(rows * cs);
-    for (let i = 1; i < rows; i++) lines += 'M0 ' + r1(i * cs) + 'H' + r1(cols * cs);
-    s += '<path d="' + lines + '" stroke="#c9a94a" stroke-opacity=".55" stroke-width="1.2" fill="none"/>';
-    holes.forEach((h) => { s += '<circle cx="' + r1((h[1] + 0.5) * cs) + '" cy="' + r1((h[0] + 0.5) * cs) + '" r="' + r1(cs * 0.3) + '" fill="#fff" stroke="' + INK + '" stroke-width="2.4"/>'; });
-    return s + '<rect width="' + r1(cols * cs) + '" height="' + r1(rows * cs) + '" rx="4" fill="none" stroke="' + INK + '" stroke-width="3"/></g>';
+    for (let i = 1; i < cols; i++) lines += 'M' + r1(i * cs) + ' 2V' + r1(h - 2);
+    for (let i = 1; i < rows; i++) lines += 'M2 ' + r1(i * cs) + 'H' + r1(w - 2);
+    s += '<path d="' + lines + '" stroke="' + T.paperGrid + '" stroke-width="' + T.W.hair + '" fill="none"/>';
+    holes.forEach((p) => { s += '<circle cx="' + r1((p[1] + 0.5) * cs) + '" cy="' + r1((p[0] + 0.5) * cs) + '" r="' + r1(cs * 0.3) + '" fill="' + T.tile + '" stroke="' + INK + '" stroke-width="' + T.W.thin + '"/>'; });
+    return s + '</g>';
   }
-  const arrowPath = (x0, y0, x1, y1) => {
-    const a = Math.atan2(y1 - y0, x1 - x0), L = 9;
-    return '<path d="M' + r1(x0) + ' ' + r1(y0) + 'L' + r1(x1) + ' ' + r1(y1) + 'M' + r1(x1 - L * Math.cos(a - 0.5)) + ' ' + r1(y1 - L * Math.sin(a - 0.5)) + 'L' + r1(x1) + ' ' + r1(y1) + 'L' + r1(x1 - L * Math.cos(a + 0.5)) + ' ' + r1(y1 - L * Math.sin(a + 0.5)) + '" fill="none" stroke="' + ORANGE + '" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>';
-  };
+  const arrowPath = (x0, y0, x1, y1) => S.arrow(x0, y0, x1, y1, { color: T.accent, w: T.W.line, head: 9 });
 
   B.GEN.fold = function (rng, level) {
     const N = level === 1 || level === 3 ? 4 : 6;
@@ -48,29 +40,29 @@
       return uniq(o);
     };
     const correct = unfold(actual, vf, hf);
-    const cs = N === 4 ? 30 : 22, A = N * cs, gap = 44, W = 14 + A + gap + (fc * cs) + 14, H = A + 50, oy = 30;
-    let inner = S.text(14 + A / 2, 12, 'Kâğıt', 15, SOFT) + S.text(14 + A + gap + (fc * cs) / 2, 12, 'Katlanmış', 15, SOFT);
+    const cs = N === 4 ? 30 : 22, A = N * cs, gap = 44, W = 14 + A + gap + (fc * cs) + 14, H = A + 54, oy = 30;
+    let inner = S.label(14 + A / 2, 12, 'Kâğıt', 15) + S.label(14 + A + gap + (fc * cs) / 2, 12, 'Katlanmış', 15);
     inner += paperDraw(N, N, cs, [], 14, oy);
-    const dash = (d) => '<path d="' + d + '" stroke="' + ORANGE + '" stroke-width="3" stroke-dasharray="7 5" stroke-linecap="round"/>';
+    const dash = (d) => S.dash(d, { w: T.W.line, dash: '7 5' });
     if (vf) {
       inner += dash('M' + r1(14 + A / 2) + ' ' + (oy - 6) + 'V' + r1(oy + A + 6));
       const sx = vside === 'L' ? 14 + A * 0.85 : 14 + A * 0.15, ex = vside === 'L' ? 14 + A * 0.58 : 14 + A * 0.42;
       inner += arrowPath(sx, oy + A * (hf ? 0.28 : 0.5), ex, oy + A * (hf ? 0.28 : 0.5));
-      if (two) inner += S.text(14 + A / 2, oy + A + 16, '1', 15, { fill: ORANGE });
+      if (two) inner += S.mark(14 + A / 2, oy + A + 18, '1', 15);
     }
     if (hf) {
       inner += dash('M' + (14 - 6) + ' ' + r1(oy + A / 2) + 'H' + r1(14 + A + 6));
       const sy = hside === 'T' ? oy + A * 0.85 : oy + A * 0.15, ey = hside === 'T' ? oy + A * 0.58 : oy + A * 0.42;
       inner += arrowPath(14 + A * (vf ? 0.28 : 0.5), sy, 14 + A * (vf ? 0.28 : 0.5), ey);
-      if (two) inner += S.text(14 + A + 14, oy + A / 2 - 16, '2', 15, { fill: ORANGE });
+      if (two) inner += S.mark(14 + A + 14, oy + A / 2 - 16, '2', 15);
     }
-    inner += '<path d="M' + (14 + A + 8) + ' ' + r1(oy + A / 2) + 'h' + (gap - 16) + 'm-7 -7l7 7l-7 7" fill="none" stroke="#566889" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    inner += S.arrow(14 + A + 8, oy + A / 2, 14 + A + gap - 8, oy + A / 2, { w: T.W.line, head: 9 });
     inner += paperDraw(fr, fc, cs, folded, 14 + A + gap, oy + (A - fr * cs) / 2);
     const q = { stem: S.svg(W, H, inner, { maxW: Math.min(W * 1.25, 420) }) };
     q.prompt = 'Kâğıt turuncu çizgi' + (two ? 'lerden sırayla' : 'den') + ' katlanıp delikler açılıyor. Kâğıt tekrar açılınca nasıl görünür?';
     q.meta = { N: N, vf: vf, hf: hf, R0: R0, C0: C0, folded: folded, holes: correct };
     q.explain = 'Katlanmış kâğıttaki her delik, açılınca katlama çizgisinin öbür yanında ayna görüntüsüyle de çıkar. ' + (two ? 'İki kez katlandığı için her delik dört yerde görünür.' : 'Bir kez katlandığı için her delik iki yerde görünür.') + ' Toplam ' + correct.length + ' delik olur.';
-    const mk = (cells) => ({ html: S.svg(100, 100, paperDraw(N, N, 82 / N, cells, 9, 9), { cls: 'opt-svg' }), key: 'f' + cellKey(cells) });
+    const mk = (cells) => ({ html: S.svg(100, 100, paperDraw(N, N, 84 / N, cells, 8, 6), { cls: 'opt-svg' }), key: 'f' + cellKey(cells) });
     const ds = [actual, unfold(actual, vf, false), unfold(actual, false, hf)];
     ds.push(uniq(actual.concat(actual.map((c) => [N - 1 - c[0], N - 1 - c[1]]))));       // aynalama yerine yarım tur çevirme
     ds.push(uniq(actual.concat(actual.map((c) => [c[1], c[0]]))));                          // köşegen yansıması
@@ -122,7 +114,7 @@
         axes = ['V', 'H', 'D', 'A'].filter((o) => invariant(m, OPS[o]));
         break;
       }
-      const q = { stem: S.svg(300, 300, G.draw(m, pal, 6, 6, 288), { maxW: 320 }) };
+      const q = { stem: S.svg(300, 306, G.draw(m, pal, 6, 6, 288), { maxW: 320 }) };
       q.prompt = 'Bu şeklin kaç simetri ekseni var? (Eksen, şekli ortadan katlayınca iki yarının tam üst üste oturduğu çizgidir.)';
       q.meta = { m: m, axes: axes.length, names: axes };
       q.explain = axes.length ? 'Şekli katlayarak denedik: ' + axes.map((o) => AXIS_NAME[o]).join(', ') + ' eksen' + (axes.length > 1 ? 'ler' : '') + ' var. Toplam ' + axes.length + ' simetri ekseni.' : 'Dikey, yatay ve iki çapraz katlamada da yarılar üst üste oturmuyor: simetri ekseni yok.';
@@ -143,17 +135,13 @@
       const mk0 = DIH.map((d) => { const m = given.map((row) => row.slice()); for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const s = d(r, c, N); m[r][c] = inGiven(s[0], s[1]) ? given[s[0]][s[1]] : 0; } return G.key(m); });
       if (new Set(mk0).size >= 4 && new Set(mk0).has(G.key(full))) break;
     }
-    const cs = 288 / N;
-    let tint = '';
-    if (kind === 'V') tint = '<rect x="' + r1(6 + (N / 2) * cs) + '" y="6" width="' + r1((N / 2) * cs) + '" height="288" fill="#cfe0fa" fill-opacity=".45"/>';
-    if (kind === 'H') tint = '<rect x="6" y="' + r1(6 + (N / 2) * cs) + '" width="288" height="' + r1((N / 2) * cs) + '" fill="#cfe0fa" fill-opacity=".45"/>';
-    if (kind === 'D') tint = '<polygon points="6,6 294,294 6,294" fill="#cfe0fa" fill-opacity=".45"/>';
-    const axisLine = kind === 'V' ? 'M150 0V300' : kind === 'H' ? 'M0 150H300' : 'M0 0L300 300';
-    const q = { stem: S.svg(300, 300, G.draw(given, pal, 6, 6, 288) + tint + '<path d="' + axisLine + '" stroke="' + ORANGE + '" stroke-width="4" stroke-dasharray="10 7" stroke-linecap="round"/>', { maxW: 320 }) };
+    // tamamlanacak yarı sarı (soru işareti kutusunun rengi); çapraz eksende köşegen kareleri verilen yarıdadır
+    const axisLine = kind === 'V' ? 'M150 0V302' : kind === 'H' ? 'M0 150H300' : 'M2 2L298 298';
+    const q = { stem: S.svg(300, 306, G.draw(given, pal, 6, 6, 288, { zone: (r, c) => !inGiven(r, c) }) + S.dash(axisLine, { w: T.W.bold, dash: '10 8' }), { maxW: 320 }) };
     q.prompt = 'Turuncu kesik çizgi bir ayna gibi. Şeklin boş yarısı aynadaki görüntüsüyle tamamlanınca nasıl görünür?';
     q.meta = { N: N, kind: kind, given: given, full: full };
     q.explain = 'Ayna çizgisinin bir yanındaki her kare, öbür yanda çizgiye aynı uzaklıkta yansır. Çizgiye yakın kareler yine çizgiye yakın kalır.';
-    const mk = (m) => ({ html: S.svg(100, 100, G.draw(m, pal, 9, 9, 82), { cls: 'opt-svg' }), key: 'y' + G.key(m) });
+    const mk = (m) => ({ html: S.gridSvg(m, pal), key: 'y' + G.key(m) });
     const ds = DIH.map((d) => { const m = given.map((row) => row.slice()); for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const s = d(r, c, N); m[r][c] = inGiven(s[0], s[1]) ? given[s[0]][s[1]] : 0; } return m; });
     const flips = [];
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!inGiven(r, c)) { const m = full.map((row) => row.slice()); m[r][c] = 1 - m[r][c]; flips.push(m); }
@@ -244,10 +232,10 @@
       if (r === ask[0] && c === ask[1]) inner += S.qtile(x + 2, y + 2, cs - 4);
       else {
         inner += S.tile(x + 2, y + 2, cs - 4);
-        if (v) inner += '<circle cx="' + r1(x + cs / 2) + '" cy="' + r1(y + cs / 2) + '" r="' + r1(cs * 0.31) + '" fill="' + fillOf(cols[v - 1]) + '" stroke="' + INK + '" stroke-width="3"/>';
+        if (v) inner += S.figAt({ shape: 'circle', color: cols[v - 1] }, x + cs * 0.08, y + cs * 0.06, cs * 0.84);
       }
     }
-    if (box) inner += '<path d="M' + r1(10 + (n / 2) * cs) + ' 6V' + (10 + n * cs + 4) + 'M6 ' + r1(10 + (n / 2) * cs) + 'H' + (10 + n * cs + 4) + '" stroke="' + INK + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8"/>';
+    if (box) inner += '<path d="M' + r1(10 + (n / 2) * cs) + ' 6V' + (10 + n * cs + 4) + 'M6 ' + r1(10 + (n / 2) * cs) + 'H' + (10 + n * cs + 4) + '" stroke="' + T.soft + '" stroke-width="' + T.W.line + '" stroke-linecap="round" stroke-dasharray="1 8"/>';
     const q = { stem: S.svg(W, W, inner, { maxW: n === 3 ? 270 : 300 }) };
     q.prompt = box ? 'Her satırda, her sütunda ve her 2×2 kutuda dört renk de birer kez bulunmalı. Soru işaretinin yerine hangi renk gelmeli?'
       : 'Her satırda ve her sütunda ' + (n === 3 ? 'üç' : 'dört') + ' renk de birer kez bulunmalı. Soru işaretinin yerine hangi renk gelmeli?';

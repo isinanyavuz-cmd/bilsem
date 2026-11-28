@@ -9,13 +9,15 @@
   function machineSvg(rows, hole) {
     const k = rows[0].ins.length, th = 58, gap = 10, tw = k === 2 ? 62 : 86, pad = 8, top = 28, aw = 40, mw = 92;
     const inW = k * tw + (k - 1) * 8, mx = pad + inW + aw, W = mx + mw + aw + 86 + pad, H = top + rows.length * th + (rows.length - 1) * gap + pad;
-    const soft = { fill: '#566889', weight: 700 };
-    const arrow = (x, y) => '<path d="M' + x + ' ' + y + 'h20m-9 -9l9 9l-9 9" fill="none" stroke="#566889" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>';
-    let inner = S.text(pad + inW / 2, 12, 'giren', 16, soft) + S.text(mx + mw / 2, 12, 'makine', 16, soft) + S.text(W - pad - 43, 12, 'çıkan', 16, soft) +
-      '<rect x="' + mx + '" y="' + (top - 4) + '" width="' + mw + '" height="' + (H - top - pad + 8) + '" rx="20" fill="#a565f2" stroke="' + INK + '" stroke-width="4"/>';
-    const my = (top + H - pad) / 2;
+    const arrow = (x, y) => S.arrow(x, y, x + 20, y);
+    // makine: mor kil gövde, içinde dönen dişliler
+    let inner = S.label(pad + inW / 2, 12, 'giren', 16) + S.label(mx + mw / 2, 12, 'makine', 16) + S.label(W - pad - 43, 12, 'çıkan', 16) +
+      S.block(mx, top - 4, mw, H - top - pad + 2, 'purple', { rx: 22, lip: 6, sw: S.STIL.W.line });
+    const my = (top + H - pad) / 2, P = S.COLORS.purple;
     [[-16, -26, 20], [16, 6, 15], [-14, 34, 11]].forEach((g) => {
-      inner += '<circle cx="' + (mx + mw / 2 + g[0]) + '" cy="' + (my + g[1]) + '" r="' + g[2] + '" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="7" stroke-dasharray="7 5"/>';
+      const gx = mx + mw / 2 + g[0], gy = my + g[1];
+      inner += '<circle cx="' + gx + '" cy="' + gy + '" r="' + g[2] + '" fill="none" stroke="' + P.tint + '" stroke-width="7" stroke-dasharray="7 5"/>' +
+        '<circle cx="' + gx + '" cy="' + gy + '" r="' + (g[2] - 2) + '" fill="' + P.tint + '"/><circle cx="' + gx + '" cy="' + gy + '" r="' + r1(g[2] * 0.36) + '" fill="' + P.edge + '"/>';
     });
     rows.forEach((row, i) => {
       const y = top + i * (th + gap), last = i === rows.length - 1, xr = W - pad - 86;
@@ -154,17 +156,17 @@
   /* ---------- Terazi ---------- */
   /* L, R: şekil dizileri ya da '?'; tilt: -1 sol ağır, 1 sağ ağır, 0 dengede */
   function scaleDraw(L, R, tilt, x0, y0) {
-    const cx = x0 + 100, cy = y0 + 32, a = tilt * 11 * Math.PI / 180, dx = 66 * Math.cos(a), dy = 66 * Math.sin(a);
+    const T = S.STIL, cx = x0 + 100, cy = y0 + 32, a = tilt * 11 * Math.PI / 180, dx = 66 * Math.cos(a), dy = 66 * Math.sin(a);
     const ends = [[cx - dx, cy - dy], [cx + dx, cy + dy]];
-    let o = '<path d="M' + (cx - 36) + ' ' + (y0 + 142) + 'h72l-12 -13h-48z" fill="#b4c5e2" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>' +
+    let o = '<path d="M' + (cx - 36) + ' ' + (y0 + 142) + 'h72l-12 -13h-48z" fill="' + T.boardLine + '" stroke="' + INK + '" stroke-width="' + T.W.line + '" stroke-linejoin="round"/>' +
       '<path d="M' + cx + ' ' + cy + 'V' + (y0 + 129) + '" stroke="' + INK + '" stroke-width="7" stroke-linecap="round"/>' +
       '<path d="M' + r1(ends[0][0]) + ' ' + r1(ends[0][1]) + 'L' + r1(ends[1][0]) + ' ' + r1(ends[1][1]) + '" stroke="' + INK + '" stroke-width="7" stroke-linecap="round"/>' +
-      '<circle cx="' + cx + '" cy="' + cy + '" r="7" fill="#ffc93c" stroke="' + INK + '" stroke-width="3"/>';
+      '<circle cx="' + cx + '" cy="' + cy + '" r="7" fill="' + S.COLORS.yellow.fill + '" stroke="' + INK + '" stroke-width="' + T.W.line + '"/>';
     ends.forEach((e, i) => {
       const py = e[1] + 54, ex = r1(e[0]), ey = r1(e[1]), load = i ? R : L;
-      o += '<path d="M' + ex + ' ' + ey + 'L' + r1(e[0] - 30) + ' ' + r1(py) + 'M' + ex + ' ' + ey + 'L' + r1(e[0] + 30) + ' ' + r1(py) + '" stroke="' + INK + '" stroke-width="2.5" fill="none"/>' +
-        '<path d="M' + r1(e[0] - 34) + ' ' + r1(py) + 'h68a34 12 0 0 1 -68 0z" fill="#dfe8f7" stroke="' + INK + '" stroke-width="3" stroke-linejoin="round"/>';
-      if (load === '?') o += S.text(e[0], py - 17, '?', 34, { fill: '#e08600' });
+      o += '<path d="M' + ex + ' ' + ey + 'L' + r1(e[0] - 30) + ' ' + r1(py) + 'M' + ex + ' ' + ey + 'L' + r1(e[0] + 30) + ' ' + r1(py) + '" stroke="' + INK + '" stroke-width="' + T.W.thin + '" fill="none"/>' +
+        '<path d="M' + r1(e[0] - 34) + ' ' + r1(py) + 'h68a34 12 0 0 1 -68 0z" fill="' + T.tile + '" stroke="' + INK + '" stroke-width="' + T.W.line + '" stroke-linejoin="round"/>';
+      if (load === '?') o += S.mark(e[0], py - 17, '?', 34);
       else {
         const m = load.length, s = m === 1 ? 40 : m === 2 ? 30 : 23, w = m * s;
         load.forEach((f, j) => { o += S.figAt(f, e[0] - w / 2 + j * s, py - s + 2, s); });

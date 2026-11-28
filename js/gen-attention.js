@@ -22,11 +22,11 @@
     if (rng.chance(0.6)) {
       const n = level + 3, colors = level === 4 ? 4 : 3, k = [0, 7, 11, 15, 21][level];
       const pal = rng.sample(COL, 4), m = randCells(rng, n, k, colors);
-      const mk = (g) => ({ html: S.svg(100, 100, G.draw(g, pal, 6, 6, 88), { cls: 'opt-svg' }), key: G.key(g) });
+      const mk = (g) => ({ html: S.gridSvg(g, pal), key: G.key(g) });
       const nud = (g) => G.nudge(rng, g, colors, ['move', 'recolor', 'move']);
       const wrong = Q.spread(rng, m, nud, G.key).map(mk);
       for (let i = 0; i < 6; i++) wrong.push(mk(nud(m)));
-      q.stem = S.svg(202, 202, G.draw(m, pal, 6, 6, 190), { maxW: 210 });
+      q.stem = S.svg(202, 206, G.draw(m, pal, 6, 6, 190), { maxW: 210 });
       q.explain = 'Satır satır karşılaştır. Diğer şıklarda bir ya da iki kare başka yerde ya da başka renkte.';
       return Q.finish(rng, q, mk(m), wrong);
     }
@@ -61,7 +61,7 @@
 
   /* İç içe şekiller: tepeden yelpaze gibi açılan üçgenler, kareli alan, köşegenli kare */
   function nested(rng, tier) {
-    const q = {}, INK = S.INK;
+    const q = {}, INK = S.INK, PAPER = S.STIL.paper, LW = S.STIL.W.bold;
     const kind = rng.pick(tier === 1 ? ['fan', 'grid'] : tier === 2 ? ['fan', 'fanline', 'grid'] : ['fanline', 'fanline', 'grid', 'diag']);
     let total, why, inner, W, H, prefer, dims = {};
     if (kind === 'fan' || kind === 'fanline') {
@@ -78,8 +78,8 @@
         const t = k / (lines + 1) * 0.92 + 0.04, y = ay + (by - ay) * t;
         d += 'M' + r1(ax + (x0 - ax) * t) + ' ' + r1(y) + 'H' + r1(ax + (x1 - ax) * t);
       }
-      inner = '<path d="M' + ax + ' ' + ay + 'L' + x1 + ' ' + by + 'H' + x0 + 'Z" fill="#fff4cc" stroke="' + INK + '" stroke-width="5" stroke-linejoin="round"/>' +
-        '<path d="' + d + '" stroke="' + INK + '" stroke-width="5" stroke-linecap="round" fill="none"/>';
+      inner = '<path d="M' + ax + ' ' + ay + 'L' + x1 + ' ' + by + 'H' + x0 + 'Z" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="' + LW + '" stroke-linejoin="round"/>' +
+        '<path d="' + d + '" stroke="' + INK + '" stroke-width="' + LW + '" stroke-linecap="round" fill="none"/>';
       q.prompt = 'Bu şekilde toplam kaç üçgen var? Büyük küçük hepsini say.';
       const parts = [];
       for (let k = 1; k <= n; k++) parts.push(k + ' parçalı ' + (n - k + 1) + ' tane');
@@ -100,15 +100,15 @@
       let d = '';
       for (let i = 1; i < cols; i++) d += 'M' + r1(8 + i * c) + ' 8v' + r1(rows * c);
       for (let i = 1; i < rows; i++) d += 'M8 ' + r1(8 + i * c) + 'h' + r1(cols * c);
-      inner = '<rect x="8" y="8" width="' + r1(cols * c) + '" height="' + r1(rows * c) + '" fill="#e2f6e9" stroke="' + INK + '" stroke-width="5" stroke-linejoin="round"/>' +
-        '<path d="' + d + '" stroke="' + INK + '" stroke-width="5" fill="none"/>';
+      inner = '<rect x="8" y="8" width="' + r1(cols * c) + '" height="' + r1(rows * c) + '" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="' + LW + '" stroke-linejoin="round"/>' +
+        '<path d="' + d + '" stroke="' + INK + '" stroke-width="' + LW + '" fill="none"/>';
       q.prompt = 'Bu şekilde toplam kaç kare var? Büyük küçük hepsini say.';
       why = 'Kareleri boyuna göre say: ' + parts.join(', ') + '. Toplam ' + total + ' kare.';
       prefer = [rows * cols, rows * cols + 1, total - 1];
     } else {
       total = 8; W = 236; H = 236;
-      inner = '<rect x="8" y="8" width="220" height="220" fill="#e6efff" stroke="' + INK + '" stroke-width="5" stroke-linejoin="round"/>' +
-        '<path d="M8 8L228 228M228 8L8 228" stroke="' + INK + '" stroke-width="5" stroke-linecap="round"/>';
+      inner = '<rect x="8" y="8" width="220" height="220" fill="' + PAPER + '" stroke="' + INK + '" stroke-width="' + LW + '" stroke-linejoin="round"/>' +
+        '<path d="M8 8L228 228M228 8L8 228" stroke="' + INK + '" stroke-width="' + LW + '" stroke-linecap="round"/>';
       q.prompt = 'Bu şekilde toplam kaç üçgen var? Büyük küçük hepsini say.';
       why = 'Köşegenler kareyi 4 küçük üçgene böler. Yan yana iki küçük üçgen birleşince 4 büyük üçgen daha oluşur. Toplam 8 üçgen.';
       prefer = [4, 6];
@@ -164,7 +164,7 @@
     for (let i = 0; i < cols * rows; i++) {
       const x = pad + (i % cols) * (s + gap), y = pad + Math.floor(i / cols) * (s + gap);
       if (pics) inner += S.tile(x, y, s) + S.emoji(x + s / 2, y + s / 2, pics[i], 58);
-      else inner += i === hole ? S.qtile(x, y, s) : S.tile(x, y, s, { fill: '#eef3fb' });
+      else inner += i === hole ? S.qtile(x, y, s) : S.tile(x, y, s, { back: true });
     }
     const W = pad * 2 + cols * s + (cols - 1) * gap;
     return S.svg(W, pad * 2 + rows * s + (rows - 1) * gap, inner, { maxW: W * 0.95 });

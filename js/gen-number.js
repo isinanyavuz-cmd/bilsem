@@ -220,17 +220,15 @@
 
   /* ---------- Şifre Çözme ---------- */
   function codeTable(syms, digits) {
-    const s = 62, n = syms.length, pad = 6, W = pad * 2 + n * s, H = pad * 2 + s * 2;
-    let inner = '<rect x="' + pad + '" y="' + pad + '" width="' + n * s + '" height="' + s * 2 + '" rx="14" fill="#fff"/>' +
-      '<rect x="' + pad + '" y="' + (pad + s) + '" width="' + n * s + '" height="' + s + '" fill="#fff4cc"/>' +
-      '<path d="M' + pad + ' ' + (pad + s) + 'h' + n * s + '" stroke="' + S.INK + '" stroke-width="3"/>';
+    // tahta üstünde her şekil kendi kartında: üstte şekil, altında sayısı
+    const s = 58, gap = 6, n = syms.length, pad = 10, W = pad * 2 + n * s + (n - 1) * gap, H = pad * 2 + s * 2;
+    let inner = S.board(2, 2, W - 4, H - 2, { rx: 20 });
     for (let i = 0; i < n; i++) {
-      const x = pad + i * s;
-      if (i) inner += '<path d="M' + x + ' ' + pad + 'v' + s * 2 + '" stroke="' + S.INK + '" stroke-opacity="0.35" stroke-width="2"/>';
-      inner += S.figAt(syms[i], x + 6, pad + 6, s - 12) + S.text(x + s / 2, pad + s * 1.5, digits[i], 34);
+      const x = pad + i * (s + gap);
+      inner += S.tile(x, pad, s, { h: s * 2 - 6 }) + S.figAt(syms[i], x + 6, pad + 5, s - 12) +
+        S.dash('M' + (x + 9) + ' ' + (pad + s - 1) + 'h' + (s - 18), { soft: true, w: S.STIL.W.thin, dash: '1 6' }) + S.text(x + s / 2, pad + s * 1.45, digits[i], 34);
     }
-    inner += '<rect x="' + pad + '" y="' + pad + '" width="' + n * s + '" height="' + s * 2 + '" rx="14" fill="none" stroke="' + S.INK + '" stroke-width="3"/>';
-    return { inner: inner, w: W, h: H };
+    return { inner: inner, w: W, h: H + 8 };
   }
   function symRow(syms, seq, s, x0, y0) {
     return seq.map((k, i) => S.tile(x0 + i * (s + 6), y0, s) + S.figAt(syms[k], x0 + i * (s + 6) + 4, y0 + 4, s - 8)).join('');
@@ -260,8 +258,8 @@
       let x, y;
       do { x = randSeq(2); y = randSeq(2); } while (kind === 'add' ? Number(numOf(x)) + Number(numOf(y)) > 99 : Number(numOf(x)) - Number(numOf(y)) < 3);
       const X = Number(numOf(x)), Y = Number(numOf(y)), ans = kind === 'add' ? X + Y : X - Y, s = 54;
-      const row = symRow(syms, x, s, 0, 14) + S.text(2 * s + 30, 14 + s / 2, kind === 'add' ? '+' : '−', 40, { fill: '#566889' }) +
-        symRow(syms, y, s, 2 * s + 54, 14) + S.text(4 * s + 84, 14 + s / 2, '=', 40, { fill: '#566889' }) + S.qtile(4 * s + 108, 14, s);
+      const row = symRow(syms, x, s, 0, 14) + S.label(2 * s + 30, 14 + s / 2, kind === 'add' ? '+' : '−', 40) +
+        symRow(syms, y, s, 2 * s + 54, 14) + S.label(4 * s + 84, 14 + s / 2, '=', 40) + S.qtile(4 * s + 108, 14, s);
       q.prompt = 'Şifre tablosuna göre alttaki işlemin sonucu kaç?';
       q.stem = under(row, 5 * s + 108, s + 20);
       q.meta = { digits: digits, kind: kind, x: x, y: y, ans: ans };

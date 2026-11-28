@@ -73,46 +73,46 @@
     });
   }
 
-  /* kategori simgeleri: soru çizimleriyle aynı şekil kütüphanesinden */
+  /* kategori simgeleri: soru çizimleriyle aynı şekil kütüphanesinden; renk ve çizgi yalnızca Bilsem.Shapes'ten gelir */
   const F = (shape, color, extra) => Object.assign({ shape: shape, color: color }, extra || {});
-  const greenTile = (x, y, rot) => '<rect x="' + x + '" y="' + y + '" width="40" height="40" rx="10" fill="#3cc35f" stroke="#23924a" stroke-width="3"/>' +
-    '<g transform="translate(' + (x + 20) + ' ' + (y + 20) + ') rotate(' + rot + ') scale(.27)"><path d="M0 -40L32 -4H14V38H-14V-4H-32Z" fill="#fff"/></g>';
+  const at = (x, y, inner) => '<g transform="translate(' + x + ' ' + y + ')">' + inner + '</g>';
+  const cmdTile = (x, y, rot) => S.block(x, y, 38, 38, 'green', { rx: 10, lip: 3 }) +
+    '<g transform="translate(' + (x + 19) + ' ' + (y + 19) + ') rotate(' + rot + ') scale(.26)"><path d="M0 -40L32 -4H14V38H-14V-4H-32Z" fill="' + S.STIL.white + '"/></g>';
   const ICONS = {
     pattern: () => S.figAt(F('circle', 'red'), 0, 30, 40) + S.figAt(F('square', 'blue'), 30, 30, 40) + S.figAt(F('circle', 'red'), 60, 30, 40),
     matrix: () => S.tile(8, 8, 40) + S.figAt(F('triangle', 'green'), 8, 8, 40) + S.tile(52, 8, 40) + S.figAt(F('triangle', 'orange'), 52, 8, 40) +
       S.tile(8, 52, 40) + S.figAt(F('circle', 'green'), 8, 52, 40) + S.qtile(52, 52, 40),
-    analogy: () => S.figAt(F('star', 'yellow'), 0, 22, 56) + '<path d="M56 50h14m-6 -6l6 6l-6 6" fill="none" stroke="#566889" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' + S.figAt(F('star', 'yellow'), 68, 36, 28),
+    analogy: () => S.figAt(F('star', 'yellow'), 0, 22, 56) + S.arrow(56, 50, 69, 50, { w: 4 }) + S.figAt(F('star', 'yellow'), 68, 36, 28),
     odd: () => S.figAt(F('circle', 'blue'), 6, 6, 44) + S.figAt(F('circle', 'blue'), 50, 6, 44) + S.figAt(F('circle', 'blue'), 6, 50, 44) + S.figAt(F('square', 'orange'), 50, 50, 44),
-    rotate: () => S.figAt(F('flag', 'purple'), 6, 24, 62) + '<path d="M62 20a26 26 0 0 1 24 26" fill="none" stroke="#f08c00" stroke-width="7" stroke-linecap="round"/><path d="M86 58l-10 -13h20z" fill="#f08c00"/>',
-    mirror: () => S.figAt(F('flag', 'green'), 0, 22, 56) + '<path d="M50 10v80" stroke="#2f7de1" stroke-width="3.4" stroke-dasharray="6 6" stroke-linecap="round"/>' + S.figAt(F('flag', 'green', { mirror: true }), 44, 22, 56),
-    cubes: () => { const c = S.cubes([[2, 1], [1, 0]], 26, S.CUBE_TONES[0]); return '<g transform="translate(' + (100 - c.w) / 2 + ' ' + (100 - c.h) / 2 + ')">' + c.inner + '</g>'; },
-    fillgap: () => { const m = [[1, 2, 1], [2, 1, 2], [1, 2, 0]]; return S.Grid.draw(m, ['blue', 'yellow'], 12, 12, 76) + '<rect x="62.7" y="62.7" width="25.3" height="25.3" rx="4" fill="#fff4cc" stroke="#f0a000" stroke-width="3" stroke-dasharray="6 4"/>' + S.text(75.3, 75.3, '?', 20, { fill: '#e08600' }); },
-    overlay: () => '<rect x="8" y="14" width="52" height="52" rx="7" fill="#e3efff" stroke="#3d6fb8" stroke-width="3.4"/><rect x="40" y="34" width="52" height="52" rx="7" fill="#e3efff" fill-opacity=".8" stroke="#3d6fb8" stroke-width="3.4"/>' +
-      '<rect x="16" y="22" width="17" height="17" fill="#26324f"/><rect x="42" y="48" width="17" height="17" fill="#26324f"/><rect x="62" y="56" width="17" height="17" fill="#26324f"/>',
-    roll: () => '<polygon points="42,18 68,33 42,48 16,33" fill="#ffd233"/><polygon points="16,33 42,48 42,80 16,65" fill="#3d8ef7"/><polygon points="42,48 68,33 68,65 42,80" fill="#f2545b"/>' +
-      '<g stroke="#1d2b4a" stroke-width="3.4" stroke-linejoin="round" fill="none"><polygon points="42,18 68,33 42,48 16,33"/><polygon points="16,33 42,48 42,80 16,65"/><polygon points="42,48 68,33 68,65 42,80"/></g>' +
-      '<path d="M74 22a22 22 0 0 1 14 22" fill="none" stroke="#f08c00" stroke-width="6" stroke-linecap="round"/><path d="M91 54l-9 -12h18z" fill="#f08c00"/>',
-    view: () => { const c = S.cubes([[2, 1], [1, 0]], 20, S.CUBE_TONES[1]); return '<g transform="translate(' + (4 + (60 - c.w) / 2) + ' ' + (100 - c.h) / 2 + ')">' + c.inner + '</g>' + S.emoji(80, 30, '👁️', 30) + '<path d="M72 44l-6 6" stroke="#f08c00" stroke-width="5" stroke-linecap="round"/>'; },
-    net: () => [[1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2]].map((p) => '<rect x="' + (p[0] * 24 + 4) + '" y="' + (p[1] * 24 + 14) + '" width="24" height="24" fill="#cfe3ff" stroke="#1d2b4a" stroke-width="3" stroke-linejoin="round"/>').join(''),
-    sym: () => '<rect x="10" y="14" width="30" height="30" fill="#3d8ef7"/><rect x="40" y="44" width="30" height="30" fill="#3d8ef7"/><rect x="60" y="14" width="30" height="30" fill="#cfe0fa" stroke="#3d8ef7" stroke-width="3" stroke-dasharray="6 4"/><path d="M50 4V96" stroke="#f08c00" stroke-width="4" stroke-dasharray="8 6" stroke-linecap="round"/>',
-    fold: () => '<rect x="12" y="22" width="76" height="56" rx="6" fill="#ffe9a8" stroke="#1d2b4a" stroke-width="3.4"/><path d="M50 22V78" stroke="#f08c00" stroke-width="3.4" stroke-dasharray="6 5"/><circle cx="28" cy="40" r="7" fill="#fff" stroke="#1d2b4a" stroke-width="3"/><circle cx="72" cy="40" r="7" fill="#fff" stroke="#1d2b4a" stroke-width="3"/>',
-    sudoku: () => [['red', 'blue'], ['blue', 'red']].map((row, r) => row.map((col, c) => S.tile(14 + c * 38, 14 + r * 38, 36) + (r === 1 && c === 1 ? S.text(14 + c * 38 + 18, 14 + r * 38 + 18, '?', 24, { fill: '#e08600' }) : '<circle cx="' + (32 + c * 38) + '" cy="' + (32 + r * 38) + '" r="11" fill="' + S.COLORS[col].fill + '" stroke="#1d2b4a" stroke-width="3"/>')).join('')).join(''),
-    cipher: () => ['K', 'U', 'Ş'].map((ch, i) => S.tile(8 + i * 28, 14, 26) + S.text(21 + i * 28, 27, ch, 17)).join('') + '<path d="M50 48v10m-5 -5l5 5l5 -5" fill="none" stroke="#566889" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>' + ['L', 'Ü', 'T'].map((ch, i) => S.tile(8 + i * 28, 62, 26, { fill: '#e8ddff' }) + S.text(21 + i * 28, 75, ch, 17)).join(''),
-    equiv: () => S.figAt(F('circle', 'red'), 4, 20, 26) + S.figAt(F('circle', 'red'), 4, 52, 26) + S.text(46, 50, '=', 28, { fill: '#566889' }) + S.figAt(F('square', 'blue'), 58, 34, 34),
-    stack: () => [['#3d8ef7', 'M12 72L88 28'], ['#ffd233', 'M10 40L90 58'], ['#f2545b', 'M24 16L76 86']].map((l) =>
-      '<path d="' + l[1] + '" stroke="#1d2b4a" stroke-width="15" stroke-linecap="round"/><path d="' + l[1] + '" stroke="' + l[0] + '" stroke-width="10" stroke-linecap="round"/>').join(''),
+    rotate: () => S.figAt(F('flag', 'purple'), 6, 24, 62) + S.turn(62, 48, 27, -88, 8, { w: 7 }),
+    mirror: () => S.figAt(F('flag', 'green'), 0, 22, 56) + S.mirrorLine(50, 10, 90) + S.figAt(F('flag', 'green', { mirror: true }), 44, 22, 56),
+    cubes: () => { const c = S.cubes([[2, 1], [1, 0]], 26, S.CUBE_TONES[0]); return at((100 - c.w) / 2, (100 - c.h) / 2, c.inner); },
+    fillgap: () => S.Grid.draw([[1, 2, 1], [2, 1, 2], [1, 2, 0]], ['blue', 'yellow'], 10, 9, 80, { hole: { r: 2, c: 2, h: 1 } }),
+    overlay: () => S.board(8, 12, 52, 52, { glass: true, rx: 8 }) + S.block(16, 20, 17, 17, 'black', { flat: true }) + '<g opacity=".86">' + S.board(40, 32, 52, 52, { glass: true, rx: 8 }) + '</g>' +
+      S.block(42, 46, 17, 17, 'black', { flat: true }) + S.block(64, 56, 17, 17, 'black', { flat: true }),
+    roll: () => { const c = S.isoCube({ T: 'yellow', S: 'blue', E: 'red' }, 34); return at(6, (100 - c.h) / 2 + 4, c.inner) + S.turn(64, 46, 24, -80, 6, { w: 6 }); },
+    view: () => { const c = S.cubes([[2, 1], [1, 0]], 20, S.CUBE_TONES[1]); return at(4 + (60 - c.w) / 2, (100 - c.h) / 2, c.inner) + S.eye(80, 28, 34, -1) + S.arrow(76, 42, 66, 52, { color: S.STIL.accent, w: 4.5 }); },
+    net: () => [[1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2]].map((p) => S.board(p[0] * 23 + 4, p[1] * 23 + 14, 23, 23, { paper: true, rx: 3 })).join(''),
+    sym: () => S.Grid.draw([[1, 0, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0], [1, 0, 0, 0]], ['blue'], 10, 9, 80, { zone: (r, c) => c > 1 }) + S.dash('M50 3V97', { w: 4, dash: '8 6' }),
+    fold: () => S.board(12, 22, 76, 56, { paper: true, rx: 6 }) + S.dash('M50 22V79', { dash: '6 5' }) +
+      [28, 72].map((x) => '<circle cx="' + x + '" cy="40" r="7" fill="' + S.STIL.tile + '" stroke="' + S.INK + '" stroke-width="' + S.STIL.W.thin + '"/>').join(''),
+    sudoku: () => [['red', 'blue'], ['blue', 'red']].map((row, r) => row.map((col, c) => (r === 1 && c === 1 ? S.qtile(14 + c * 38, 14 + r * 38, 36) :
+      S.tile(14 + c * 38, 14 + r * 38, 36) + S.figAt(F('circle', col), 14 + c * 38, 14 + r * 38, 36))).join('')).join(''),
+    cipher: () => ['K', 'U', 'Ş'].map((ch, i) => S.tile(8 + i * 28, 12, 26) + S.text(21 + i * 28, 25, ch, 17)).join('') + S.arrow(50, 45, 50, 56, { w: 3.5 }) +
+      ['L', 'Ü', 'T'].map((ch, i) => S.tile(8 + i * 28, 62, 26, { tone: 'purple' }) + S.text(21 + i * 28, 75, ch, 17)).join(''),
+    equiv: () => S.figAt(F('circle', 'red'), 4, 20, 26) + S.figAt(F('circle', 'red'), 4, 52, 26) + S.label(46, 50, '=', 28) + S.figAt(F('square', 'blue'), 58, 34, 34),
+    stack: () => [['blue', 'M14 72L86 30'], ['yellow', 'M12 40L88 58'], ['red', 'M26 18L74 84']].map((l) => S.rope(l[1], l[0], 10)).join(''),
     numseq: () => S.tile(3, 35, 29) + S.text(17.5, 49.5, '2', 20) + S.tile(35.5, 35, 29) + S.text(50, 49.5, '4', 20) + S.qtile(68, 35, 29),
-    fruit: () => S.emoji(24, 50, '🍎', 32) + S.text(50, 50, '+', 26, { fill: '#566889' }) + S.emoji(76, 50, '🍌', 32),
-    code: () => S.figAt(F('triangle', 'red'), 0, 27, 46) + S.text(53, 50, '=', 26, { fill: '#566889' }) + S.text(78, 50, '7', 42),
-    same: () => { const m = [[1, 0, 2], [0, 1, 0], [2, 0, 0]], p = ['purple', 'yellow']; return S.Grid.draw(m, p, 5, 29, 42) + S.Grid.draw(m, p, 53, 29, 42); },
+    fruit: () => S.emoji(24, 50, '🍎', 32) + S.label(50, 50, '+', 26) + S.emoji(76, 50, '🍌', 32),
+    code: () => S.figAt(F('triangle', 'red'), 0, 27, 46) + S.label(53, 50, '=', 26) + S.text(78, 50, '7', 42),
+    same: () => { const m = [[1, 0, 2], [0, 1, 0], [2, 0, 0]], p = ['purple', 'yellow']; return S.Grid.draw(m, p, 4, 28, 44) + S.Grid.draw(m, p, 52, 28, 44); },
     count: () => S.figAt(F('star', 'yellow'), 2, 4, 46) + S.figAt(F('star', 'yellow'), 50, 18, 46) + S.figAt(F('star', 'yellow'), 14, 50, 46),
     memory: () => S.tile(6, 28, 42) + S.emoji(27, 49, '🐱', 26) + S.qtile(52, 28, 42),
-    path: () => greenTile(8, 14, 90) + greenTile(52, 14, 90) + greenTile(52, 54, 180),
-    machine: () => '<rect x="26" y="22" width="48" height="56" rx="12" fill="#a565f2" stroke="#1d2b4a" stroke-width="3.4"/>' + S.text(50, 50, '+2', 24, { fill: '#fff' }) +
-      S.text(11, 50, '3', 24) + S.text(89, 50, '5', 24),
+    path: () => cmdTile(9, 12, 90) + cmdTile(53, 12, 90) + cmdTile(53, 54, 180),
+    machine: () => S.block(26, 20, 48, 56, 'purple', { rx: 12, lip: 5 }) + S.text(50, 48, '+2', 24, { fill: S.STIL.white }) + S.text(11, 49, '3', 24) + S.text(89, 49, '5', 24),
     shadow: () => S.figAt(F('star', 'yellow'), 2, 14, 54) + S.figAt(F('star', 'ink'), 44, 32, 54),
-    balance: () => '<path d="M50 30V78M34 82h32" stroke="#1d2b4a" stroke-width="5" stroke-linecap="round"/><path d="M18 24L82 38" stroke="#1d2b4a" stroke-width="5" stroke-linecap="round"/>' +
-      '<circle cx="50" cy="31" r="5" fill="#ffc93c" stroke="#1d2b4a" stroke-width="2.6"/>' + S.figAt(F('circle', 'red'), 4, 26, 30) + S.figAt(F('square', 'blue'), 68, 42, 28),
+    balance: () => '<path d="M50 30V78M34 82h32M18 24L82 38" fill="none" stroke="' + S.INK + '" stroke-width="' + S.STIL.W.bold + '" stroke-linecap="round"/>' +
+      '<circle cx="50" cy="31" r="5" fill="' + S.COLORS.yellow.fill + '" stroke="' + S.INK + '" stroke-width="' + S.STIL.W.thin + '"/>' + S.figAt(F('circle', 'red'), 4, 26, 30) + S.figAt(F('square', 'blue'), 68, 42, 28),
   };
   const icon = (id) => S.svg(100, 100, ICONS[id](), { cls: 'cat-svg' });
 

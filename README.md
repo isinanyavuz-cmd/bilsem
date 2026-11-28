@@ -145,10 +145,21 @@ Testler her soru türünü her seviyede yüzlerce kez üretip şunları denetler
 şıklar birbirinden farklı mı, tek doğru cevap var mı, açıklama dolu mu, doğru
 cevap hep aynı şıkka mı düşüyor. Küp sayma, ok yolu ve terazi gibi türlerde cevabın gerçekten doğru olduğu ayrıca hesaplanır.
 
+### Görsel standart
+
+Soru, şık ve tür simgelerinin bütün renkleri, çizgi kalınlıkları ve kil görünümü tek yerde durur:
+`js/shapes.js` (`STIL`, `COLORS` ve çizim yardımcıları; kurallar dosyanın başında yazılı). Üreteç
+dosyaları renk kodu yazmaz, kutu ve tahtaları kendileri çizmez; `tests/stil.test.js` bunu denetler.
+Bir rengi ya da kalınlığı değiştirmek için yalnızca `shapes.js` değişir.
+
+Bütün türleri yan yana görmek için `tools/galeri.html` dosyasını tarayıcıda aç
+(`?cat=matrix,sym&lv=1,2,3,4&theme=dark&exam=1` ile daraltılır). Önceki ve yeni görünüm:
+`docs/gorsel-standart/`.
+
 | Dosya | Görev |
 |---|---|
 | `js/core.js` | Tohumlu rastgele sayı üreteci, kategori listesi, şık yardımcıları |
-| `js/shapes.js` | Şekil, kareli şekil ve küp çizimleri (SVG metni; DOM gerekmez) |
+| `js/shapes.js` | Görsel standart (renk, çizgi, kil görünümü) ve bütün çizim yardımcıları (SVG metni; DOM gerekmez) |
 | `js/gen-*.js` | Soru üreticileri: `Bilsem.GEN[tür](rng, kademe)`; kademe 1–4 |
 | `js/gen-sinif3.js` | 3. sınıf türleri: Desen Tamamlama, Şeffaf Kâğıt, Küpün Yüzünü Bul, Küp Görünümü, Küp Açılımı |
 | `js/gen-sinif3b.js` | Katlama, Simetri, Mini Sudoku |

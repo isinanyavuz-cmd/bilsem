@@ -3,8 +3,7 @@
 (function (root) {
   'use strict';
   const B = root.Bilsem, S = B.Shapes, Q = B.Q;
-  const INK = S.INK, r1 = S.r1, PAL = S.COLOR_IDS;
-  const SOFT = { fill: '#566889', weight: 700 };
+  const r1 = S.r1, PAL = S.COLOR_IDS;
 
   /* ---------- Harf Şifresi ---------- */
   const ALPHA = Array.from('ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ');   // 29 harflik Türk alfabesi
@@ -51,11 +50,11 @@
     }
     const exCode = encode(ex, rule), answer = encode(target, rule);
     // şekil: örnek kelime ve şifresi, altında sorulan kelime
-    const cs = 40, g = 6, row = (letters, y, fill) => Array.from(letters).map((ch, i) => S.tile(8 + i * (cs + g), y, cs, fill ? { fill: fill } : {}) + S.text(8 + i * (cs + g) + cs / 2, y + cs / 2, ch, 26)).join('');
+    const cs = 40, g = 6, row = (letters, y, coded) => Array.from(letters).map((ch, i) => S.tile(8 + i * (cs + g), y, cs, coded ? { tone: 'purple' } : {}) + S.text(8 + i * (cs + g) + cs / 2, y + cs / 2, ch, 26)).join('');
     const W = Math.max(ex.length, target.length) * (cs + g) + 16 + 2;
-    const arrow = (y) => '<path d="M' + r1(W / 2) + ' ' + y + 'v16m-7 -7l7 7l7 -7" fill="none" stroke="#566889" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>';
-    const inner = S.text(W / 2, 10, 'şifre', 14, SOFT) + row(ex, 20) + arrow(66) + row(exCode, 90, '#e8ddff') +
-      S.text(W / 2, 148, 'aynı şifre', 14, SOFT) + row(target, 158) + arrow(204) + Array.from(target).map((_, i) => S.qtile(8 + i * (cs + g), 228, cs)).join('');
+    const arrow = (y) => S.arrow(W / 2, y + 1, W / 2, y + 17, { w: S.STIL.W.line, head: 9 });
+    const inner = S.label(W / 2, 10, 'şifre', 14) + row(ex, 20) + arrow(66) + row(exCode, 90, true) +
+      S.label(W / 2, 148, 'aynı şifre', 14) + row(target, 158) + arrow(204) + Array.from(target).map((_, i) => S.qtile(8 + i * (cs + g), 228, cs)).join('');
     const q = { stem: S.svg(W, 276, inner, { maxW: Math.min(W * 1.2, 360) }) };
     q.prompt = 'Bir şifrede ' + ex + ' kelimesi ' + exCode + ' olarak yazılıyor. Aynı şifreyle ' + target + ' nasıl yazılır?';
     q.meta = { rule: rule, ex: ex, exCode: exCode, target: target, answer: answer };
@@ -124,7 +123,7 @@
     const small = consistent[0], size = 34, gap = 6;
     const items = (counts) => { const a = []; counts.forEach((c, i) => { for (let k = 0; k < c; k++) a.push(i); }); return a; };
     const width = (list) => list.length * (size + gap);
-    const eq = (x, y) => S.text(x, y, '=', 34, SOFT);
+    const eq = (x, y) => S.label(x, y, '=', 34);
     const maxL = Math.max.apply(null, rows.map((r) => width(items(r.left))).concat([width(items(ask))])), maxR = Math.max.apply(null, rows.map((r) => width(items(r.right))).concat([size + 12 + size + gap]));
     const W = 16 + maxL + 40 + maxR, rowH = size + 18, H = 12 + (rows.length + 1) * rowH;
     let inner = '';
@@ -134,7 +133,7 @@
       inner += drawList(items(r.left), 8 + maxL - width(items(r.left)), y) + eq(8 + maxL + 20, y + size / 2) + drawList(items(r.right), 8 + maxL + 40, y);
     });
     const yq = 10 + rows.length * rowH + 6;
-    inner += '<path d="M8 ' + (yq - 8) + 'H' + (W - 8) + '" stroke="#c5d3ea" stroke-width="2.5" stroke-dasharray="6 6"/>' +
+    inner += S.dash('M8 ' + (yq - 8) + 'H' + (W - 8), { soft: true, w: S.STIL.W.thin, dash: '6 6' }) +
       drawList(items(ask), 8 + maxL - width(items(ask)), yq) + eq(8 + maxL + 20, yq + size / 2) + S.qtile(8 + maxL + 40, yq - 3, size + 6) + S.figAt(figs[unit], 8 + maxL + 40 + size + 12, yq, size);
     const q = { stem: S.svg(W, H + 14, inner, { maxW: Math.min(W * 1.25, 420) }) };
     q.prompt = 'Aynı şekiller hep aynı ağırlıkta. Son eşitlikte soru işaretinin yerine kaç tane gelmeli?';

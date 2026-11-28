@@ -55,7 +55,7 @@
   const colName = (c) => S.COLORS[c].name;
   const shName = (s) => S.SHAPES[s].name;
   const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
-  const gridOpt = (m, pal) => ({ html: S.svg(100, 100, G.draw(m, pal, 9, 9, 82), { cls: 'opt-svg' }), key: 'g' + G.key(m) });
+  const gridOpt = (m, pal) => ({ html: S.gridSvg(m, pal), key: 'g' + G.key(m) });
 
   function valName(attr, v) {
     if (attr === 'shape') return shName(v);
@@ -88,13 +88,13 @@
     return Q.spread(rng, f, mod, S.key, { pool: pool }).concat(variants(rng, f, pools));
   }
 
-  /* Yan yana kutular; draw(i, x, y, s) kutunun içini çizer. */
-  function rowSvg(n, hole, draw) {
+  /* Yan yana kutular; draw(i, x, y, s) kutunun içini çizer. bare: içerik kendi zeminini çizer (kareli şekil), kutu çizilmez. */
+  function rowSvg(n, hole, draw, bare) {
     const s = 96, gap = 10, pad = 6;
     let inner = '';
     for (let i = 0; i < n; i++) {
       const x = pad + i * (s + gap);
-      inner += i === hole ? S.qtile(x, pad, s) : S.tile(x, pad, s) + draw(i, x, pad, s);
+      inner += i === hole ? S.qtile(x, pad, s) : (bare ? '' : S.tile(x, pad, s)) + draw(i, x, pad, s);
     }
     const W = pad * 2 + n * s + (n - 1) * gap;
     return S.svg(W, s + pad * 2, inner, { maxW: W * 0.95 });
@@ -132,7 +132,7 @@
     const names = centre.map((v) => (v ? colName(pal[v - 1]) : 'boş'));
     if (new Set(centre).size > 1) why += ' Ortadaki kare sırayla ' + names.join(', ') + ' oluyor.';
     return {
-      stem: rowSvg(len, hole, (i, x, y, s) => G.draw(frame(i), pal, x + 10, y + 10, s - 20)),
+      stem: rowSvg(len, hole, (i, x, y, s) => G.draw(frame(i), pal, x, y, s), true),
       correct: gridOpt(frame(hole), pal), wrong: wrong.map((m) => gridOpt(m, pal)), why: why,
     };
   }
@@ -214,14 +214,14 @@
   /* ---------- Şekil Tablosu (3x3) ---------- */
   const LATINS = [[[0, 1, 2], [1, 2, 0], [2, 0, 1]], [[0, 1, 2], [2, 0, 1], [1, 2, 0]]];
 
-  function tableSvg(hole, draw) {
+  function tableSvg(hole, draw, bare) {
     const s = 92, gap = 10, pad = 14, W = pad * 2 + 3 * s + 2 * gap;
-    let inner = '<rect x="2" y="2" width="' + (W - 4) + '" height="' + (W - 4) + '" rx="24" fill="#e9f0fb" stroke="#c5d3ea" stroke-width="3"/>';
+    let inner = S.board(2, 2, W - 4, W - 4, { rx: 26 });
     for (let i = 0; i < 9; i++) {
       const x = pad + (i % 3) * (s + gap), y = pad + Math.floor(i / 3) * (s + gap);
-      inner += i === hole ? S.qtile(x, y, s) : S.tile(x, y, s) + draw(i, x, y, s);
+      inner += i === hole ? S.qtile(x, y, s) : (bare ? '' : S.tile(x, y, s)) + draw(i, x, y, s);
     }
-    return S.svg(W, W, inner, { maxW: 300 });
+    return S.svg(W, W + 6, inner, { maxW: 300 });
   }
 
   function attrVals(rng, a, shapePool) {
@@ -262,7 +262,7 @@
       { ok: lit, pool: [comb((a, b) => a || b), comb((a, b) => a !== b), comb((a, b) => a && b), others[0], others[1]] });
     return {
       rows: rows, hole: hole,
-      stem: tableSvg(hole, (i, x, y, s) => G.draw(rows[Math.floor(i / 3)][i % 3], pal, x + 11, y + 11, s - 22)),
+      stem: tableSvg(hole, (i, x, y, s) => G.draw(rows[Math.floor(i / 3)][i % 3], pal, x, y, s), true),
       correct: gridOpt(ans, pal), wrong: wrong.map((g) => gridOpt(g, pal)),
       why: xor
         ? 'Her satırda ilk iki şekil üst üste konuyor. İki şekilde de boyalı olan kareler siliniyor, yalnız birinde boyalı olanlar kalıyor.'
@@ -326,17 +326,15 @@
   };
 
   /* ---------- Şekil Benzetmesi (A -> B, C -> ?) ---------- */
-  function arrowGlyph(x, y) {
-    return '<path d="M' + x + ' ' + y + 'h26m-11 -11l11 11l-11 11" fill="none" stroke="#5a6b8c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>';
-  }
-  /* draw: üç çizim işlevi (x, y, s) -> svg */
-  function analogySvg(draw) {
+  const arrowGlyph = (x, y) => S.arrow(x, y, x + 26, y, { w: 6 });
+  /* draw: üç çizim işlevi (x, y, s) -> svg; bare: çizimler kendi zeminini getirir (kareli şekil) */
+  function analogySvg(draw, bare) {
     const s = 96, y = 6, aw = 44, mid = 34;
     const xs = [6, 6 + s + aw, 6 + 2 * s + aw + mid, 6 + 3 * s + 2 * aw + mid], W = xs[3] + s + 6;
-    const inner = S.tile(xs[0], y, s) + draw[0](xs[0], y, s) + arrowGlyph(xs[0] + s + 8, y + s / 2) +
-      S.tile(xs[1], y, s) + draw[1](xs[1], y, s) +
-      '<path d="M' + (xs[1] + s + mid / 2) + ' ' + (y + 10) + 'v' + (s - 20) + '" stroke="#c5d3ea" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 10"/>' +
-      S.tile(xs[2], y, s) + draw[2](xs[2], y, s) + arrowGlyph(xs[2] + s + 8, y + s / 2) + S.qtile(xs[3], y, s);
+    const box = (i) => (bare ? '' : S.tile(xs[i], y, s)) + draw[i](xs[i], y, s);
+    const inner = box(0) + arrowGlyph(xs[0] + s + 8, y + s / 2) + box(1) +
+      S.dash('M' + (xs[1] + s + mid / 2) + ' ' + (y + 10) + 'v' + (s - 20), { soft: true, w: 4, dash: '1 10' }) +
+      box(2) + arrowGlyph(xs[2] + s + 8, y + s / 2) + S.qtile(xs[3], y, s);
     return S.svg(W, s + 12, inner, { maxW: W * 0.95 });
   }
   const figDraw = (f) => (x, y, s) => S.figAt(f, x, y, s);
@@ -356,8 +354,8 @@
       : [{ rot: t.rot, mirror: true }, { rot: (t.rot + 180) % 360, mirror: false }, { rot: (t.rot + 90) % 360, mirror: false }];
     const rest = rng.shuffle(S.TFS);
     return {
-      stem: analogySvg([(x, y, s) => S.objDraw(A, { rot: 0, mirror: false }, x + 10, y + 10, s - 20), (x, y, s) => S.objDraw(A, t, x + 10, y + 10, s - 20),
-        (x, y, s) => S.objDraw(C, { rot: 0, mirror: false }, x + 10, y + 10, s - 20)]),
+      stem: analogySvg([(x, y, s) => S.objDraw(A, { rot: 0, mirror: false }, x, y, s), (x, y, s) => S.objDraw(A, t, x, y, s),
+        (x, y, s) => S.objDraw(C, { rot: 0, mirror: false }, x, y, s)], true),
       correct: o(t),
       wrong: Q.spread(rng, t, (x) => (rng.chance(0.5) ? { rot: (x.rot + rng.pick([90, 180, 270])) % 360, mirror: x.mirror } : { rot: x.rot, mirror: !x.mirror }),
         (x) => o(x).key, { pool: near }).concat(rest).map(o),
@@ -472,7 +470,7 @@
       let alt = null;
       for (let t = 0; t < 40 && !alt; t++) { const m = G.nudge(rng, o.m, 2, ['move']); if (!orbit.has(G.key(m))) alt = m; }
       if (!alt) throw new Error('yakın şekil bulunamadı');
-      const mkG = (m) => ({ html: S.svg(100, 100, G.draw(m, o.pal, 9, 9, 82), { cls: 'opt-svg' }), key: 'g' + G.key(m) });
+      const mkG = (m) => ({ html: S.gridSvg(m, o.pal), key: 'g' + G.key(m) });
       q.explain = 'Diğer üçü aynı şeklin döndürülmüş hâli. Farklı olanda bir kare başka yerde duruyor.';
       return Q.finish(rng, q, mkG(G.tf(alt, tf(rng.pick([0, 90, 180, 270])))), rng.sample([0, 90, 180, 270], 3).map((r) => mkG(G.tf(o.m, tf(r)))));
     }

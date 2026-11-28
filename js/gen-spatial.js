@@ -6,7 +6,7 @@
 
   const tf = (rot, mirror) => ({ rot: ((rot % 360) + 360) % 360, mirror: !!mirror });
   const objOpt = (o, t) => ({ html: S.objSvg(o, t), key: S.objKey(o, t) });
-  const gridOpt = (o, m) => ({ html: S.svg(100, 100, G.draw(m, o.pal, 9, 9, 82), { cls: 'opt-svg' }), key: 'g' + G.key(m) + o.pal.join('') });
+  const gridOpt = (o, m) => ({ html: S.gridSvg(m, o.pal), key: 'g' + G.key(m) + o.pal.join('') });
   const gridObj = (rng, n) => S.randObj(rng, n === 5 ? { kind: 'grid', n: 5, cells: rng.int(9, 11), accent: 3 }
     : n === 4 ? { kind: 'grid', n: 4, cells: rng.int(6, 8), accent: 2 } : { kind: 'grid', n: 3, cells: rng.int(4, 5), accent: 1 });
 
@@ -24,24 +24,20 @@
     const a = p(-90, R), b = p(end, R), tdeg = end + (sweep ? 90 : -90);
     const tip = [b[0] + 15 * Math.cos(tdeg * Math.PI / 180), b[1] + 15 * Math.sin(tdeg * Math.PI / 180)];
     const b1 = p(end, R - 12), b2 = p(end, R + 12), P = (pt) => r1(pt[0]) + ' ' + r1(pt[1]);
-    return '<path d="M' + P(a) + 'A' + R + ' ' + R + ' 0 0 ' + sweep + ' ' + P(b) + '" fill="none" stroke="#f08c00" stroke-width="9" stroke-linecap="round"/>' +
-      '<path d="M' + P(tip) + 'L' + P(b1) + 'L' + P(b2) + 'Z" fill="#f08c00" stroke="#f08c00" stroke-width="4" stroke-linejoin="round"/>' +
+    const ac = S.STIL.accent;
+    return '<path d="M' + P(a) + 'A' + R + ' ' + R + ' 0 0 ' + sweep + ' ' + P(b) + '" fill="none" stroke="' + ac + '" stroke-width="9" stroke-linecap="round"/>' +
+      '<path d="M' + P(tip) + 'L' + P(b1) + 'L' + P(b2) + 'Z" fill="' + ac + '" stroke="' + ac + '" stroke-width="4" stroke-linejoin="round"/>' +
       '<circle cx="' + cx + '" cy="' + cy + '" r="5" fill="' + S.INK + '"/>';
   }
-  /* Ayna (dik kesik çizgi) ve su (dalgalı çizgi) simgeleri */
-  function flipIcon(water, cx, cy) {
-    if (water) return '<path d="M' + (cx - 34) + ' ' + cy + 'q8.5 -11 17 0t17 0t17 0t17 0" fill="none" stroke="#2f9be1" stroke-width="6" stroke-linecap="round"/>';
-    return '<rect x="' + (cx - 6) + '" y="' + (cy - 34) + '" width="12" height="68" rx="6" fill="#bfe3ff"/>' +
-      '<path d="M' + cx + ' ' + (cy - 30) + 'v60" stroke="#2f7de1" stroke-width="4" stroke-dasharray="7 7" stroke-linecap="round"/>';
-  }
+  /* Ayna (dik cam şerit) ve su (dalgalı çizgi) simgeleri */
+  const flipIcon = (water, cx, cy) => (water ? S.waterLine(cx - 35, cx + 35, cy, 6) : S.mirrorLine(cx, cy - 34, cy + 34));
   const TURN_LABEL = { 90: 'çeyrek tur sağa', 270: 'çeyrek tur sola', 180: 'yarım tur' };
   const TURN_TEXT = { 90: 'sağa doğru çeyrek tur dönüyor', 270: 'sola doğru çeyrek tur dönüyor', 180: 'yarım tur dönüyor' };
-  const soft = { fill: '#5a6b8c', weight: 700 };
 
   /* ---------- Döndürme ---------- */
   B.GEN.rotate = function (rng, level) {
     const s = 150, o = gridObj(rng, level === 1 ? 3 : level === 3 ? 5 : 4);
-    const figure = S.tile(6, 6, s) + S.objDraw(o, tf(0), 20, 20, s - 28);
+    const figure = S.objTile(o, tf(0), 6, 6, s);
     const q = {};
 
     if (level < 4) {
@@ -50,8 +46,8 @@
       const turn = (right ? 90 * k : 360 - 90 * k) % 360, yon = right ? 'sağa' : 'sola', KEZ = ['', 'bir', 'iki', 'üç'];
       q.prompt = half ? 'Şekil yarım tur dönerse (baş aşağı) hangisi olur?' : 'Şekil ' + yon + ' doğru ' + KEZ[k] + ' kez çeyrek tur dönerse hangisi olur?';
       const cx = s + 100, label = half ? 'yarım tur' : k === 1 ? 'çeyrek tur ' + yon : yon + ' ' + k + ' kez çeyrek tur';
-      const times = (half || k === 1) ? '' : '<circle cx="' + (cx + 50) + '" cy="30" r="17" fill="' + S.INK + '"/>' + S.text(cx + 50, 30, '×' + k, 18, { fill: '#fff' });
-      q.stem = S.svg(s + 200, s + 12, figure + turnIcon(half ? 180 : right ? 90 : 270, cx, 66) + times + S.text(cx, 130, label, 17, soft), { maxW: 380 });
+      const times = (half || k === 1) ? '' : S.badge(cx + 50, 30, '×' + k, 17);
+      q.stem = S.svg(s + 200, s + 12, figure + turnIcon(half ? 180 : right ? 90 : 270, cx, 66) + times + S.label(cx, 130, label, 17), { maxW: 380 });
       q.explain = k === 1 ? (right ? 'Sağa doğru çeyrek turda üstteki kısım sağa, sağdaki kısım alta geçer.' : 'Sola doğru çeyrek turda üstteki kısım sola, soldaki kısım alta geçer.')
         : k === 2 ? (half ? 'Yarım turda üst ile alt, sağ ile sol yer değiştirir.' : 'İki çeyrek tur bir yarım tur eder: üst ile alt, sağ ile sol yer değiştirir.')
           : right ? 'Sağa üç çeyrek tur, sola bir çeyrek tur ile aynı yere getirir: üstteki kısım sola geçer.'
@@ -72,8 +68,8 @@
     const flipText = water ? 'sudaki yansıması alınıyor' : 'aynadaki görüntüsü alınıyor';
     q.prompt = 'Şekil önce ' + (turnFirst ? TURN_TEXT[turn] : flipText) + ', sonra ' + (turnFirst ? flipText : TURN_TEXT[turn]) + '. Sonunda hangisi olur?';
     const icon = (isTurn, cx) => (isTurn ? turnIcon(turn, cx, 62) : flipIcon(water, cx, 62)) +
-      S.text(cx, 128, isTurn ? TURN_LABEL[turn] : water ? 'su' : 'ayna', 16, soft);
-    const badge = (n, cx) => '<circle cx="' + cx + '" cy="14" r="12" fill="#1d2b4a"/>' + S.text(cx, 14, n, 15, { fill: '#fff' });
+      S.label(cx, 128, isTurn ? TURN_LABEL[turn] : water ? 'su' : 'ayna', 16);
+    const badge = (n, cx) => S.badge(cx, 15, n, 12);
     q.stem = S.svg(s + 262, s + 12, figure + badge(1, s + 72) + icon(turnFirst, s + 72) + badge(2, s + 194) + icon(!turnFirst, s + 194), { maxW: 440 });
     q.explain = 'Adım adım düşün: önce ' + (turnFirst ? TURN_TEXT[turn] : flipText) + ', sonra ' + (turnFirst ? flipText : TURN_TEXT[turn]) +
       '. Aynada sağ ile sol, suda üst ile alt yer değiştirir.';
@@ -86,21 +82,15 @@
   B.GEN.mirror = function (rng, level) {
     const o = gridObj(rng, level === 1 ? 3 : level === 2 ? 4 : rng.pick([4, 5, 5]));
     const s = 130, g = 22, q = {};
-    const tile = (x, y) => S.tile(x, y, s) + S.objDraw(o, tf(0), x + 12, y + 12, s - 24);
-    const mirrorLine = (x, y0, y1) => '<rect x="' + (x - 5) + '" y="' + y0 + '" width="10" height="' + (y1 - y0) + '" rx="5" fill="#bfe3ff"/>' +
-      '<path d="M' + x + ' ' + (y0 + 4) + 'V' + (y1 - 4) + '" stroke="#2f7de1" stroke-width="3" stroke-dasharray="7 7" stroke-linecap="round"/>';
-    const waterLine = (x0, x1, y) => {
-      let d = 'M' + x0 + ' ' + y;
-      for (let x = x0; x < x1 - 10; x += 20) d += 'q5 -7 10 0t10 0';
-      return '<path d="' + d + '" fill="none" stroke="#2f9be1" stroke-width="4" stroke-linecap="round"/>';
-    };
+    const tile = (x, y) => S.objTile(o, tf(0), x, y, s);
+    const mirrorLine = S.mirrorLine, waterLine = (x0, x1, y) => S.waterLine(x0, x1, y, 4);
 
     if (level === 4) {
       // önce ayna, sonra su: şekil baş aşağı döner
       const W = s * 2 + g * 2 + 12, mx = 6 + s + g, my = 6 + s + g;
       q.prompt = 'Şekil önce aynada, sonra suda yansıyor. Soru işaretinin yerine hangisi gelir?';
       q.stem = S.svg(W, W, tile(6, 6) + mirrorLine(mx, 2, 6 + s + 4) +
-        '<rect x="' + (mx + g) + '" y="6" width="' + s + '" height="' + s + '" rx="22" fill="none" stroke="#c5d3ea" stroke-width="3" stroke-dasharray="9 8"/>' +
+        S.ghost(mx + g, 6, s) +
         waterLine(mx + g - 10, W - 2, my) + S.qtile(mx + g, my + g, s), { maxW: 300 });
       q.explain = 'Aynada sağ ile sol, suda üst ile alt yer değiştirir. İkisi birlikte şekli baş aşağı çevirir.';
       const ans = G.tf(o.m, tf(180));
@@ -254,10 +244,8 @@
     }
     return 'M' + at(0, 0) + 'L' + at(L, 0);
   }
-  function lineDraw(l, w) {
-    const d = linePath(l), common = '" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="';
-    return '<path d="' + d + common + S.INK + '" stroke-width="' + (w + 5) + '"/><path d="' + d + common + S.COLORS[l.color].fill + '" stroke-width="' + w + '"/>';
-  }
+  /* kesişmede kenarı kesilmeyen ip üsttedir */
+  const lineDraw = (l, w) => S.rope(linePath(l), l.color, w);
   const lineOpt = (l) => ({
     html: '<span class="opt-pair">' + S.svg(100, 50, lineDraw({ x0: 12, y0: 25, x1: 88, y1: 25, color: l.color, style: l.style, amp: l.style === 'arc' ? 3 : 7 }, 12), { cls: 'opt-svg opt-line' }) +
       '<span class="opt-cap">' + S.COLORS[l.color].name + '</span></span>',
