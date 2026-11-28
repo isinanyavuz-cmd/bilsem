@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Görsel galeri (geliştirici aracı)</title>
+<base href="../">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .gal { display: grid; gap: 28px; padding: 12px; max-width: 900px; margin: 0 auto; }
+  .gal-item { display: grid; gap: 12px; }
+  .gal-item > h2 { font: 800 15px/1.2 var(--font-display); color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<!-- Kullanım: tools/galeri.html?cat=pattern,matrix&lv=1,2,3,4&seed=7&theme=dark&n=1&exam=1
+     Her tür ve kademe için soru gövdesini ve şıkları uygulamadaki sınıflarla çizer. -->
+<div id="app"></div>
+<script src="js/core.js"></script>
+<script src="js/shapes.js"></script>
+<script src="js/gen-visual.js"></script>
+<script src="js/gen-spatial.js"></script>
+<script src="js/gen-number.js"></script>
+<script src="js/gen-attention.js"></script>
+<script src="js/gen-logic.js"></script>
+<script src="js/gen-extra.js"></script>
+<script src="js/gen-sinif3.js"></script>
+<script src="js/gen-sinif3b.js"></script>
+<script src="js/gen-bilsem.js"></script>
+<script>
+(function () {
+  const B = window.Bilsem, S = B.Shapes, P = new URLSearchParams(location.search);
+  if (P.get('theme')) document.documentElement.dataset.theme = P.get('theme');
+  if (P.get('exam')) document.documentElement.classList.add('exam-on');
+  const cats = (P.get('cat') || B.CATS.map((c) => c.id).join(',')).split(',');
+  const lvs = (P.get('lv') || '1,2,3,4').split(',').map(Number);
+  const seed = Number(P.get('seed') || 7), n = Number(P.get('n') || 1);
+  const L = ['A', 'B', 'C', 'D'];
+  let html = S.defs() + '<div class="gal">';
+  cats.forEach((id) => {
+    const cat = B.catById(id);
+    lvs.forEach((lv) => {
+      for (let k = 0; k < n; k++) {
+        const q = B.generate(id, lv, new B.RNG(seed * 1000 + lv * 37 + k * 101 + id.length));
+        html += '<section class="gal-item quiz' + (id === 'cubes' ? ' quiz-cubes' : '') + '" data-cat="' + id + '" data-lv="' + lv + '" style="--area: var(--a-' + cat.area + ')">' +
+          '<h2>' + id + ' · ' + cat.name + ' · ' + B.LEVEL_NAMES[lv] + '</h2>' +
+          '<div class="q-prompt"><h1>' + q.prompt + '</h1></div>' +
+          (q.memo ? '<div class="paper stem">' + q.memo.html + '</div>' : '') +
+          (q.stem ? '<div class="paper stem">' + q.stem + '</div>' : '') +
+          '<div class="opts opts-' + q.options.length + (q.layout === 'wide' ? ' opts-wide' : '') + '">' +
+          q.options.map((o, i) => '<button type="button" class="opt"><span class="opt-letter">' + L[i] + '</span>' + o.html + '</button>').join('') + '</div></section>';
+      }
+    });
+  });
+  document.getElementById('app').innerHTML = html + '</div>';
+})();
+</script>
+</body>
+</html>

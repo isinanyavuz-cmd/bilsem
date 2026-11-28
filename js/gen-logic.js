@@ -21,16 +21,16 @@
     }
     return [x, y];
   }
-  const badge = (x, y, k) => '<circle cx="' + x + '" cy="' + y + '" r="11" fill="#1d2b4a" stroke="#fff" stroke-width="2"/>' + S.text(x, y, k, 14, { fill: '#fff' });
-  function tileBox(x, y, s, fill, line) {
-    return '<rect x="' + x + '" y="' + y + '" width="' + s + '" height="' + s + '" rx="' + s * 0.24 + '" fill="' + fill + '" stroke="' + line + '" stroke-width="3"/>';
-  }
+  const badge = (x, y, k) => S.badge(x, y, k, 11);
+  const WHITE = S.STIL.white;
+  /* komut düğmesi: yeşil ilerle, turuncu dön */
+  const tileBox = (x, y, s, color) => S.block(x, y, s, s, color, { rx: s * 0.24, lip: 3 });
   /* mutlak yönlü oklar; k > 1 ise köşede tekrar sayısı */
   function arrowRow(steps, s, x0, y0) {
     return steps.map((st, i) => {
       const x = x0 + i * (s + 8);
-      return tileBox(x, y0, s, '#3cc35f', '#23924a') +
-        '<g transform="translate(' + (x + s / 2) + ' ' + (y0 + s / 2) + ') rotate(' + DIRS[st.d][2] + ') scale(' + s / 150 + ')"><path d="' + ARROW + '" fill="#fff"/></g>' +
+      return tileBox(x, y0, s, 'green') +
+        '<g transform="translate(' + (x + s / 2) + ' ' + (y0 + s / 2) + ') rotate(' + DIRS[st.d][2] + ') scale(' + s / 150 + ')"><path d="' + ARROW + '" fill="' + WHITE + '"/></g>' +
         (st.k > 1 ? badge(x + s - 4, y0 + 4, st.k) : '');
     }).join('');
   }
@@ -39,30 +39,27 @@
     return cmds.map((c, i) => {
       const x = x0 + i * (s + 8), cx = x + s / 2, cy = y0 + s / 2;
       if (c.t === 'F') {
-        return tileBox(x, y0, s, '#3cc35f', '#23924a') + '<g transform="translate(' + cx + ' ' + cy + ') scale(' + s / 150 + ')"><path d="' + ARROW + '" fill="#fff"/></g>' + (c.k > 1 ? badge(x + s - 4, y0 + 4, c.k) : '');
+        return tileBox(x, y0, s, 'green') + '<g transform="translate(' + cx + ' ' + cy + ') scale(' + s / 150 + ')"><path d="' + ARROW + '" fill="' + WHITE + '"/></g>' + (c.k > 1 ? badge(x + s - 4, y0 + 4, c.k) : '');
       }
       // çeyrek dönüş: aşağıdan gelip sağa ya da sola kıvrılan ok
       const u = s / 44, dir = c.t === 'R' ? 1 : -1, xs = cx - dir * 8 * u, y1 = cy - 5 * u, x1 = cx + dir * 7 * u;
-      return tileBox(x, y0, s, '#ff9838', '#cc6a12') +
+      return tileBox(x, y0, s, 'orange') +
         '<path d="M' + r1(xs) + ' ' + r1(cy + 13 * u) + 'V' + r1(y1 + 6 * u) + 'a' + r1(6 * u) + ' ' + r1(6 * u) + ' 0 0 ' + (dir > 0 ? 1 : 0) + ' ' + r1(dir * 6 * u) + ' ' + r1(-6 * u) + 'H' + r1(x1) +
-        '" fill="none" stroke="#fff" stroke-width="' + r1(5 * u) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
-        '<path d="M' + r1(x1) + ' ' + r1(y1 - 7 * u) + 'L' + r1(x1 + dir * 8 * u) + ' ' + r1(y1) + 'L' + r1(x1) + ' ' + r1(y1 + 7 * u) + 'Z" fill="#fff" stroke="#fff" stroke-width="' + r1(2 * u) + '" stroke-linejoin="round"/>';
+        '" fill="none" stroke="' + WHITE + '" stroke-width="' + r1(5 * u) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<path d="M' + r1(x1) + ' ' + r1(y1 - 7 * u) + 'L' + r1(x1 + dir * 8 * u) + ' ' + r1(y1) + 'L' + r1(x1) + ' ' + r1(y1 + 7 * u) + 'Z" fill="' + WHITE + '" stroke="' + WHITE + '" stroke-width="' + r1(2 * u) + '" stroke-linejoin="round"/>';
     }).join('');
   }
 
   function boardSvg(n, start, hero, cells, facing) {
-    const c = n > 5 ? 58 : 66, pad = 6, W = n * c + pad * 2;
-    let inner = '<rect x="' + pad + '" y="' + pad + '" width="' + n * c + '" height="' + n * c + '" rx="12" fill="#f3fbef" stroke="' + S.INK + '" stroke-width="3"/>';
-    let lines = '';
-    for (let i = 1; i < n; i++) lines += 'M' + (pad + i * c) + ' ' + pad + 'v' + n * c + 'M' + pad + ' ' + (pad + i * c) + 'h' + n * c;
-    inner += '<path d="' + lines + '" stroke="' + S.INK + '" stroke-opacity="0.25" stroke-width="2" fill="none"/>';
-    const sx = pad + start[0] * c, sy = pad + start[1] * c;
-    inner += '<rect x="' + (sx + 4) + '" y="' + (sy + 4) + '" width="' + (c - 8) + '" height="' + (c - 8) + '" rx="12" fill="#ffe27a"/>';
-    if (facing) {
-      // robot: baktığı yönü gösteren mavi ok
-      inner += '<g transform="translate(' + (sx + c / 2) + ' ' + (sy + c / 2) + ') rotate(' + DIRS[facing][2] + ') scale(' + c / 130 + ')"><path d="' + ARROW + '" fill="#3d8ef7" stroke="' + S.INK + '" stroke-width="5" stroke-linejoin="round"/></g>';
-    } else inner += S.emoji(sx + c / 2, sy + c / 2, hero, c * 0.6);
-    cells.forEach((it) => { inner += S.emoji(pad + it.x * c + c / 2, pad + it.y * c + c / 2, it.e, c * 0.58); });
+    // tahta: boş kareler kutu, başlangıç karesi sarı
+    const size = n * (n > 5 ? 58 : 66), pad = 6, W = size + pad * 2, g = S.Grid.geom(n, size), c = g.c, o0 = pad + g.pad;
+    const empty = Array.from({ length: n }, () => Array(n).fill(0));
+    let inner = S.Grid.draw(empty, [], pad, pad, size, { zone: (r, k) => r === start[1] && k === start[0] });
+    const sx = o0 + start[0] * c, sy = o0 + start[1] * c;
+    // robot: baktığı yönü gösteren mavi ok
+    if (facing) inner += S.figAt({ shape: 'arrow', color: 'blue', rot: DIRS[facing][2] }, sx + c * 0.12, sy + c * 0.12, c * 0.76);
+    else inner += S.emoji(sx + c / 2, sy + c / 2, hero, c * 0.6);
+    cells.forEach((it) => { inner += S.emoji(o0 + it.x * c + c / 2, o0 + it.y * c + c / 2, it.e, c * 0.58); });
     return { inner: inner, w: W };
   }
 

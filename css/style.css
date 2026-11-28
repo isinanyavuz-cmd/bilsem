@@ -399,6 +399,9 @@ svg { display: block; }
 
 .stem { display: grid; place-items: center; min-height: 110px; }
 .q-svg { width: 100%; height: auto; max-height: min(42vh, 360px); margin: 0 auto; }
+/* Soru, şık ve tür çizimlerinin renk, çizgi ve kil görünümü tek yerde tanımlı: js/shapes.js (STIL, COLORS).
+   Buradaki kurallar yalnızca yazı tipini ve deneme modundaki sadeleşmeyi belirler. */
+.q-svg text, .opt-svg text, .cat-svg text { font-family: var(--font-display); }
 
 .eq { display: grid; gap: 6px; justify-items: center; font: 800 clamp(26px, 5.4vw, 40px)/1.15 var(--font-display); }
 .eq-row { display: flex; align-items: center; gap: .28em; padding: 4px 16px; border-radius: 16px; background: var(--paper); box-shadow: inset 0 0 0 2px var(--paper-line); }
@@ -433,7 +436,7 @@ svg { display: block; }
   background: var(--paper-tint); color: var(--paper-soft);
   font: 800 15px/1 var(--font-display);
 }
-.opt-svg { width: min(100%, 124px); height: auto; }
+.opt-svg { width: min(100%, 136px); height: auto; }
 .opt-svg-row { width: 100%; max-width: 330px; max-height: 60px; }
 .opt-num { font: 800 clamp(36px, 8vw, 54px)/1 var(--font-display); font-variant-numeric: tabular-nums; }
 .opt-num-sm { font-size: clamp(27px, 6vw, 40px); letter-spacing: 2px; }
@@ -733,3 +736,7 @@ td .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; b
 .exam-on .exam-nav .btn:active { transform: none; }
 .exam-on .memo-bar { background: var(--surface-2); box-shadow: none; }
 .exam-on .memo-bar i { background: var(--cobalt); }
+/* çizimler de sadeleşir: kil dudağı ve parlaklık yok, kutular nötr; şekil renkleri bilgi taşıdığı için kalır */
+.exam-on .bz-lip, .exam-on .bz-gloss { display: none; }
+.exam-on .bz-tile:not(.bz-tone), .exam-on .bz-cell { fill: #ffffff; stroke: var(--line-strong); }
+.exam-on .bz-tile.bz-back, .exam-on .bz-board { fill: var(--surface-2); stroke: var(--line-strong); }
